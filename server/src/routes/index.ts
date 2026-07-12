@@ -16,7 +16,7 @@ export async function routes(fastify: FastifyInstance, options: FastifyPluginOpt
         return new ListOfficialController().handle(request, reply);
     });
 
-    fastify.delete("/official", async (request, reply) => {
+    fastify.delete("/official", async (request: FastifyRequest, reply: FastifyReply) => {
         return new DeleteOfficialController().handle(request, reply);
     });
 }
