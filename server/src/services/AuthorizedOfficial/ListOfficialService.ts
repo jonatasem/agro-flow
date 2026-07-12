@@ -1,4 +1,4 @@
-import prismaClient from "../prisma/index.js";
+import prismaClient from "../../prisma/index.js";
 
 class ListOfficialService {
     async execute() {

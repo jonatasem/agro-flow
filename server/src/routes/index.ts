@@ -1,8 +1,9 @@
 import type { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from "fastify";
 
 // controllers
-import CreateOfficialController from "../controllers/CreateOfficialController.js";
-import ListOfficialController from "../controllers/ListOfficialController.js";
+import CreateOfficialController from "../controllers/AuthorizedOfficial/CreateOfficialController.js";
+import ListOfficialController from "../controllers/AuthorizedOfficial/ListOfficialController.js";
+import DeleteOfficialController from "../controllers/AuthorizedOfficial/DeleteOfficialController.js";
 
 export async function routes(fastify: FastifyInstance, options: FastifyPluginOptions) {
 
@@ -15,6 +16,9 @@ export async function routes(fastify: FastifyInstance, options: FastifyPluginOpt
         return new ListOfficialController().handle(request, reply);
     });
 
+    fastify.delete("/official", async (request, reply) => {
+        return new DeleteOfficialController().handle(request, reply);
+    });
 }
 
 export default routes;

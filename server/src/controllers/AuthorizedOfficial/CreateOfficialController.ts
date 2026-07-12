@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import CreateOfficialService from "../services/CreateOficialService.js";
+import CreateOfficialService from "../../services/AuthorizedOfficial/CreateOficialService.js";
 
 class CreateOfficialController {
     async handle(request: FastifyRequest, reply: FastifyReply) {
