@@ -1,13 +1,13 @@
 import prismaClient from "../prisma/index.js";
 
-interface CreateAuthorizedProps {
+interface CreateOfficialProps {
     name: string,
     registration: string,
     city: string
 }
 
-class CreateAuthorizedService {
-    async execute({ name, registration, city }: CreateAuthorizedProps) {
+class CreateOfficialService {
+    async execute({ name, registration, city }: CreateOfficialProps) {
 
         if(!name || !registration || !city){
             throw new Error('Todos os campos são obrigatórios');
@@ -26,4 +26,4 @@ class CreateAuthorizedService {
     }
 }
 
-export default CreateAuthorizedService;
+export default CreateOfficialService;
