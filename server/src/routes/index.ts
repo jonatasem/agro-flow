@@ -1,25 +1,48 @@
-import type { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from "fastify";
+import type {
+  FastifyInstance,
+  FastifyPluginOptions,
+  FastifyRequest,
+  FastifyReply,
+} from "fastify";
 
 // controllers
 import CreateOfficialController from "../controllers/AuthorizedOfficial/CreateOfficialController.js";
 import ListOfficialController from "../controllers/AuthorizedOfficial/ListOfficialController.js";
 import DeleteOfficialController from "../controllers/AuthorizedOfficial/DeleteOfficialController.js";
+import UpdateOfficialController from "../controllers/AuthorizedOfficial/UpdateOfficialController.js";
 
-export async function routes(fastify: FastifyInstance, options: FastifyPluginOptions) {
+export async function routes(
+  fastify: FastifyInstance,
+  options: FastifyPluginOptions,
+) {
+  // ROTA PARA FUNCIONARIOS
+  fastify.post(
+    "/official",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new CreateOfficialController().handle(request, reply);
+    },
+  );
 
-    // ROTA PARA FUNCIONARIOS
-    fastify.post("/official", async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreateOfficialController().handle(request, reply);
-    });
+  fastify.get(
+    "/official",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new ListOfficialController().handle(request, reply);
+    },
+  );
 
-    fastify.get("/official", async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListOfficialController().handle(request, reply);
-    });
+  fastify.delete(
+    "/official",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new DeleteOfficialController().handle(request, reply);
+    },
+  );
 
-    fastify.delete("/official", async (request: FastifyRequest, reply: FastifyReply) => {
-        return new DeleteOfficialController().handle(request, reply);
-    });
+  fastify.put(
+    "/official/:id",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new UpdateOfficialController().handle(request, reply);
+    },
+  );
 }
 
 export default routes;
- 

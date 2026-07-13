@@ -8,13 +8,11 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "NodeNext",
-    "moduleResolution": "NodeNext",   
+    "moduleResolution": "NodeNext",
     "target": "es2023",
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     // For nodejs:
-    "lib": ["ES2015", "ES2020", "DOM" ],
+    "lib": ["ES2015", "ES2020", "DOM"],
     // "types": ["node"],
     // and npm install -D @types/node
 
@@ -44,6 +42,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "moduleResolution": "NodeNext",
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   }
 }
