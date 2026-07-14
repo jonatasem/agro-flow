@@ -1,6 +1,6 @@
 import prismaClient from "../../prisma/index.js";
 
-interface UpdateOfficialProps {
+interface UpdateCollaboratorProps {
   id: string;
   name?: string;
   registration?: string;
@@ -8,17 +8,17 @@ interface UpdateOfficialProps {
   status?: boolean;
 }
 
-export class UpdateOfficialService {
-  async execute({ id, name, registration, city, status }: UpdateOfficialProps) {
+export class UpdatecollaboratorService {
+  async execute({ id, name, registration, city, status }: UpdateCollaboratorProps) {
     if (!id) {
       throw new Error("O ID do funcionário é obrigatório para atualização");
     }
 
-    const officialExists = await prismaClient.official.findUnique({
+    const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: { id },
     });
 
-    if (!officialExists) {
+    if (!collaboratorExists) {
       throw new Error("Funcionário não encontrado.");
     }
 
@@ -31,11 +31,11 @@ export class UpdateOfficialService {
     if (status !== undefined) updateData.status = status;
 
     // Atualiza apenas com os campos modificados
-    const updateOfficial = await prismaClient.official.update({
+    const updateCollaborator = await prismaClient.collaborator.update({
       where: { id },
       data: updateData,
     });
 
-    return updateOfficial;
+    return updateCollaborator;
   }
 }

@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import prismaClient from "../../prisma/index.js";
 
-interface UpdateOfficialProps {
+interface UpdateCollaboratorProps {
   id: string;
   name?: string;
   registration?: string;
@@ -9,12 +9,12 @@ interface UpdateOfficialProps {
   status?: boolean;
 }
 
-export class UpdateOfficialController {
+export class UpdateCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
 
     const { name, registration, city, status } =
-      (request.body as UpdateOfficialProps) || {};
+      (request.body as UpdateCollaboratorProps) || {};
 
     if (!id) {
       return reply.status(400).send({
@@ -22,11 +22,11 @@ export class UpdateOfficialController {
       });
     }
 
-    const officialExists = await prismaClient.official.findUnique({
+    const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: { id },
     });
 
-    if (!officialExists) {
+    if (!collaboratorExists) {
       return reply.status(404).send({
         error: "Funcionário não encontrado.",
       });
@@ -41,11 +41,11 @@ export class UpdateOfficialController {
       ...(status !== undefined && { status }),
     };
 
-    const updateOfficial = await prismaClient.official.update({
+    const updateCollaborator = await prismaClient.collaborator.update({
       where: { id },
       data: updateData,
     });
 
-    return reply.send(updateOfficial);
+    return reply.send(updateCollaborator);
   }
 }

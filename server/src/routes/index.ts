@@ -8,10 +8,10 @@ import type {
 // CONTROLLERS
 
 // FUNCIONARIOS AUTORIZADOS
-import { CreateOfficialController } from "../controllers/AuthorizedOfficial/CreateOfficialController.js";
-import { ListOfficialController } from "../controllers/AuthorizedOfficial/ListOfficialController.js";
-import { DeleteOfficialController } from "../controllers/AuthorizedOfficial/DeleteOfficialController.js";
-import { UpdateOfficialController } from "../controllers/AuthorizedOfficial/UpdateOfficialController.js";
+import { CreateCollaboratorController } from "../controllers/Collaborator/CreateCollaboratorController.js";
+import { ListCollaboratorController } from "../controllers/Collaborator/ListCollaboratorController.js";
+import { DeleteCollaboratorController } from "../controllers/Collaborator/DeleteCollaboratorController.js";
+import { UpdateCollaboratorController } from "../controllers/Collaborator/UpdateCollaboratorController.js";
 
 // EQUIPAMENTOS
 import { CreateEquipmentController } from "../controllers/Equipment/CreateEquipmentController.js";
@@ -32,30 +32,30 @@ export async function routes(
 
   // ROTA PARA FUNCIONARIOS
   fastify.get(
-    "/official",
+    "/collaborator",
     async (request: FastifyRequest, reply: FastifyReply) => {
-      return new ListOfficialController().handle(request, reply);
+      return new ListCollaboratorController().handle(request, reply);
     },
   );
 
   fastify.post(
-    "/official",
+    "/collaborator",
     async (request: FastifyRequest, reply: FastifyReply) => {
-      return new CreateOfficialController().handle(request, reply);
+      return new CreateCollaboratorController().handle(request, reply);
     },
   );
 
   fastify.put(
-    "/official/:id",
+    "/collaborator/:id",
     async (request: FastifyRequest, reply: FastifyReply) => {
-      return new UpdateOfficialController().handle(request, reply);
+      return new UpdateCollaboratorController().handle(request, reply);
     },
   );
 
   fastify.delete(
-    "/official",
+    "/collaborator",
     async (request: FastifyRequest, reply: FastifyReply) => {
-      return new DeleteOfficialController().handle(request, reply);
+      return new DeleteCollaboratorController().handle(request, reply);
     },
   );
 

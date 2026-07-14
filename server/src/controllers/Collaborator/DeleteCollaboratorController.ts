@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { DeleteOfficialService } from "../../services/AuthorizedOfficial/DeleteOfficialService.js";
+import { DeleteCollaboratorService } from "../../services/Collaborator/DeleteCollaboratorService.js";
 
-export class DeleteOfficialController {
+export class DeleteCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.query as {
       id: string;
@@ -13,11 +13,11 @@ export class DeleteOfficialController {
         .send({ error: "O ID do funcionario é obrigatório." });
     }
 
-    const officialService = new DeleteOfficialService();
+    const collaboratorService = new DeleteCollaboratorService();
 
-    const official = await officialService.execute({ id });
+    const collaborator = await collaboratorService.execute({ id });
 
-    reply.status(200).send(official);
+    reply.status(200).send(collaborator);
   }
 }
 
