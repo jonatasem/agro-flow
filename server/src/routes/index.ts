@@ -19,6 +19,12 @@ import { ListEquipmentController } from "../controllers/Equipment/ListEquipmentC
 import { UpdateEquipmentController } from "../controllers/Equipment/UpdateEquipmentController.js";
 import { DeleteEquipmentController } from "../controllers/Equipment/DeleteEquipmentController.js";
 
+// OPERADORES
+import { CreateOperatorController } from "../controllers/Operator/CreateOperatorController.js";
+import { ListOperatorController } from "../controllers/Operator/ListOperatorController.js";
+import { UpdateOperatorController } from "../controllers/Operator/UpdateOperatorController.js";
+import { DeleteOperatorController } from "../controllers/Operator/DeleteOperatorController.js";
+
 export async function routes(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
@@ -82,6 +88,34 @@ export async function routes(
     },
   );
 
+  // ROTAS PARA OPERADORES
+  fastify.get(
+    "/operator",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new ListOperatorController().handle(request, reply);
+    },
+  );
+
+  fastify.post(
+    "/operator",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new CreateOperatorController().handle(request, reply);
+    }
+  );
+
+  fastify.put(
+    "/operator/:id",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new UpdateOperatorController().handle(request, reply);
+    },
+  );
+
+  fastify.delete(
+    "/operator",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new DeleteOperatorController().handle(request, reply);
+    },
+  );
 
 
 
