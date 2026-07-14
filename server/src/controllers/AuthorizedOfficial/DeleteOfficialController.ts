@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import DeleteOfficialService from "../../services/AuthorizedOfficial/DeleteOfficialService.js";
+import { DeleteOfficialService } from "../../services/AuthorizedOfficial/DeleteOfficialService.js";
 
-class DeleteOfficialController {
+export class DeleteOfficialController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.query as {
       id: string;
@@ -21,4 +21,3 @@ class DeleteOfficialController {
   }
 }
 
-export default DeleteOfficialController;

@@ -1,34 +1,33 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import prismaClient from "../../prisma/index.js";
 
-interface UpdateOfficialProps {
+interface UpdateEquipmentProps {
   id: string;
   name?: string;
-  registration?: string;
+  fleet?: string;
   city?: string;
   status?: boolean;
 }
 
-export class UpdateOfficialController {
+export class UpdateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
 
-    const { name, registration, city, status } =
-      (request.body as UpdateOfficialProps) || {};
+    const { name, fleet, city, status } = (request.body as UpdateEquipmentProps) || {};
 
     if (!id) {
       return reply.status(400).send({
-        error: "O ID do funcionário é obrigatório para a atualização.",
+        error: "O ID do equipamento é obrigatório para a atualização.",
       });
     }
 
-    const officialExists = await prismaClient.official.findUnique({
+    const equipmentExists = await prismaClient.equipment.findUnique({
       where: { id },
     });
 
-    if (!officialExists) {
+    if (!equipmentExists) {
       return reply.status(404).send({
-        error: "Funcionário não encontrado.",
+        error: "Equipamento não encontrado.",
       });
     }
 
@@ -36,16 +35,17 @@ export class UpdateOfficialController {
     // a propriedade sequer existirá no objeto final enviado ao Prisma.
     const updateData = {
       ...(name !== undefined && { name }),
-      ...(registration !== undefined && { registration }),
+      ...(fleet !== undefined && { fleet }),
       ...(city !== undefined && { city }),
       ...(status !== undefined && { status }),
     };
 
-    const updateOfficial = await prismaClient.official.update({
+    const updateEquipment = await prismaClient.equipment.update({
       where: { id },
       data: updateData,
     });
 
-    return reply.send(updateOfficial);
+    return reply.send(updateEquipment);
+
   }
 }

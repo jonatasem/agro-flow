@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import CreateOfficialService from "../../services/AuthorizedOfficial/CreateOficialService.js";
+import { CreateOfficialService } from "../../services/AuthorizedOfficial/CreateOficialService.js";
 
-class CreateOfficialController {
+export class CreateOfficialController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { name, registration, city } = request.body as {
       name: string;
@@ -19,5 +19,3 @@ class CreateOfficialController {
     return reply.status(201).send(authorized);
   }
 }
-
-export default CreateOfficialController;

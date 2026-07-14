@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url = env("DATABASE_URL") //ignore o erro, nao é obrigatorio utilizar acelador na versao 6.19 do prisma, versao compativel com o mongodb.
+  url = env("DATABASE_URL")
 }
 
 model Official {
@@ -17,4 +17,16 @@ model Official {
   updatedAt DateTime @updatedAt
 
   @@map("official")
+}
+
+model Equipment {
+  id String   @id @map("_id") @default(auto()) @db.ObjectId
+  name     String
+  fleet      String
+  city     String
+  status    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("equipment")
 }

@@ -4,7 +4,7 @@ interface DeleteOfficialProps {
   id: string;
 }
 
-class DeleteOfficialService {
+export class DeleteOfficialService {
   async execute(id: DeleteOfficialProps) {
     if (!id) {
       throw new Error("Id do funcionario não encontrado.");
@@ -29,5 +29,3 @@ class DeleteOfficialService {
     return { message: "Funcionário deletado com sucesso." };
   }
 }
-
-export default DeleteOfficialService;

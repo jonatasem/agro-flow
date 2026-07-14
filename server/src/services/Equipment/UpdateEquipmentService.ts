@@ -1,41 +1,41 @@
 import prismaClient from "../../prisma/index.js";
 
-interface UpdateOfficialProps {
+interface UpdateEquipmentProps {
   id: string;
   name?: string;
-  registration?: string;
+  fleet?: string;
   city?: string;
   status?: boolean;
 }
 
-export class UpdateOfficialService {
-  async execute({ id, name, registration, city, status }: UpdateOfficialProps) {
+export class UpdateEquipmentService {
+  async execute({ id, name, fleet, city, status }: UpdateEquipmentProps) {
     if (!id) {
-      throw new Error("O ID do funcionário é obrigatório para atualização");
+      throw new Error("O ID do equipamento é obrigatório para atualização");
     }
 
-    const officialExists = await prismaClient.official.findUnique({
+    const equipmentExists = await prismaClient.equipment.findUnique({
       where: { id },
     });
 
-    if (!officialExists) {
-      throw new Error("Funcionário não encontrado.");
+    if (!equipmentExists) {
+      throw new Error("Equipamento não encontrado.");
     }
 
     // Isso evita o erro de tipagem e impede o Prisma de atualizar campos inalterados
     const updateData: Record<string, any> = {};
 
     if (name !== undefined) updateData.name = name;
-    if (registration !== undefined) updateData.registration = registration;
+    if (fleet !== undefined) updateData.fleet = fleet;
     if (city !== undefined) updateData.city = city;
     if (status !== undefined) updateData.status = status;
 
     // Atualiza apenas com os campos modificados
-    const updateOfficial = await prismaClient.official.update({
+    const updateEquipment = await prismaClient.equipment.update({
       where: { id },
       data: updateData,
     });
 
-    return updateOfficial;
+    return updateEquipment;
   }
 }

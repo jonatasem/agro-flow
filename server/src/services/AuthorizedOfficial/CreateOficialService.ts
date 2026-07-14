@@ -6,7 +6,7 @@ interface CreateOfficialProps {
   city: string;
 }
 
-class CreateOfficialService {
+export class CreateOfficialService {
   async execute({ name, registration, city }: CreateOfficialProps) {
     if (!name || !registration || !city) {
       throw new Error("Todos os campos são obrigatórios");
@@ -24,5 +24,3 @@ class CreateOfficialService {
     return authorized;
   }
 }
-
-export default CreateOfficialService;
