@@ -24,6 +24,7 @@ import { CreateOperatorController } from "../controllers/Operator/CreateOperator
 import { ListOperatorController } from "../controllers/Operator/ListOperatorController.js";
 import { UpdateOperatorController } from "../controllers/Operator/UpdateOperatorController.js";
 import { DeleteOperatorController } from "../controllers/Operator/DeleteOperatorController.js";
+import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
 
 export async function routes(
   fastify: FastifyInstance,
@@ -118,6 +119,13 @@ export async function routes(
   );
 
 
+  // ROTAS PARA ORDENS
+  fastify.post(
+    "/work-order",
+    async (request:FastifyRequest, reply:FastifyReply) => {
+      return new CreateWorkOrderController().handle(request, reply);
+    },
+  );
 
 
 }
