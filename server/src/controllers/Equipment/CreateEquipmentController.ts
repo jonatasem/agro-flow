@@ -3,17 +3,15 @@ import { CreateEquipmentService } from "../../services/Equipment/CreateEquipment
 
 export class CreateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { name, fleet, city } = request.body as {
+    const { name, fleet } = request.body as {
         name: string,
         fleet: string,
-        city: string
     }
 
     const equipmentService = new CreateEquipmentService();
     const equipment = await equipmentService.execute({
         name, 
-        fleet,
-        city
+        fleet
     });
 
     return reply.status(201).send(equipment);

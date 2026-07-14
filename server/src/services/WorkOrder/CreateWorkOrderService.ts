@@ -5,12 +5,13 @@ interface CreateWorkOrderProps {
     setor: string;
     qruDescricao: string;
     qth: string;
+    city: string; 
     criadoPor: string;
 }
 
 export class CreateWorkOrderService {
-    async execute({fleet, setor, qruDescricao, qth, criadoPor}: CreateWorkOrderProps) {
-        if(!fleet || !setor || !qruDescricao || !qth || !criadoPor) {
+    async execute({fleet, setor, qruDescricao, qth, city, criadoPor}: CreateWorkOrderProps) {
+        if(!fleet || !setor || !qruDescricao || !qth || !city || !criadoPor) {
             throw new Error("Todos os campos são obrigatórios");
         }
 
@@ -36,6 +37,7 @@ export class CreateWorkOrderService {
                     setor,
                     qruDescricao,
                     qth,
+                    city,
                     criadoPor,
                     status: "Aguardando Manutenção"
                 },
@@ -46,13 +48,13 @@ export class CreateWorkOrderService {
         const newWorkOrder = await prismaClient.workOrder.create({
             data: {
                 equipmentId: equipment.id,
-                city: equipment.city,
                 status: "ABERTA ",
                 setores: {
                     create: {
                         setor,
                         qruDescricao,
                         qth,
+                        city,
                         criadoPor,
                         status: "Aguardando Manutenção",
                     },

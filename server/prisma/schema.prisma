@@ -24,8 +24,6 @@ model Equipment {
   id String   @id @map("_id") @default(auto()) @db.ObjectId
   name     String
   fleet      String @unique
-  city     String
-  status    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   workOrder  WorkOrder[]
@@ -38,8 +36,6 @@ model Operator {
   id String   @id @map("_id") @default(auto()) @db.ObjectId
   name     String
   registration     String
-  city     String
-  status    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -51,7 +47,6 @@ model WorkOrder {
   equipmentId String          @db.ObjectId
   equipment   Equipment       @relation(fields: [equipmentId], references: [id])
   status      String          @default("ABERTA") 
-  city        String 
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   setores     SectorService[]
@@ -69,7 +64,8 @@ model SectorService {
   qruDescricao         String    
   solucaoTecnico       String    @default("") 
   tipoCausa            String?   
-  qth                  String   
+  qth                  String
+  city                 String 
   criadoPor            String    
   tecnicoResponsavel   String?  
   
