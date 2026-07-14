@@ -23,7 +23,7 @@ model Collaborator {
 model Equipment {
   id String   @id @map("_id") @default(auto()) @db.ObjectId
   name     String
-  fleet      String
+  fleet      String @unique
   city     String
   status    Boolean  @default(false)
   createdAt DateTime @default(now())
