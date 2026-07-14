@@ -20,4 +20,3 @@ export class DeleteCollaboratorController {
     reply.status(200).send(collaborator);
   }
 }
-

@@ -9,7 +9,13 @@ interface UpdateCollaboratorProps {
 }
 
 export class UpdatecollaboratorService {
-  async execute({ id, name, registration, city, status }: UpdateCollaboratorProps) {
+  async execute({
+    id,
+    name,
+    registration,
+    city,
+    status,
+  }: UpdateCollaboratorProps) {
     if (!id) {
       throw new Error("O ID do funcionário é obrigatório para atualização");
     }

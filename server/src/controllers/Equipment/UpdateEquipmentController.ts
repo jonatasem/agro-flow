@@ -13,7 +13,8 @@ export class UpdateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
 
-    const { name, fleet, city, status } = (request.body as UpdateEquipmentProps) || {};
+    const { name, fleet, city, status } =
+      (request.body as UpdateEquipmentProps) || {};
 
     if (!id) {
       return reply.status(400).send({
@@ -46,6 +47,5 @@ export class UpdateEquipmentController {
     });
 
     return reply.send(updateEquipment);
-
   }
 }

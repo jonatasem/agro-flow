@@ -20,4 +20,3 @@ export class DeleteOperatorController {
     reply.status(200).send(operator);
   }
 }
-

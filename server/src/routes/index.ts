@@ -30,7 +30,6 @@ export async function routes(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
-
   // ROTA PARA FUNCIONARIOS
   fastify.get(
     "/collaborator",
@@ -72,7 +71,7 @@ export async function routes(
     "/equipment",
     async (request: FastifyRequest, reply: FastifyReply) => {
       return new CreateEquipmentController().handle(request, reply);
-    }
+    },
   );
 
   fastify.put(
@@ -101,7 +100,7 @@ export async function routes(
     "/operator",
     async (request: FastifyRequest, reply: FastifyReply) => {
       return new CreateOperatorController().handle(request, reply);
-    }
+    },
   );
 
   fastify.put(
@@ -118,16 +117,13 @@ export async function routes(
     },
   );
 
-
   // ROTAS PARA ORDENS
   fastify.post(
     "/work-order",
-    async (request:FastifyRequest, reply:FastifyReply) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
       return new CreateWorkOrderController().handle(request, reply);
     },
   );
-
-
 }
 
 export default routes;
