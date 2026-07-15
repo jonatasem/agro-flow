@@ -11,7 +11,8 @@ model Collaborator {
   id String   @id @map("_id") @default(auto()) @db.ObjectId
   name      String
   role      String
-  registration     String
+  registration     String @unique
+  password      String
   city     String
   status    Boolean  @default(false)
   createdAt DateTime @default(now())

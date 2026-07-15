@@ -4,11 +4,18 @@ interface CreateCollaboratorProps {
   name: string;
   role: string;
   registration: string;
+  password: string;
   city: string;
 }
 
 export class CreateCollaboratorService {
-  async execute({ name, role, registration, city }: CreateCollaboratorProps) {
+  async execute({
+    name,
+    role,
+    registration,
+    password,
+    city,
+  }: CreateCollaboratorProps) {
     if (!name || !role || !registration || !city) {
       throw new Error("Todos os campos são obrigatórios");
     }
@@ -18,6 +25,7 @@ export class CreateCollaboratorService {
         name,
         role,
         registration,
+        password,
         city,
         status: true,
       },

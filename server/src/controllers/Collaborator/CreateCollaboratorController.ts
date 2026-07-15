@@ -3,10 +3,11 @@ import { CreateCollaboratorService } from "../../services/Collaborator/CreateCol
 
 export class CreateCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { name, role, registration, city } = request.body as {
+    const { name, role, registration, password, city } = request.body as {
       name: string;
       role: string;
       registration: string;
+      password: string;
       city: string;
     };
 
@@ -15,6 +16,7 @@ export class CreateCollaboratorController {
       name,
       role,
       registration,
+      password,
       city,
     });
 
