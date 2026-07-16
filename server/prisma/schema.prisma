@@ -4,41 +4,44 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Collaborator {
-  id String   @id @map("_id") @default(auto()) @db.ObjectId
-  name      String
-  role      String
-  registration     String @unique
-  password      String
-  city     String
-  status    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @map("_id") @default(auto()) @db.ObjectId
+  name         String
+  role         String
+  registration String   @unique
+  password     String
+  city         String
+  status       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  servicosCriados   SectorService[] @relation("CriadorServico")
+  servicosAtendidos SectorService[] @relation("TecnicoResponsavel")
 
   @@map("collaborator")
 }
 
 model Equipment {
-  id String   @id @map("_id") @default(auto()) @db.ObjectId
-  name     String
-  fleet      String @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  workOrder  WorkOrder[]
+  id        String      @id @map("_id") @default(auto()) @db.ObjectId
+  name      String
+  fleet     String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  workOrder WorkOrder[]
 
   @@map("equipment")
 }
 
-
 model Operator {
-  id String   @id @map("_id") @default(auto()) @db.ObjectId
-  name     String
-  registration     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String      @id @map("_id") @default(auto()) @db.ObjectId
+  name         String
+  registration String      @unique // Adicionado @unique para evitar duplicidade de matrículas
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  workOrders   WorkOrder[]
 
   @@map("operator")
 }
@@ -47,6 +50,8 @@ model WorkOrder {
   id          String          @id @map("_id") @default(auto()) @db.ObjectId
   equipmentId String          @db.ObjectId
   equipment   Equipment       @relation(fields: [equipmentId], references: [id])
+  operatorId  String?         @db.ObjectId
+  operator    Operator?       @relation(fields: [operatorId], references: [id])
   status      String          @default("ABERTA") 
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -59,7 +64,6 @@ model SectorService {
   id          String    @id @map("_id") @default(auto()) @db.ObjectId
   workOrderId String    @db.ObjectId
   workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
-
   setor                String    
   status               String    @default("AGUARDANDO_MANUTENCAO") 
   qruDescricao         String    
@@ -67,8 +71,10 @@ model SectorService {
   tipoCausa            String?   
   qth                  String
   city                 String 
-  criadoPor            String    
-  tecnicoResponsavel   String?  
+  criadoPorId          String    @db.ObjectId
+  criador              Collaborator @relation("CriadorServico", fields: [criadoPorId], references: [id])
+  tecnicoResponsavelId String?   @db.ObjectId
+  tecnicoResponsavel   Collaborator? @relation("TecnicoResponsavel", fields: [tecnicoResponsavelId], references: [id])
   
   // Métricas de Tempo
   dataCriacao          DateTime  @default(now())
