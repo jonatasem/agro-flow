@@ -19,7 +19,7 @@ export async function isAuthenticated(request: FastifyRequest, reply: FastifyRep
     }
 
     // Separando o texto do token
-    const [ ,token ] = authHeader.split("");
+    const [ ,token ] = authHeader.split(" ");
 
     if(!token){
         return reply.status(401).send({ error: "Token malformatado ou ausente" })
