@@ -3,15 +3,16 @@ import { CreateWorkOrderService } from "../../services/WorkOrder/CreateWorkOrder
 
 export class CreateWorkOrderController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { fleet, setor, qruDescricao, qth, city, criadoPor } =
+    const { fleet, setor, qruDescricao, qth, city } =
       request.body as {
         fleet: string;
         setor: string;
         qruDescricao: string;
         qth: string;
         city: string;
-        criadoPor: string;
       };
+
+    const criadoPor = request.userId;
 
     const workOrderService = new CreateWorkOrderService();
 
