@@ -33,7 +33,7 @@ export async function isAuthenticated(request: FastifyRequest, reply: FastifyRep
 
     try {
         const decoded = jwt.verify(token, secret) as TokenPayload;
-            request.userId = decoded.sub;
+        request.userId = decoded.sub;
 
         } catch (err) {
         return reply.status(401).send({ error: "Token invalido ou expirado" });

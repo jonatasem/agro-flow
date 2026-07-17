@@ -5,8 +5,6 @@ import type {
   FastifyReply,
 } from "fastify";
 
-// CONTROLLERS
-
 // FUNCIONARIOS AUTORIZADOS
 import { CreateCollaboratorController } from "../controllers/Collaborator/CreateCollaboratorController.js";
 import { ListCollaboratorController } from "../controllers/Collaborator/ListCollaboratorController.js";

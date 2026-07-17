@@ -21,6 +21,10 @@ export class LoginCollaboratorService {
       throw new Error("Matrícula não autorizada");
     }
 
+    if(!collaborator.status){
+      throw new Error("Este colaborador está desativado no sistema");
+    }
+
     const passwordMatch = await bcrypt.compare(password, collaborator.password);
 
     if (!passwordMatch) {
@@ -35,12 +39,15 @@ export class LoginCollaboratorService {
 
     const token = jwt.sign(
       {
-        id: collaborator.id,
         name: collaborator.name,
         role: collaborator.role,
       },
       secret,
-      { expiresIn: "30d" },
+      { 
+        subject: collaborator.id,
+        expiresIn: "30d",
+
+      },
     );
     return {
       id: collaborator.id,
