@@ -1,45 +1,65 @@
-import type {
-  FastifyInstance,
-  FastifyPluginOptions,
-  FastifyRequest,
-  FastifyReply,
+import {
+  type FastifyInstance,
+  type FastifyPluginOptions,
+  type FastifyRequest,
+  type FastifyReply,
 } from "fastify";
 
-// FUNCIONARIOS AUTORIZADOS
+// Middleware de autenticacao
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+
+// Funcionarios autorizados
 import { CreateCollaboratorController } from "../controllers/Collaborator/CreateCollaboratorController.js";
 import { ListCollaboratorController } from "../controllers/Collaborator/ListCollaboratorController.js";
 import { DeleteCollaboratorController } from "../controllers/Collaborator/DeleteCollaboratorController.js";
 import { UpdateCollaboratorController } from "../controllers/Collaborator/UpdateCollaboratorController.js";
 
-// EQUIPAMENTOS
+// Equipamentos
 import { CreateEquipmentController } from "../controllers/Equipment/CreateEquipmentController.js";
 import { ListEquipmentController } from "../controllers/Equipment/ListEquipmentController.js";
 import { UpdateEquipmentController } from "../controllers/Equipment/UpdateEquipmentController.js";
 import { DeleteEquipmentController } from "../controllers/Equipment/DeleteEquipmentController.js";
 
-// OPERADORES
+// Operadores
 import { CreateOperatorController } from "../controllers/Operator/CreateOperatorController.js";
 import { ListOperatorController } from "../controllers/Operator/ListOperatorController.js";
 import { UpdateOperatorController } from "../controllers/Operator/UpdateOperatorController.js";
 import { DeleteOperatorController } from "../controllers/Operator/DeleteOperatorController.js";
+
+// Ordem de servico
 import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
+
+// LOGIN
+import { LoginCollaboratorController } from "../controllers/LoginCollaborator/LoginCollaboratorController.js";
+
+import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js";
 
 export async function routes(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
-  // ROTA PARA FUNCIONARIOS
-  fastify.get(
-    "/collaborator",
+  // ==========================================
+  // ROTAS PÚBLICAS
+  // ==========================================
+
+  fastify.post(
+    "/login",
     async (request: FastifyRequest, reply: FastifyReply) => {
-      return new ListCollaboratorController().handle(request, reply);
-    },
+      return new LoginCollaboratorController().handle(request, reply);
+    }
   );
 
   fastify.post(
     "/collaborator",
     async (request: FastifyRequest, reply: FastifyReply) => {
       return new CreateCollaboratorController().handle(request, reply);
+    },
+  );
+
+  fastify.get(
+    "/collaborator",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new ListCollaboratorController().handle(request, reply);
     },
   );
 
@@ -57,7 +77,6 @@ export async function routes(
     },
   );
 
-  // ROTAS PARA EQUIPAMENTOS
   fastify.get(
     "/equipment",
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -86,7 +105,6 @@ export async function routes(
     },
   );
 
-  // ROTAS PARA OPERADORES
   fastify.get(
     "/operator",
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -115,13 +133,28 @@ export async function routes(
     },
   );
 
-  // ROTAS PARA ORDENS
-  fastify.post(
-    "/work-order",
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      return new CreateWorkOrderController().handle(request, reply);
-    },
-  );
+   // Listar/Visualizar Ordens de Serviço (Rota Nova)
+    fastify.get(
+      "/work-order",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ListWorkOrderController().handle(request, reply);
+      },
+    );
+
+  // ==========================================
+  // ROTAS PRIVADAS (Requerem Token JWT)
+  // ==========================================
+  fastify.register(async function protectedRoutes(subFastify) {
+    subFastify.addHook("preHandler", isAuthenticated);
+
+    // Criar ordem de servico
+    subFastify.post(
+      "/work-order",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new CreateWorkOrderController().handle(request, reply);
+      },
+    );
+  });
 }
 
 export default routes;

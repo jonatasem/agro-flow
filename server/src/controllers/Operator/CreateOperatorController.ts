@@ -3,17 +3,15 @@ import { CreateOperatorService } from "../../services/Operator/CreateOficialServ
 
 export class CreateOperatorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { name, registration, city } = request.body as {
+    const { name, registration } = request.body as {
       name: string;
       registration: string;
-      city: string;
     };
 
     const operatorService = new CreateOperatorService();
     const operator = await operatorService.execute({
       name,
-      registration,
-      city,
+      registration
     });
 
     return reply.status(201).send(operator);
