@@ -11,7 +11,7 @@ export class CreateOperatorController {
     const operatorService = new CreateOperatorService();
     const operator = await operatorService.execute({
       name,
-      registration
+      registration,
     });
 
     return reply.status(201).send(operator);

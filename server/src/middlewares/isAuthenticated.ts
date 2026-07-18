@@ -2,40 +2,49 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import jwt from "jsonwebtoken";
 
 declare module "fastify" {
-    interface FastifyRequest {
-        userId: string;
-    }
+  interface FastifyRequest {
+    userId: string;
+  }
 }
 
 interface TokenPayload {
-    sub: string;
+  sub: string;
 }
 
-export async function isAuthenticated(request: FastifyRequest, reply: FastifyReply) {
-    const authHeader = request.headers.authorization;
+export async function isAuthenticated(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
 
-    if(!authHeader) {
-        return reply.status(401).send({ error: "Token nao fornecido" });
-    }
+  // Pega o header
+  const authHeader = request.headers.authorization;
 
-    // Separando o texto do token
-    const [ ,token ] = authHeader.split(" ");
+  // Verifica se existe um token
+  if (!authHeader) {
+    return reply.status(401).send({ error: "Token nao fornecido" });
+  }
 
-    if(!token){
-        return reply.status(401).send({ error: "Token malformatado ou ausente" })
-    }
+  // Separando o texto do token
+  const [, token] = authHeader.split(" ");
 
-    const secret = process.env.JWT_SECRET;
+  // Se nao reconhecer o token, avise
+  if (!token) {
+    return reply.status(401).send({ error: "Token malformatado ou ausente" });
+  }
 
-    if(!secret){
-        throw new Error("Não foi fornecido nenhum token JWT_SECRET")
-    }
+  // Busca os token JWT
+  const secret = process.env.JWT_SECRET;
 
-    try {
-        const decoded = jwt.verify(token, secret) as TokenPayload;
-        request.userId = decoded.sub;
+  // Se nao existir um token, avise
+  if (!secret) {
+    throw new Error("Não foi fornecido nenhum token JWT_SECRET");
+  }
 
-        } catch (err) {
-        return reply.status(401).send({ error: "Token invalido ou expirado" });
-    }
+  try {
+    // Pega o token e tenta validar utlizando a chave secrete
+    const decoded = jwt.verify(token, secret) as TokenPayload;
+    request.userId = decoded.sub;
+  } catch (err) {
+    return reply.status(401).send({ error: "Token invalido ou expirado" });
+  }
 }

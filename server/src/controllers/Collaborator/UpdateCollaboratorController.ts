@@ -11,6 +11,7 @@ interface UpdateCollaboratorProps {
 
 export class UpdateCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
+
     const { id } = request.params as { id: string };
 
     const { name, registration, city, status } =

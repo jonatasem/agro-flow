@@ -7,17 +7,20 @@ interface CreateOperatorProps {
 
 export class CreateOperatorService {
   async execute({ name, registration }: CreateOperatorProps) {
+    // Verifica se todos os dados foram enviados
     if (!name || !registration) {
       throw new Error("Todos os campos são obrigatórios");
     }
 
+    // Salva o operador no banco de dados
     const operator = await prismaClient.operator.create({
       data: {
         name,
-        registration
+        registration,
       },
     });
 
+    // Retorna o operador cadastrado
     return operator;
   }
 }

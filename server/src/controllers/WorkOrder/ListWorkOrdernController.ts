@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { ListWorkOrderService } from "../../services/WorkOrder/ListWorkOrderService.js";
 
 interface ListWorkOrderProps {
-    status?: string | undefined;
+  status?: string | undefined;
 }
 
 export class ListWorkOrderController {
@@ -14,7 +14,9 @@ export class ListWorkOrderController {
     const listWorkOrderService = new ListWorkOrderService();
 
     try {
-      const workOrders = await listWorkOrderService.execute({ status: status as string });
+      const workOrders = await listWorkOrderService.execute({
+        status: status as string,
+      });
       return reply.status(200).send(workOrders);
     } catch (error: any) {
       return reply.status(400).send({ error: error.message });

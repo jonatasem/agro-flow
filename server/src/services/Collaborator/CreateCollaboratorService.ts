@@ -17,22 +17,28 @@ export class CreateCollaboratorService {
     password,
     city,
   }: CreateCollaboratorProps) {
+
+    // Se esses dados nao forem fornecidos, de um erro
     if (!name || !role || !registration || !password || !city) {
       throw new Error("Todos os campos são obrigatórios");
     }
 
+    // Faz a busca da matricula para verificar se o colaborador ja nao esta cadastrado
     const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: {
-        registration: registration
+        registration: registration,
       },
     });
 
-    if(collaboratorExists){
+    // Se o colaborador existir, retorne uma mensagem
+    if (collaboratorExists) {
       throw new Error("Esta matrícula já está cadastrada no sistema");
     }
 
+    // Funcao que mistura as senhas
     const hashedPassword = await hash(password, 8);
 
+    // Salva no banco de dados
     const collaborator = await prismaClient.collaborator.create({
       data: {
         name,
@@ -44,6 +50,7 @@ export class CreateCollaboratorService {
       },
     });
 
+    // Guarda a senha em uma variavel temporaria
     const { password: _, ...collaboratorWithoutPassWord } = collaborator;
 
     return collaboratorWithoutPassWord;

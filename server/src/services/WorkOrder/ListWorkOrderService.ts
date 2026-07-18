@@ -17,10 +17,12 @@ export class ListWorkOrderService {
       where: whereClause,
       include: {
         equipment: true, // Traz os dados do veículo
-        operator: true,  // Traz os dados do operador
-        setores: {       // Traz todos os setores associados a esta O.S.
+        operator: true, // Traz os dados do operador
+        setores: {
+          // Traz todos os setores associados a esta O.S.
           include: {
-            criador: {   // Dentro de cada serviço, traz quem o criou (apenas dados essenciais)
+            criador: {
+              // Dentro de cada serviço, traz quem o criou (apenas dados essenciais)
               select: {
                 id: true,
                 name: true,
@@ -42,6 +44,7 @@ export class ListWorkOrderService {
       },
     });
 
+    // Retorna as os salvas em aberto
     return workOrders;
   }
 }
