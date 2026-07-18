@@ -29,7 +29,7 @@ export class CreateCollaboratorController {
         city,
       });
 
-      // Retorna os dados cadastrados
+      // Retorna o colaborador cadastrados
       return reply.status(201).send(collaborator);
     } catch (error: any) {
       return reply.status(400).send({ error: error.message });

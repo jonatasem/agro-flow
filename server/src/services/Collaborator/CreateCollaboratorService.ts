@@ -53,6 +53,7 @@ export class CreateCollaboratorService {
     // Guarda a senha em uma variavel temporaria
     const { password: _, ...collaboratorWithoutPassWord } = collaborator;
 
+    // Retorna o colaborador 
     return collaboratorWithoutPassWord;
   }
 }
