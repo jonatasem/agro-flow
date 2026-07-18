@@ -8,6 +8,7 @@ import {
 // Middleware de autenticacao
 import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 import { LoginCollaboratorController } from "../controllers/LoginCollaborator/LoginCollaboratorController.js";
+import { CheckRegistrationController } from "../controllers/LoginCollaborator/CheckRegistrationController.js";
 
 // Funcionarios autorizados
 import { CreateCollaboratorController } from "../controllers/Collaborator/CreateCollaboratorController.js";
@@ -50,6 +51,17 @@ export async function routes(
       return new CreateCollaboratorController().handle(request, reply);
     },
   );
+
+  // Verificar se a matrícula existe, e se o usuario nao ta desativado, retorna o nome 
+    fastify.post(
+      "/login/check-registration",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new CheckRegistrationController().handle(request, reply);
+      }
+    );
+
+
+
 
   // Rotas privadas
   fastify.register(async function protectedRoutes(subFastify) {
