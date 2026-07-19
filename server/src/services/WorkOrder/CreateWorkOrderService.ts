@@ -52,7 +52,7 @@ export class CreateWorkOrderService {
           qth,
           city,
           criadoPorId: criadoPor,
-          status: "Aguardando Manutenção",
+          status: "AGUARDANDO_MANUTENCAO",
         },
       });
 
@@ -72,7 +72,7 @@ export class CreateWorkOrderService {
             qth,
             city,
             criadoPorId: criadoPor,
-            status: "Aguardando Manutenção",
+            status: "AGUARDANDO_MANUTENCAO",
           },
         },
       },

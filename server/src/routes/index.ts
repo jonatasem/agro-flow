@@ -32,6 +32,7 @@ import { DeleteOperatorController } from "../controllers/Operator/DeleteOperator
 import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
 import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js";
 import { StartSectorServiceController } from "../controllers/SectorService/StartSectorServiceController.js";
+import { FinishSectorServiceController } from "../controllers/SectorService/FinishSectorServiceController.js";
 
 export async function routes(
   fastify: FastifyInstance,
@@ -79,6 +80,14 @@ export async function routes(
       "/sector-service/:id/start",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new StartSectorServiceController().handle(request, reply);
+      }
+    )
+
+    // Finaliza a manutencao
+    subFastify.put(
+      "/sector-service/:id/finish",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new FinishSectorServiceController().handle(request, reply);
       }
     )
 
