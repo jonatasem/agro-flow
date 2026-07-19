@@ -31,6 +31,7 @@ import { DeleteOperatorController } from "../controllers/Operator/DeleteOperator
 // Ordem de servico
 import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
 import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js";
+import { StartSectorServiceController } from "../controllers/SectorService/StartSectorServiceController.js";
 
 export async function routes(
   fastify: FastifyInstance,
@@ -60,20 +61,26 @@ export async function routes(
       }
     );
 
+  // ROTAS PRIVADAS
 
-
-
-  // Rotas privadas
   fastify.register(async function protectedRoutes(subFastify) {
     subFastify.addHook("preHandler", isAuthenticated);
 
-    // Cria uma nova os
+    // Cria uma nova orden
     subFastify.post(
       "/work-order",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new CreateWorkOrderController().handle(request, reply);
       },
     );
+
+    // Inicia a manutencao
+    subFastify.put(
+      "/sector-service/:id/start",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new StartSectorServiceController().handle(request, reply);
+      }
+    )
 
     // Busca as ordens cadastradas
     subFastify.get(
