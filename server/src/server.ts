@@ -28,3 +28,7 @@ const start = async () => {
 };
 
 start();
+
+// Jonatas Elieser Moreira
+// Todos os direitos reservados
+// 2026
