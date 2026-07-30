@@ -1,25 +1,28 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { CreateWorkOrderService } from "../../services/WorkOrder/CreateWorkOrderService.js";
 
+interface CreateWorkServiceProsp {
+    fleet: string;
+    setor: string;
+    qruDescricao: string;
+    qth: string;
+    city: string;
+}
+
 export class CreateWorkOrderController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    
-    // Busca os dados no corpo da requisicao
-    const { fleet, setor, qruDescricao, qth, city } = request.body as {
-      fleet: string;
-      setor: string;
-      qruDescricao: string;
-      qth: string;
-      city: string;
-    };
+    const { fleet, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProsp;
 
-    // Busca o id pelo userId.
-    const criadoPor = request.userId;
+    const criadoPor = (request as any).userId as string;
 
-    // Cria um servico para criar a os
+    if (!criadoPor) {
+      return reply
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
+    }
+
     const workOrderService = new CreateWorkOrderService();
 
-    // Tenta salvar no banco de dados
     try {
       const result = await workOrderService.execute({
         fleet,
@@ -30,11 +33,8 @@ export class CreateWorkOrderController {
         criadoPor,
       });
 
-      // Retorna a os criada
       return reply.status(201).send(result);
     } catch (error: any) {
-
-      // Retorna um erro se falhar
       return reply.status(400).send({ error: error.message });
     }
   }

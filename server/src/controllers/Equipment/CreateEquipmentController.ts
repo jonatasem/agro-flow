@@ -1,25 +1,26 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { CreateEquipmentService } from "../../services/Equipment/CreateEquipmentService.js";
 
+interface CreateEquipmentProps {
+  name: string;
+  fleet: string;
+}
+
 export class CreateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    
-    // Busca do dados no corpo da requisicao
-    const { name, fleet } = request.body as {
-      name: string;
-      fleet: string;
-    };
+    const { name, fleet } = request.body as CreateEquipmentProps;
 
-    // Cria um servico para criar o equipamento
     const equipmentService = new CreateEquipmentService();
 
-    // Executa o metodo execute do service
-    const equipment = await equipmentService.execute({
-      name,
-      fleet,
-    });
+    try {
+      const result = await equipmentService.execute({
+        name,
+        fleet,
+      });
 
-    // Retorna o equipamento criado
-    return reply.status(201).send(equipment);
+      return reply.status(201).send(result);
+    } catch(error: any){
+      return reply.status(400).send({error});
+    }
   }
 }

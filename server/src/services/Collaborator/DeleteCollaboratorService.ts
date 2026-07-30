@@ -5,33 +5,24 @@ interface DeleteCollaboratorProps {
 }
 
 export class DeleteCollaboratorService {
-  async execute(id: DeleteCollaboratorProps) {
-
-    // Verifica se passou o id corretamente
+  async execute({id}: DeleteCollaboratorProps) {
     if (!id) {
       throw new Error("Id do funcionario não encontrado.");
     }
 
-    // Faz a busca do colaborador pelo id
-    const findCollaborator = await prismaClient.collaborator.findFirst({
-      where: {
-        id: id.id,
-      },
+    const findCollaborator = await prismaClient.collaborator.findUnique({
+      where: { id },
     });
 
-    // Se nao encontrar, de um erro
     if (!findCollaborator) {
-      throw new Error("Funcionário não encontrado");
+      throw new Error("Funcionário não encontrado.");
     }
 
-    // Deleta o funcionario
     await prismaClient.collaborator.delete({
-      where: {
-        id: findCollaborator.id,
-      },
+      where: { id },
     });
 
-    // Retorna a mensagem de sucesso
     return { message: "Funcionário deletado com sucesso." };
   }
 }
+

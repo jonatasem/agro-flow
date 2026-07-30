@@ -7,13 +7,18 @@ interface CreateEquipmentProps {
 
 export class CreateEquipmentService {
   async execute({ name, fleet }: CreateEquipmentProps) {
-
-    // Verifica se todos os dados foram enviados
     if (!name || !fleet) {
-      throw new Error("Todos os campos são obrigatórios");
+      throw new Error("Todos os campos são obrigatórios.");
     }
 
-    // Salva no banco de dados
+    const fleetExists = await prismaClient.equipment.findUnique({
+      where: { fleet }
+    });
+    
+    if(!fleetExists){
+      throw new Error("Já existe um equipamento cadastrado com essa frota.")
+    }
+
     const equipment = await prismaClient.equipment.create({
       data: {
         name,
@@ -21,7 +26,6 @@ export class CreateEquipmentService {
       },
     });
 
-    // Retorna o equipamento cadastrado
     return equipment;
   }
 }

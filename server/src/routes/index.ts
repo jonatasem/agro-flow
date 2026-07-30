@@ -62,8 +62,15 @@ export async function routes(
       }
     );
 
-  // ROTAS PRIVADAS
+    // Busca as ordens cadastradas
+    fastify.get(
+      "/work-order",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ListWorkOrderController().handle(request, reply);
+      },
+    );
 
+  // ROTAS PRIVADAS
   fastify.register(async function protectedRoutes(subFastify) {
     subFastify.addHook("preHandler", isAuthenticated);
 
@@ -91,13 +98,15 @@ export async function routes(
       }
     )
 
-    // Busca as ordens cadastradas
+    /*
     subFastify.get(
       "/work-order",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new ListWorkOrderController().handle(request, reply);
       },
     );
+
+    */
 
     // Busca os colaborador cadastrados
     subFastify.get(
@@ -117,7 +126,7 @@ export async function routes(
 
     // Deleta um colaborador
     subFastify.delete(
-      "/collaborator",
+      "/collaborator/:id",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new DeleteCollaboratorController().handle(request, reply);
       },
@@ -149,7 +158,7 @@ export async function routes(
 
     // Deleta um equipamento
     subFastify.delete(
-      "/equipment",
+      "/equipment/:id",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new DeleteEquipmentController().handle(request, reply);
       },
@@ -181,7 +190,7 @@ export async function routes(
 
     // Deleta um operador
     subFastify.delete(
-      "/operator",
+      "/operator/:id",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new DeleteOperatorController().handle(request, reply);
       },

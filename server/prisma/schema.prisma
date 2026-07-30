@@ -30,6 +30,7 @@ model Equipment {
   fleet     String      @unique
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+
   workOrder WorkOrder[]
 
   @@map("equipment")
@@ -41,6 +42,9 @@ model Operator {
   registration String      @unique // Adicionado @unique para evitar duplicidade de matrículas
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  city         String
+  status       Boolean     @default(true)
+
   workOrders   WorkOrder[]
 
   @@map("operator")
@@ -55,6 +59,7 @@ model WorkOrder {
   status      String          @default("ABERTA") 
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+
   setores     SectorService[]
 
   @@map("work_order")
@@ -75,8 +80,6 @@ model SectorService {
   criador              Collaborator @relation("CriadorServico", fields: [criadoPorId], references: [id])
   tecnicoResponsavelId String?   @db.ObjectId
   tecnicoResponsavel   Collaborator? @relation("TecnicoResponsavel", fields: [tecnicoResponsavelId], references: [id])
-  
-  // Métricas de Tempo
   dataCriacao          DateTime  @default(now())
   dataInicioManutencao DateTime? 
   dataFimManutencao    DateTime? 

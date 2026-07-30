@@ -10,31 +10,27 @@ interface CreateWorkOrderProps {
 }
 
 export class CreateWorkOrderService {
-  async execute({
-    fleet,
-    setor,
-    qruDescricao,
-    qth,
-    city,
-    criadoPor,
-  }: CreateWorkOrderProps) {
-
-    // Verifica se todos os dados foram enviados
+  async execute({ fleet, setor, qruDescricao, qth, city, criadoPor }: CreateWorkOrderProps) {
     if (!fleet || !setor || !qruDescricao || !qth || !city || !criadoPor) {
       throw new Error("Todos os campos são obrigatórios");
     }
 
-    // Busca o equipamento pela frota
+    const collaboratorExists = await prismaClient.collaborator.findUnique({
+      where: { id: criadoPor }
+    })
+
+    if(!collaboratorExists){
+      throw new Error("Usuário criador não encontrado.")
+    }
+
     const equipment = await prismaClient.equipment.findUnique({
       where: { fleet },
     });
 
-    // Se nao existir, avise
     if (!equipment) {
       throw new Error("Equipamento não encontrado");
     }
 
-    // Verifica se existe alguma os aberta com a frota do equipamento que quero criar
     const activeWorkOrder = await prismaClient.workOrder.findFirst({
       where: {
         equipmentId: equipment.id,
@@ -42,9 +38,9 @@ export class CreateWorkOrderService {
       },
     });
 
-    // Se existir, cadastre um novo setor dentro dessa os
+    // Se existir O.S. aberta, cadastra o novo setor dentro dela
     if (activeWorkOrder) {
-      const newSectorService = await prismaClient.sectorService.create({
+      await prismaClient.sectorService.create({
         data: {
           workOrderId: activeWorkOrder.id,
           setor,
@@ -56,11 +52,27 @@ export class CreateWorkOrderService {
         },
       });
 
-      // Retorna o setor criado
-      return newSectorService;
+      // Retorna a O.S. completa atualizada
+      return await prismaClient.workOrder.findUnique({
+        where: { id: activeWorkOrder.id },
+        include: {
+          equipment: true,
+          operator: true,
+          setores: {
+            include: {
+              criador: {
+                select: { id: true, name: true, role: true },
+              },
+              tecnicoResponsavel: {
+                select: { id: true, name: true, role: true },
+              },
+            },
+          },
+        },
+      });
     }
 
-    // Cria uma nova os com o status ABERTA
+    // Se não existir O.S. aberta, cria uma nova
     const newWorkOrder = await prismaClient.workOrder.create({
       data: {
         equipmentId: equipment.id,
@@ -77,11 +89,22 @@ export class CreateWorkOrderService {
         },
       },
       include: {
-        setores: true,
+        equipment: true,
+        operator: true,
+        setores: {
+          include: {
+            criador: {
+              select: { id: true, name: true, role: true },
+            },
+            tecnicoResponsavel: {
+              select: { id: true, name: true, role: true },
+            },
+          },
+        },
       },
     });
 
-    // Retorna a os criada
     return newWorkOrder;
   }
 }
+

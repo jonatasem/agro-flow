@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { ListOperatorService } from "../../services/Operator/ListOfficialService.js";
+import { ListOperatorService } from "../../services/Operator/ListOperatorService.js";
 
 export class ListOperatorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {

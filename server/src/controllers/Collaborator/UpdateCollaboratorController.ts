@@ -1,58 +1,33 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import prismaClient from "../../prisma/index.js";
+import { UpdateCollaboratorService } from "../../services/Collaborator/UpdateCollaboratorService.js";
 
 interface UpdateCollaboratorProps {
-  id: string;
-  name?: string;
-  registration?: string;
-  city?: string;
-  status?: boolean;
+  name?: string | undefined;
+  registration?: string | undefined;
+  city?: string | undefined;
+  status?: boolean | undefined;
 }
 
 export class UpdateCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-
-    // Busca o id pelo params
     const { id } = request.params as { id: string };
 
-    // Busca os dados no corpo da requicao
-    const { name, registration, city, status } =
-      (request.body as UpdateCollaboratorProps) || {};
+    const { name, registration, city, status } = request.body as UpdateCollaboratorProps;
 
-    // Verifica se o id e valido
-    if (!id) {
-      return reply.status(400).send({
-        error: "O ID do funcionário é obrigatório para a atualização.",
+    const updateCollaboratorService = new UpdateCollaboratorService();
+
+    try {
+      const result = await updateCollaboratorService.execute({
+        id,
+        name,
+        registration,
+        city,
+        status,
       });
+
+      return reply.status(200).send(result);
+    } catch (error: any) {
+      return reply.status(400).send({ error: error.message });
     }
-
-    // Busca o colaborador pelo id
-    const collaboratorExists = await prismaClient.collaborator.findUnique({
-      where: { id },
-    });
-
-    // Retorna um erro se nao existir
-    if (!collaboratorExists) {
-      return reply.status(404).send({
-        error: "Funcionário não encontrado.",
-      });
-    }
-
-    // Atualiza somente os dados que o usuario enviar
-    const updateData = {
-      ...(name !== undefined && { name }),
-      ...(registration !== undefined && { registration }),
-      ...(city !== undefined && { city }),
-      ...(status !== undefined && { status }),
-    };
-
-    // Atualiza no banco de dados
-    const updateCollaborator = await prismaClient.collaborator.update({
-      where: { id },
-      data: updateData,
-    });
-
-    // Retorna o operador cadastrado
-    return reply.send(updateCollaborator);
   }
 }

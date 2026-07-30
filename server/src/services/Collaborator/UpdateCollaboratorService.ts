@@ -2,52 +2,40 @@ import prismaClient from "../../prisma/index.js";
 
 interface UpdateCollaboratorProps {
   id: string;
-  name?: string;
-  registration?: string;
-  city?: string;
-  status?: boolean;
+  name?: string | undefined;
+  registration?: string | undefined;
+  city?: string | undefined;
+  status?: boolean | undefined;
 }
 
-export class UpdatecollaboratorService {
-  async execute({
-    id,
-    name,
-    registration,
-    city,
-    status,
-  }: UpdateCollaboratorProps) {
-
-    // Verifica se passou o id corretamente
-    if (!id) {
-      throw new Error("O ID do funcionário é obrigatório para atualização");
-    }
-
-    // Verifica se o colaborador existe no banco de dados
+export class UpdateCollaboratorService {
+  async execute({ id, name, registration, city, status }: UpdateCollaboratorProps) {
+    if (!id) throw new Error("O ID do funcionário é obrigatório.");
     const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: { id },
     });
 
-    // Retorna um erro se nao existir
-    if (!collaboratorExists) {
-      throw new Error("Funcionário não encontrado.");
-    }
+    if (!collaboratorExists) throw new Error("Funcionário não encontrado.");
 
-    // Isso evita o erro de tipagem e impede o Prisma de atualizar campos inalterados
-    const updateData: Record<string, any> = {};
-    
-    // Atualiza apenas com os campos modificados
-    if (name !== undefined) updateData.name = name;
-    if (registration !== undefined) updateData.registration = registration;
-    if (city !== undefined) updateData.city = city;
-    if (status !== undefined) updateData.status = status;
-
-    // Atualiza no banco de dados
-    const updateCollaborator = await prismaClient.collaborator.update({
+    return await prismaClient.collaborator.update({
       where: { id },
-      data: updateData,
+      data: {
+        //Atualiza somente o que tem valor diferente de vazio
+        ...(name !== undefined && { name }),
+        ...(registration !== undefined && { registration }),
+        ...(city !== undefined && { city }),
+        ...(status !== undefined && { status }),
+      },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        registration: true,
+        city: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
-
-    // Retorna os dados atualizados
-    return updateCollaborator;
   }
 }

@@ -3,26 +3,15 @@ import { DeleteCollaboratorService } from "../../services/Collaborator/DeleteCol
 
 export class DeleteCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string }
 
-    // Busca o id pela query
-    const { id } = request.query as {
-      id: string;
-    };
-
-    // Se o id nao for encontrado, avise
-    if (!id) {
-      return reply
-        .status(400)
-        .send({ error: "O ID do funcionario é obrigatório." });
-    }
-
-    // Cria um novo servico para deletar um colaborador
     const collaboratorService = new DeleteCollaboratorService();
 
-    // Aguarda o service executar 
-    const collaborator = await collaboratorService.execute({ id });
-
-    // Retorna o colaborador excluido
-    reply.status(200).send(collaborator);
+    try {
+      const result = await collaboratorService.execute({ id });
+      return reply.status(200).send(result);
+    } catch(error : any) {
+      return reply.status(400).send({error})
+    }
   }
 }

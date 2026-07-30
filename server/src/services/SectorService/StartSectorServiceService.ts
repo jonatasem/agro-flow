@@ -7,28 +7,28 @@ interface StartSectorServiceProps {
 
 export class StartSectorServiceService {
     async execute({ sectorServiceId, tecnicoId }: StartSectorServiceProps ){
-        
-        // Verifica se o id foi enviado corretamente
         if(!sectorServiceId){
-            throw new Error("O ID é obrigatório");
+            throw new Error("O ID do serviço obrigatório");
         }
 
-        // Busca o service pelo id do setor
+        if(!tecnicoId){
+            throw new Error("O ID do tecnico é obrigatório");
+        }
+
         const sectorService = await prismaClient.sectorService.findUnique({
             where: {id: sectorServiceId}
         });
 
-        // Se não encontrar, retorne erro
         if(!sectorService){
             throw new Error("Serviço não encontrado");
         }
 
-        // Verificar se o setorService já não foi iniciado
-        if(sectorService.status === "EM_MANUTENCAO") {
-            throw new Error("Este serviço já esta em andamento");
+        if(sectorService.status !== "AGUARDANDO_MANUTENCAO") {
+            throw new Error(
+                `Este serviço não pode ser iniciado pois seu status atual é: ${sectorService.status}`
+            );
         }
 
-        // Tenta atualizar os dados no banco de dados
         const updatedService = await prismaClient.sectorService.update({
             where: {id: sectorServiceId},
             data : {
@@ -47,7 +47,6 @@ export class StartSectorServiceService {
             }
         });
 
-        // Retorna a os atualizada
         return updatedService;
     }
 }

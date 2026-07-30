@@ -1,27 +1,22 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { LoginCollaboratorService } from "../../services/LoginCollaborator/LoginCollaboratorService.js";
 
+interface LoginCollaboratorProps {
+  registration: string;
+  password: string;
+}
+
 export class LoginCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    
-    // Busca os dados no corpo da requisicao
-    const { registration, password } = request.body as {
-      registration: string;
-      password: string;
-    };
+    const { registration, password } = request.body as LoginCollaboratorProps;
 
-    // Cria o servico pra fazer login
     const loginService = new LoginCollaboratorService();
 
-    // Tenta fazer login utilizando os dados matricula e senha
     try {
       const result = await loginService.execute({ registration, password });
 
-      // Se conseguir, retorne o login
-      return reply.send(result);
+      return reply.status(200).send(result);
     } catch (error: any) {
-      
-      // Se der erro, mostre um erro
       return reply.status(401).send({ error: error.message });
     }
   }

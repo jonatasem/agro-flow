@@ -1,23 +1,27 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { CreateOperatorService } from "../../services/Operator/CreateOficialService.js";
+import { CreateOperatorService } from "../../services/Operator/CreateOperatorService.js";
+
+interface CreateOperatorProps {
+    name: string;
+    registration: string;
+}
 
 export class CreateOperatorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     
-    // Busca os dados no corpo da requicao
-    const { name, registration } = request.body as {
-      name: string;
-      registration: string;
-    };
+    const { name, registration } = request.body as CreateOperatorProps;
 
-        // Cria um novo service para criar um operador
     const operatorService = new CreateOperatorService();
-    const operator = await operatorService.execute({
-      name,
-      registration,
-    });
 
-       // Retorna os dados cadastrados
-    return reply.status(201).send(operator);
+    try {
+      const result = await operatorService.execute({
+        name,
+        registration,
+      });
+
+      return reply.status(201).send(result);    
+    } catch(error: any){
+      return reply.status(400).send({error});
+    }
   }
 }
