@@ -62,14 +62,6 @@ export async function routes(
       }
     );
 
-    // Busca as ordens cadastradas
-    fastify.get(
-      "/work-order",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListWorkOrderController().handle(request, reply);
-      },
-    );
-
   // ROTAS PRIVADAS
   fastify.register(async function protectedRoutes(subFastify) {
     subFastify.addHook("preHandler", isAuthenticated);
@@ -98,15 +90,12 @@ export async function routes(
       }
     )
 
-    /*
     subFastify.get(
       "/work-order",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new ListWorkOrderController().handle(request, reply);
       },
     );
-
-    */
 
     // Busca os colaborador cadastrados
     subFastify.get(
