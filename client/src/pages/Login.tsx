@@ -1,49 +1,23 @@
-import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import React from "react";
+import { useLoginForm } from "../hooks/useLoginForm";
 
+/**
+ * Página de Autenticação baseada no Hook `useLoginForm`
+ */
 export const Login: React.FC = () => {
-  const { checkRegistration, signIn } = useAuth();
-
-  const [step, setStep] = useState<1 | 2>(1);
-  const [registration, setRegistration] = useState("");
-  const [password, setPassword] = useState("");
-  const [collaboratorName, setCollaboratorName] = useState("");
-  
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Check registration
-  const handleCheckRegistration = async (e: React.SubmitEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
-
-    try {
-      const data = await checkRegistration(registration);
-      setCollaboratorName(data.name);
-      setStep(2);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, "Erro ao verificar matrícula."));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Login
-  const handleLogin = async (e: React.SubmitEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
-
-    try {
-      await signIn(registration, password);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, "Senha incorreta ou erro ao entrar."));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    step,
+    registration,
+    setRegistration,
+    password,
+    setPassword,
+    collaboratorName,
+    error,
+    isSubmitting,
+    handleCheckRegistration,
+    handleLogin,
+    handleBackToStep1,
+  } = useLoginForm();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-4">
@@ -69,20 +43,21 @@ export const Login: React.FC = () => {
                 id="registration"
                 type="text"
                 required
-                placeholder="Informe sua matrícula"
+                autoFocus
+                placeholder="Informe a sua matrícula"
                 value={registration}
                 onChange={(e) => setRegistration(e.target.value)}
                 disabled={isSubmitting}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-white"
+                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-white disabled:opacity-50"
               />
             </div>
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-sm rounded-xl transition-all disabled:opacity-50"
+              disabled={isSubmitting || !registration.trim()}
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-sm rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Verificando..." : "Avançar"}
+              {isSubmitting ? "A verificar..." : "Avançar"}
             </button>
           </form>
         ) : (
@@ -94,10 +69,7 @@ export const Login: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setStep(1);
-                  setPassword("");
-                }}
+                onClick={handleBackToStep1}
                 className="text-xs text-slate-500 hover:text-slate-300 underline"
               >
                 Trocar
@@ -106,26 +78,27 @@ export const Login: React.FC = () => {
 
             <div className="space-y-1">
               <label htmlFor="password" className="text-xs text-slate-300 font-semibold">
-                Senha
+                Palavra-passe
               </label>
               <input
                 id="password"
                 type="password"
                 required
-                placeholder="Informe sua senha"
+                autoFocus
+                placeholder="Informe a sua palavra-passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-white"
+                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-white disabled:opacity-50"
               />
             </div>
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-sm rounded-xl transition-all disabled:opacity-50"
+              disabled={isSubmitting || !password.trim()}
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-sm rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Entrando..." : "Entrar"}
+              {isSubmitting ? "A entrar..." : "Entrar"}
             </button>
           </form>
         )}

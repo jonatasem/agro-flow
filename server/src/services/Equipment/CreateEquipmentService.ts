@@ -15,7 +15,7 @@ export class CreateEquipmentService {
       where: { fleet }
     });
     
-    if(!fleetExists){
+    if(fleetExists){
       throw new Error("Já existe um equipamento cadastrado com essa frota.")
     }
 

@@ -54,12 +54,27 @@ export async function routes(
     },
   );
 
+  //test
+    fastify.get(
+      "/collaborator",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ListCollaboratorController().handle(request, reply);
+      },
+    );
+
   // Verificar se a matrícula existe, e se o usuario nao ta desativado, retorna o nome 
     fastify.post(
       "/login/check-registration",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new CheckRegistrationController().handle(request, reply);
       }
+    );
+
+    fastify.get(
+      "/work-order",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ListWorkOrderController().handle(request, reply);
+      },
     );
 
   // ROTAS PRIVADAS
@@ -90,20 +105,25 @@ export async function routes(
       }
     )
 
-    subFastify.get(
-      "/work-order",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListWorkOrderController().handle(request, reply);
-      },
-    );
-
-    // Busca os colaborador cadastrados
+    
+    /*
+    
     subFastify.get(
       "/collaborator",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new ListCollaboratorController().handle(request, reply);
       },
     );
+
+    subFastify.get(
+      "/work-order",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ListWorkOrderController().handle(request, reply);
+      },
+    );
+    
+    */
+    
 
     // Atualiza um colaborador
     subFastify.put(
