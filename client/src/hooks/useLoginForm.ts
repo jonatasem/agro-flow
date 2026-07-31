@@ -13,8 +13,8 @@ export function useLoginForm() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Etapa 1: Verificar se a matrícula existe
-  const handleCheckRegistration = async (e: React.FormEvent) => {
+  // Verificar se a matrícula existe
+  const handleCheckRegistration = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!registration.trim()) return;
 
@@ -33,7 +33,7 @@ export function useLoginForm() {
   };
 
   // Etapa 2: Realizar a autenticação
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!password.trim()) return;
 

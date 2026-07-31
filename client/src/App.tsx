@@ -1,7 +1,7 @@
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./contexts/AuthProvider";
 import { Login } from "./pages/Login";
-import { Dashboard } from "./pages/Dashboard";
+import { DashboardPage } from "./features/work-orders/pages/DashboardPage";
 
 const Main: React.FC = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -14,7 +14,7 @@ const Main: React.FC = () => {
     );
   }
 
-  return isAuthenticated ? <Dashboard /> : <Login />;
+  return isAuthenticated ? <DashboardPage /> : <Login />;
 };
 
 export default function App() {

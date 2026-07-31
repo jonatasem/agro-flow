@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { api } from "../services/api";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { api } from "../../../services/api";
+import { getErrorMessage } from "../../../utility/getErrorMessage";
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,44 +8,45 @@ interface ModalProps {
   onSuccess: () => void;
 }
 
-export const CreateCollaboratorModal: React.FC<ModalProps> = ({
+export const CreateOperatorModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
 }) => {
   const [name, setName] = useState("");
   const [registration, setRegistration] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("TECNICO");
   const [city, setCity] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  // CORREÇÃO: Alterado de React.SubmitEvent para React.FormEvent
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !registration.trim() || !password.trim()) return;
+    if (!name.trim() || !registration.trim()) return;
 
     try {
       setLoading(true);
       setError("");
-      await api.post("/collaborator", {
+
+      // Mantido estritamente na rota de operadores
+      await api.post("/operator", {
         name,
         registration,
-        password,
-        role,
         city,
+        password,
       });
+
       setName("");
       setRegistration("");
-      setPassword("");
-      setRole("");
       setCity("");
+      setPassword("");
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      setError(getErrorMessage(err, "Erro ao cadastrar colaborador."));
+      setError(getErrorMessage(err, "Erro ao cadastrar operador. Verifique os dados fornecidos."));
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
       <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-md space-y-4 shadow-2xl">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-100">Novo Colaborador</h2>
+          <h2 className="text-lg font-bold text-slate-100">Novo Operador</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-sm">
             ✕
           </button>
@@ -69,11 +70,11 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs text-slate-300 font-semibold">Nome Completo</label>
+            <label className="text-xs text-slate-300 font-semibold">Nome Completo *</label>
             <input
               type="text"
               required
-              placeholder="Ex: Fernando Souza"
+              placeholder="Ex: Carlos Silva"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={loading}
@@ -81,44 +82,14 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <label className="text-xs text-slate-300 font-semibold">Matrícula</label>
-              <input
-                type="text"
-                required
-                placeholder="Ex: 1024"
-                value={registration}
-                onChange={(e) => setRegistration(e.target.value)}
-                disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs text-slate-300 font-semibold">Cargo / Função</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
-              >
-                <option value="TECNICO">Técnico</option>
-                <option value="LIDER">Líder</option>
-                <option value="COA">COA</option>
-                <option value="ADMIN">Administrador</option>
-              </select>
-            </div>
-          </div>
-
           <div className="space-y-1">
-            <label className="text-xs text-slate-300 font-semibold">Senha de Acesso</label>
+            <label className="text-xs text-slate-300 font-semibold">Matrícula *</label>
             <input
-              type="password"
+              type="text"
               required
-              placeholder="Mínimo 6 caracteres"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Ex: OP-503"
+              value={registration}
+              onChange={(e) => setRegistration(e.target.value)}
               disabled={loading}
               className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
             />
@@ -128,9 +99,21 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
             <label className="text-xs text-slate-300 font-semibold">Cidade / Base</label>
             <input
               type="text"
-              placeholder="Ex: Sertãozinho - SP"
+              placeholder="Ex: Lucélia - SP"
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              disabled={loading}
+              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-slate-300 font-semibold">Senha de Acesso</label>
+            <input
+              type="password"
+              placeholder="Padrão: 123456"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
             />

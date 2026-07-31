@@ -5,7 +5,7 @@ import { CreateOperatorModal } from "../components/CreateOperatorModal";
 /**
  * Componente de página para visualização, busca e cadastro de Operadores
  */
-export const Operators: React.FC = () => {
+export const OperatorsPage: React.FC = () => {
   const { operators, loading, error, refetch } = useOperators();
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,9 +1,6 @@
 import React from "react";
 import { useLoginForm } from "../hooks/useLoginForm";
 
-/**
- * Página de Autenticação baseada no Hook `useLoginForm`
- */
 export const Login: React.FC = () => {
   const {
     step,

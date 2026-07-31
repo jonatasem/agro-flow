@@ -1,20 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
-import { getCollaborators, type CollaboratorInfo } from "../services/workOrder";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { workOrderService, type WorkOrder } from "../services/workOrderService";
+import { getErrorMessage } from "../../../utility/getErrorMessage";
 
-export function useCollaborators() {
-  const [collaborators, setCollaborators] = useState<CollaboratorInfo[]>([]);
+export function useWorkOrders() {
+  const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const refetch = useCallback(async () => {
+  const fetchWorkOrders = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await getCollaborators();
-      setCollaborators(data);
+      const data = await workOrderService.getAll();
+      setWorkOrders(data);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, "Erro ao carregar colaboradores."));
+      setError(getErrorMessage(err, "Erro ao carregar Ordens de Serviço."));
     } finally {
       setLoading(false);
     }
@@ -26,13 +26,13 @@ export function useCollaborators() {
     async function loadData() {
       try {
         setError("");
-        const data = await getCollaborators();
+        const data = await workOrderService.getAll();
         if (isMounted) {
-          setCollaborators(data);
+          setWorkOrders(data);
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(getErrorMessage(err, "Erro ao carregar colaboradores."));
+          setError(getErrorMessage(err, "Erro ao carregar Ordens de Serviço."));
         }
       } finally {
         if (isMounted) {
@@ -49,10 +49,9 @@ export function useCollaborators() {
   }, []);
 
   return {
-    collaborators,
+    workOrders,
     loading,
     error,
-    refetch,
+    refetch: fetchWorkOrders,
   };
 }
-

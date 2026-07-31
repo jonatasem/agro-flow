@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { api } from "../services/api";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { api } from "../../../services/api";
+import { getErrorMessage } from "../../../utility/getErrorMessage";
 
 interface ModalProps {
   isOpen: boolean;

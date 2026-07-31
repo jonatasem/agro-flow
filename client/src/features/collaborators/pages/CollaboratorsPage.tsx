@@ -1,11 +1,22 @@
 import React, { useState } from "react";
-import { useCollaborators } from "../hooks/useCollaborator";
+import { useCollaborator } from "../hooks/useCollaborator";
 import { CreateCollaboratorModal } from "../components/CreateCollaboratorModal";
+import { type Collaborator } from "../services/collaboratorService";
+import { getErrorMessage } from "../../../utility/getErrorMessage";
 
-export const Collaborators: React.FC = () => {
-  const { collaborators, loading, error, refetch } = useCollaborators();
+export const CollaboratorsPage: React.FC = () => {
+  const {
+    collaborators,
+    loading,
+    error,
+    refetch,
+    deleteCollaborator,
+  } = useCollaborator();
+
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filteredCollaborators = Array.isArray(collaborators)
     ? collaborators.filter((collab) => {
@@ -19,6 +30,31 @@ export const Collaborators: React.FC = () => {
         return nameMatch || roleMatch || regMatch;
       })
     : [];
+
+    const handleDelete = async (id: string, name: string) => {
+      if (!window.confirm(`Tem certeza que deseja excluir o colaborador "${name}"?`)) {
+        return;
+      }
+
+      try {
+        setDeletingId(id);
+        await deleteCollaborator(id);
+      } catch (err: unknown) {
+        alert(getErrorMessage(err, "Erro ao excluir colaborador."));
+      } finally {
+        setDeletingId(null);
+      }
+    };
+
+  const handleEdit = (collaborator: Collaborator) => {
+    setEditingCollaborator(collaborator);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingCollaborator(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -38,13 +74,16 @@ export const Collaborators: React.FC = () => {
           />
           <button
             onClick={refetch}
-            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 rounded-xl"
+            className="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 rounded-xl transition-colors"
             title="Atualizar"
           >
             🔄
           </button>
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setEditingCollaborator(null);
+              setIsModalOpen(true);
+            }}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-xl transition-all shadow-lg shadow-indigo-600/20 whitespace-nowrap"
           >
             + Colaborador
@@ -71,18 +110,36 @@ export const Collaborators: React.FC = () => {
           {filteredCollaborators.map((c) => (
             <div
               key={c.id}
-              className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2 hover:border-slate-700 transition-colors shadow-lg"
+              className="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 hover:border-slate-700 transition-colors shadow-lg"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start gap-2">
                 <div>
                   <h3 className="font-bold text-slate-100 text-sm">{c.name}</h3>
                   <span className="text-xs text-indigo-300 font-medium">{c.role}</span>
                 </div>
-                {c.registration && (
-                  <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-                    Matrícula: {c.registration}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {c.registration && (
+                    <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
+                      Matrícula: {c.registration}
+                    </span>
+                  )}
+                  {/* Botões de Ação */}
+                  <button
+                    onClick={() => handleEdit(c)}
+                    className="p-1 text-slate-400 hover:text-indigo-400 text-xs transition-colors"
+                    title="Editar"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => handleDelete(c.id, c.name)}
+                    disabled={deletingId === c.id}
+                    className="p-1 text-slate-400 hover:text-red-400 text-xs transition-colors disabled:opacity-50"
+                    title="Excluir"
+                  >
+                    {deletingId === c.id ? "⏳" : "🗑️"}
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-between items-center text-[11px] text-slate-500 pt-2 border-t border-slate-800/60">
@@ -102,11 +159,12 @@ export const Collaborators: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de Cadastro */}
+      {/* Modal de Cadastro / Edição */}
       <CreateCollaboratorModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onSuccess={refetch}
+        initialData={editingCollaborator}
       />
     </div>
   );

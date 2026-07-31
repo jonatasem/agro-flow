@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useEquipments } from "../hooks/useEquipment";
 import { CreateEquipmentModal } from "../components/CreateEquipmentModal";
 
-export const Equipments: React.FC = () => {
+export const EquipmentsPage: React.FC = () => {
   const { equipments, loading, error, refetch } = useEquipments();
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);

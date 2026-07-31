@@ -1,27 +1,47 @@
 import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 import { useWorkOrders } from "../hooks/useWorkOrders";
 import { CreateWorkOrderModal } from "../components/CreateWorkOrderModal";
 import { WorkOrderCard } from "../components/WorkOrderCard";
-import { Equipments } from "./Equipments";
-import { Operators } from "./Operators";
-import { Collaborators } from "./Collaborators";
+import { EquipmentsPage } from "../../equipments/pages/EquipmentsPage";
+import { CollaboratorsPage } from "../../collaborators/pages/CollaboratorsPage";
+import { OperatorsPage } from "../../operators/pages/OperatorsPage";
+import { workOrderService, type WorkOrder } from "../services/workOrderService";
 
 type TabType = "work-orders" | "equipments" | "operators" | "collaborators";
 
 /**
- * Painel Principal com Navegação por Abas (Tabs) e Gestão de O.S.
+ * Painel Principal com Navegação por Abas (Tabs) e Gestão de O.S. (CRUD)
  */
-export const Dashboard: React.FC = () => {
+export const DashboardPage: React.FC = () =>          {
   const { user, signOut } = useAuth();
   const { workOrders, loading, error, refetch } = useWorkOrders();
-
   const [activeTab, setActiveTab] = useState<TabType>("work-orders");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<WorkOrder | null>(null);
+
+  const handleCreateOpen = () => {
+    setSelectedOrder(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditOpen = (order: WorkOrder) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Deseja realmente remover esta Ordem de Serviço?")) return;
+    try {
+      await workOrderService.delete(id);
+      refetch();
+    } catch (err: unknown) {
+      alert( err || "Erro ao remover Ordem de Serviço.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 md:p-6 space-y-6">
-      {/* Cabeçalho */}
       <header className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
         <div>
           <h1 className="text-2xl font-bold text-indigo-400">AgroFlow</h1>
@@ -33,7 +53,7 @@ export const Dashboard: React.FC = () => {
 
         <div className="flex gap-2">
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleCreateOpen}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20"
           >
             + Nova O.S.
@@ -47,7 +67,6 @@ export const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Navegação por Abas */}
       <nav className="max-w-5xl mx-auto flex gap-2 border-b border-slate-800/80 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab("work-orders")}
@@ -91,7 +110,6 @@ export const Dashboard: React.FC = () => {
         </button>
       </nav>
 
-      {/* Conteúdo Dinâmico */}
       <main className="max-w-5xl mx-auto space-y-4">
         {activeTab === "work-orders" && (
           <div className="space-y-4">
@@ -124,23 +142,31 @@ export const Dashboard: React.FC = () => {
             ) : (
               <div className="grid gap-4">
                 {workOrders.map((order) => (
-                  <WorkOrderCard key={order.id} order={order} />
+                  <WorkOrderCard 
+                    key={order.id} 
+                    order={order} 
+                    onEdit={() => handleEditOpen(order)}
+                    onDelete={() => handleDelete(order.id)}
+                  />
                 ))}
               </div>
             )}
           </div>
         )}
 
-        {activeTab === "equipments" && <Equipments />}
-        {activeTab === "operators" && <Operators />}
-        {activeTab === "collaborators" && <Collaborators />}
+        {activeTab === "equipments" && <EquipmentsPage />}
+        {activeTab === "operators" && <OperatorsPage />}
+        {activeTab === "collaborators" && <CollaboratorsPage />}
       </main>
 
-      {/* Modal de Criação de O.S. */}
       <CreateWorkOrderModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedOrder(null);
+        }}
         onSuccess={refetch}
+        initialData={selectedOrder}
       />
     </div>
   );
