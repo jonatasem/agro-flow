@@ -22,7 +22,7 @@ export const CreateOperatorModal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!name.trim() || !registration.trim()) return;
 
@@ -30,13 +30,11 @@ export const CreateOperatorModal: React.FC<ModalProps> = ({
       setLoading(true);
       setError("");
 
-      // Enviamos para /collaborator especificando a role OPERADOR
-      await api.post("/collaborator", {
+      await api.post("/operator", {
         name,
         registration,
         city,
-        role: "OPERADOR",
-        password: password || "123456", // Senha padrão caso o backend exija
+        password: password,
       });
 
       setName("");

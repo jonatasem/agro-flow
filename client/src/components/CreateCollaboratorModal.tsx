@@ -23,14 +23,13 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!name.trim() || !registration.trim() || !password.trim()) return;
 
     try {
       setLoading(true);
       setError("");
-      // Rota do backend: POST /collaborator
       await api.post("/collaborator", {
         name,
         registration,
@@ -41,7 +40,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
       setName("");
       setRegistration("");
       setPassword("");
-      setRole("TECNICO");
+      setRole("");
       setCity("");
       onSuccess();
       onClose();
