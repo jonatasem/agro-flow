@@ -34,7 +34,6 @@ export interface WorkOrder {
   id: string;                          // Identificador único da Ordem de Serviço.
   equipmentId: string;                 // ID do maquinário ou veículo associado.
   operatorId?: string | null;          // ID opcional do operador encarregado do maquinário.
-  // Enumeração estrita representando o status geral da Ordem de Serviço.
   status: "ABERTA" | "EM_ANDAMENTO" | "FINALIZADA";
   createdAt?: string;                  // Carimbo de data/hora de criação do registro.
   updatedAt?: string;                  // Carimbo de data/hora da última modificação.
@@ -88,19 +87,18 @@ export const workOrderService = {
 
   // Método assíncrono para modificar atributos de uma Ordem de Serviço existente.
   update: async (id: string, payload: UpdateWorkOrderInput): Promise<WorkOrder> => {
-    const response = await api.put<WorkOrder>(`/work-order/${id}`, payload);
+    const response = await api.put<WorkOrder>(`/sector-service/${id}`, payload);
     return response.data;
   },
 
   // Método assíncrono para deletar/remover de forma permanente uma OS da base de dados.
   delete: async (id: string): Promise<void> => {
-    await api.delete(`/work-order/${id}`);
+    await api.delete(`/sector-service/${id}`);
   },
 
   // 🚀 NOVO: Método assíncrono para disparar o início do atendimento de um setor específico.
   startSector: async (sectorServiceId: string): Promise<SectorService> => {
-    // Faz a chamada HTTP PATCH ou POST correspondente à rota paramétrica do Fastify.
-    const response = await api.patch<SectorService>(`/sector/start/${sectorServiceId}`);
+    const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/start`);
     return response.data;
   },
 
@@ -110,7 +108,7 @@ export const workOrderService = {
     payload: { solucaoTecnico: string; tipoCausa?: string }
   ): Promise<SectorService> => {
     // Transmite a solução técnica e o tipo de causa no corpo (body) da requisição.
-    const response = await api.patch<SectorService>(`/sector/finish/${sectorServiceId}`, payload);
+    const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/finish`, payload);
     return response.data;
   }
 };

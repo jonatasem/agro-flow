@@ -68,7 +68,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEdit, onD
   };
 
   // 🚀 NOVO: Trata o envio do formulário técnico para encerrar o chamado do setor.
-  const handleFinishRepair = async (e: React.FormEvent, sectorServiceId: string) => {
+  const handleFinishRepair = async (e: React.SubmitEvent<HTMLFormElement>, sectorServiceId: string) => {
     e.preventDefault();
     if (!solucao.trim()) return;
 

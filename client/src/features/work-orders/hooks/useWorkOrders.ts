@@ -1,29 +1,16 @@
-// Importa os hooks necessários do React para gerenciar estado, efeitos colaterais e memorização de funções.
 import { useState, useEffect, useCallback } from "react";
-
-// Importa o serviço que faz as requisições de ordens de serviço e o seu respectivo tipo de dado.
 import { workOrderService, type WorkOrder } from "../services/workOrderService";
-
-// Importa a função utilitária para extrair mensagens de erro com segurança.
 import { getErrorMessage } from "../../../utility/getErrorMessage";
 
-// Define e exporta a função do hook personalizado que gerencia a listagem de ordens de serviço.
 export function useWorkOrders() {
-  // Estado que armazena a lista de ordens de serviço retornada pela API.
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
-  
-  // Estado booleano que indica se a aplicação está buscando os dados (inicia como verdadeiro).
   const [loading, setLoading] = useState(true);
-  
-  // Estado que armazena mensagens de erro em caso de falha nas requisições.
   const [error, setError] = useState("");
 
   // Memoriza a função de busca usando useCallback para evitar que ela seja recriada a cada renderização da página.
   const fetchWorkOrders = useCallback(async () => {
     try {
-      // Ativa o indicador visual de carregamento.
       setLoading(true);
-      // Limpa erros residuais antes de iniciar a nova tentativa de busca.
       setError("");
       // Executa a chamada HTTP para obter todas as ordens de serviço.
       const data = await workOrderService.getAll();

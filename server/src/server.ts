@@ -9,7 +9,7 @@ const app = fastify({
 const start = async () => {
   await app.register(cors, {
     origin: "*", //temporário
-    methods: ["GET", "POST", "UPDATE", "DELETE"],
+    methods: ["GET", "POST", "PUT", "UPDATE", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
 

@@ -7,6 +7,7 @@ export const api = axios.create({
 
 // Configura um interceptor que altera a requisição automaticamente antes que ela seja enviada ao servidor.
 api.interceptors.request.use((config) => {
+  
   // Busca o token de autenticação JWT salvo no localStorage do navegador.
   const token = localStorage.getItem("@agroflow:token");
   
