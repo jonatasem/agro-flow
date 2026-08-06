@@ -18,23 +18,23 @@ export class LoginCollaboratorService {
     });
 
     if (!collaborator) {
-      throw new Error("Matrícula não autorizada");
+      throw new Error("Matrícula não autorizada.");
     }
 
     if (!collaborator.status) {
-      throw new Error("Este colaborador está desativado no sistema");
+      throw new Error("Este colaborador está desativado no sistema.");
     }
 
     const passwordMatch = await bcrypt.compare(password, collaborator.password);
 
     if (!passwordMatch) {
-      throw new Error("Matrícula ou senha incorreta");
+      throw new Error("Senha incorreta.");
     }
 
     const secret = process.env.JWT_SECRET;
 
     if (!secret) {
-      throw new Error("A variável de ambiente JWT_SECRET não foi definida");
+      throw new Error("A variável de ambiente JWT_SECRET não foi definida.");
     }
 
     const token = jwt.sign(
