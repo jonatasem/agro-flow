@@ -20,28 +20,22 @@ export const ActiveWorkOrdersPage: React.FC<ActiveWorkOrdersPageProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-          Ordens de Serviço Ativas
-        </h2>
-        <button onClick={refetch} className="text-xs text-indigo-400 hover:underline">
-          Atualizar
-        </button>
-      </div>
-
+      {/* Alerta de Erro */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs p-3 rounded-xl">
+        <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3.5 rounded-xl font-medium">
           {error}
         </div>
       )}
 
+      {/* Estado de Carregamento / Vazio / Lista de Cards */}
       {loading ? (
-        <div className="text-center py-12 text-slate-500 text-xs animate-pulse">
+        <div className="text-center py-12 text-slate-400 text-xs font-semibold animate-pulse bg-white rounded-2xl border border-slate-200 shadow-sm">
           A carregar Ordens de Serviço...
         </div>
       ) : activeWorkOrders.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 p-12 rounded-2xl text-center text-slate-400 text-sm">
-          Nenhuma Ordem de Serviço ativa no momento.
+        <div className="bg-white border border-slate-200 p-12 rounded-2xl text-center text-slate-500 text-sm shadow-sm">
+          <p className="font-bold text-slate-700 text-base mb-1">Tudo limpo por aqui! 🌾</p>
+          <p className="text-xs text-slate-400">Nenhuma Ordem de Serviço ativa no momento.</p>
         </div>
       ) : (
         <div className="grid gap-4">
