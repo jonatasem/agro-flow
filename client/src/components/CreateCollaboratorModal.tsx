@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { api } from "../services/api";
 import { getErrorMessage } from "../utility/getErrorMessage";
@@ -17,13 +16,12 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   onSuccess,
   initialData,
 }) => {
-
-
-  const [name, setName] = useState(() => initialData?.name || "");
-  const [registration, setRegistration] = useState(() => initialData?.registration || "");
+  // Inicialização direta do estado através do initialData (sem uso de useEffect para evitar avisos de re-renderização em cadeia)
+  const [name, setName] = useState(initialData?.name || "");
+  const [registration, setRegistration] = useState(initialData?.registration || "");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState(() => initialData?.role || "TECNICO");
-  const [city, setCity] = useState(() => initialData?.city || "");
+  const [role, setRole] = useState(initialData?.role || "TECNICO");
+  const [city, setCity] = useState(initialData?.city || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -50,10 +48,8 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
       }
     
       if (initialData?.id) {
-      
         await api.put(`/collaborator/${initialData.id}`, payload);
       } else {
-      
         await api.post("/collaborator", payload);
       }
     
@@ -73,28 +69,26 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   };
 
   return (
-  
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-md space-y-4 shadow-2xl">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold text-slate-100">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md space-y-4 shadow-xl text-slate-800">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h2 className="text-lg font-bold text-slate-800">
             {initialData ? "Editar Colaborador" : "Novo Colaborador"}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white text-sm">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm font-bold">
             ✕
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs p-3 rounded-xl">
+          <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           <div className="space-y-1">
-            <label className="text-xs text-slate-300 font-semibold">Nome Completo</label>
+            <label className="text-xs text-slate-700 font-semibold">Nome Completo</label>
             <input
               type="text"
               required
@@ -102,13 +96,13 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={loading}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <label className="text-xs text-slate-300 font-semibold">Matrícula</label>
+              <label className="text-xs text-slate-700 font-semibold">Matrícula</label>
               <input
                 type="text"
                 required
@@ -116,17 +110,17 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
                 value={registration}
                 onChange={(e) => setRegistration(e.target.value)}
                 disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
               />
             </div>
            
             <div className="space-y-1">
-              <label className="text-xs text-slate-300 font-semibold">Cargo / Função</label>
+              <label className="text-xs text-slate-700 font-semibold">Cargo / Função</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
               >
                 <option value="TECNICO">Técnico</option>
                 <option value="LIDER">Líder</option>
@@ -137,8 +131,8 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-300 font-semibold">
-             {initialData ? "Nova Senha (Opcional)" : "Senha de Acesso"}
+            <label className="text-xs text-slate-700 font-semibold">
+              {initialData ? "Nova Senha (Opcional)" : "Senha de Acesso"}
             </label>
             <input
               type="password"
@@ -147,42 +141,37 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-300 font-semibold">Cidade / Base</label>
+            <label className="text-xs text-slate-700 font-semibold">Cidade / Base</label>
             <input
               type="text"
               placeholder="Ex: Sertãozinho - SP"
               value={city}
-            
               onChange={(e) => setCity(e.target.value)}
               disabled={loading}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
             />
           </div>
 
-         
-          <div className="flex justify-end gap-2 pt-2">
-           
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-xl"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-semibold rounded-xl transition-colors"
             >
               Cancelar
             </button>
             
-           
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-xl transition-all"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-indigo-600/20"
             >
-             
               {loading ? "Salvando..." : initialData ? "Salvar Alterações" : "Cadastrar"}
             </button>
           </div>
