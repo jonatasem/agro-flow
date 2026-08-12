@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useOperators } from "../hooks/useOperator";
-import { CreateOperatorModal } from "../components/CreateOperatorModal";
+import { CreateOperatorModal } from "../components/operator/CreateOperatorModal";
 
 export const OperatorsPage: React.FC = () => {
   const { operators, loading, error, refetch } = useOperators();

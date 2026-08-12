@@ -2,6 +2,7 @@ import prismaClient from "../../prisma/index.js";
 
 interface CreateWorkOrderProps {
   fleet: string;
+  operatorId: string;
   setor: string;
   qruDescricao: string;
   qth: string;
@@ -10,17 +11,17 @@ interface CreateWorkOrderProps {
 }
 
 export class CreateWorkOrderService {
-  async execute({ fleet, setor, qruDescricao, qth, city, criadoPor }: CreateWorkOrderProps) {
-    if (!fleet || !setor || !qruDescricao || !qth || !city || !criadoPor) {
+  async execute({ fleet, operatorId, setor, qruDescricao, qth, city, criadoPor }: CreateWorkOrderProps) {
+    if (!fleet || !operatorId || !setor || !qruDescricao || !qth || !city || !criadoPor) {
       throw new Error("Todos os campos são obrigatórios");
     }
 
     const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: { id: criadoPor }
-    })
+    });
 
-    if(!collaboratorExists){
-      throw new Error("Usuário criador não encontrado.")
+    if (!collaboratorExists) {
+      throw new Error("Usuário criador não encontrado.");
     }
 
     const equipment = await prismaClient.equipment.findUnique({
@@ -29,6 +30,20 @@ export class CreateWorkOrderService {
 
     if (!equipment) {
       throw new Error("Equipamento não encontrado");
+    }
+
+    // 1. Verifica se a string já é um ObjectId de 24 caracteres do MongoDB
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(operatorId);
+
+    // 2. Busca o operador pelo ObjectId ou pela matrícula
+    const operatorExists = await prismaClient.operator.findFirst({
+      where: isObjectId
+        ? { id: operatorId }
+        : { registration: operatorId }
+    });
+
+    if (!operatorExists) {
+      throw new Error("Operador não encontrado com esta matrícula/ID.");
     }
 
     const activeWorkOrder = await prismaClient.workOrder.findFirst({
@@ -52,7 +67,6 @@ export class CreateWorkOrderService {
         },
       });
 
-      // Retorna a O.S. completa atualizada
       return await prismaClient.workOrder.findUnique({
         where: { id: activeWorkOrder.id },
         include: {
@@ -76,6 +90,7 @@ export class CreateWorkOrderService {
     const newWorkOrder = await prismaClient.workOrder.create({
       data: {
         equipmentId: equipment.id,
+        operatorId: operatorExists.id,
         status: "ABERTA",
         setores: {
           create: {
@@ -107,4 +122,3 @@ export class CreateWorkOrderService {
     return newWorkOrder;
   }
 }
-

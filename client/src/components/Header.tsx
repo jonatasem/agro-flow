@@ -21,7 +21,6 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
       <div className="flex items-center gap-3">
-        {/* Logótipo / Emblema AgroFlow Zilor */}
         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-green-700 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-emerald-600/20">
           Z
         </div>
@@ -30,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 className="text-xl font-black text-slate-800 tracking-tight">AgroFlow</h1>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Utilizador: <span className="font-semibold text-slate-700">{user?.name || "Operador"}</span> •{" "}
+            Logado como: <span className="font-semibold text-slate-700">{user?.name || "Operador"}</span> •{" "}
             <span className="text-emerald-700 font-medium">{user?.role || "Técnico"}</span>
           </p>
         </div>

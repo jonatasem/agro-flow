@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { api } from "../services/api";
-import { getErrorMessage } from "../utility/getErrorMessage";
-import type { Collaborator } from "../services/collaboratorService";
+import { api } from "../../services/api";
+import { getErrorMessage } from "../../utility/getErrorMessage";
+import type { Collaborator } from "../../services/collaboratorService";
 
 interface ModalProps {
   isOpen: boolean;               

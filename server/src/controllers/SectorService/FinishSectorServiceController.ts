@@ -2,45 +2,39 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { FinishSectorServiceService } from "../../services/SectorService/FinishSectorServiceService.js";
 
 interface FinishSectorServiceProps {
-    sectorServiceId: string;
-    solucaoTecnico: string;
-    tipoCausa?: string;
-    tecnicoId: string;
+  solucaoTecnico: string;
+  tipoCausa: string;
+  usedPartIds: { partId: string; quantity: number }[];
+  usedToolIds: string[];
 }
 
 export class FinishSectorServiceController {
-  async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { id: sectorServiceId } = request.params as { id: string };
+    async handle(request: FastifyRequest, reply: FastifyReply) {
+        const { id: sectorServiceId } = request.params as { id: string };
 
-    const { solucaoTecnico, tipoCausa } = request.body as {
-      solucaoTecnico: string;
-      tipoCausa?: string;
-    };
+        const { solucaoTecnico, tipoCausa, usedPartIds, usedToolIds } = request.body as FinishSectorServiceProps;
 
-    const tecnicoId = request.userId;
+        const tecnicoId = request.userId;
 
-    if (!tecnicoId) {
-      return reply.status(401).send({ error: "Não autorizado. Técnico não identificado." });
+        if (!tecnicoId) {
+            return reply.status(401).send({ error: "Não autorizado. Técnico não identificado." });
+        }
+
+        const finishService = new FinishSectorServiceService();
+
+        try {
+            const result = await finishService.execute({
+                sectorServiceId,
+                solucaoTecnico,
+                tipoCausa,
+                tecnicoId,
+                usedPartIds,
+                usedToolIds
+            });
+
+            return reply.status(200).send(result);
+        } catch (error: any) {
+            return reply.status(400).send({ error: error.message });
+        }
     }
-
-    const finishService = new FinishSectorServiceService();
-
-    try {
-      const dadosParaFinalizar: FinishSectorServiceProps = {
-        sectorServiceId,
-        solucaoTecnico,
-        tecnicoId,
-      };
-
-      if (tipoCausa) {
-        dadosParaFinalizar.tipoCausa = tipoCausa;
-      }
-
-      const result = await finishService.execute(dadosParaFinalizar);
-
-      return reply.status(200).send(result);
-    } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
-    }
-  }
 }

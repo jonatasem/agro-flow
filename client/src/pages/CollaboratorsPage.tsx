@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useCollaborator } from "../hooks/useCollaborator";
 
 // Importa o componente modal encarregado tanto de realizar o cadastro quanto as atualizações do funcionário.
-import { CreateCollaboratorModal } from "../components/CreateCollaboratorModal";
+import { CreateCollaboratorModal } from "../components/collaborator/CreateCollaboratorModal";
 
 // Importa a tipagem estruturada de Colaborador do arquivo de serviços.
 import { type Collaborator } from "../services/collaboratorService";

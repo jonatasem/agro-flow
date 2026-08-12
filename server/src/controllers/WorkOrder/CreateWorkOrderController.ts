@@ -3,6 +3,7 @@ import { CreateWorkOrderService } from "../../services/WorkOrder/CreateWorkOrder
 
 interface CreateWorkServiceProsp {
     fleet: string;
+    operatorId: string;
     setor: string;
     qruDescricao: string;
     qth: string;
@@ -11,7 +12,7 @@ interface CreateWorkServiceProsp {
 
 export class CreateWorkOrderController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { fleet, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProsp;
+    const { fleet, operatorId, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProsp;
 
     const criadoPor = (request as any).userId as string;
 
@@ -26,6 +27,7 @@ export class CreateWorkOrderController {
     try {
       const result = await workOrderService.execute({
         fleet,
+        operatorId,
         setor,
         qruDescricao,
         qth,

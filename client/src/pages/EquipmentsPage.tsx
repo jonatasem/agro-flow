@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useEquipments } from "../hooks/useEquipment";
-import { CreateEquipmentModal } from "../components/CreateEquipmentModal";
+import { CreateEquipmentModal } from "../components/equipment/CreateEquipmentModal";
 
 export const EquipmentsPage: React.FC = () => {
   const { equipments, loading, error, refetch } = useEquipments();

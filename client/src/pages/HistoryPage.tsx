@@ -1,5 +1,5 @@
 import React from "react";
-import { WorkOrderCard } from "../components/WorkOrderCard";
+import { WorkOrderCard } from "../components/workOrder/WorkOrderCard";
 import { type WorkOrder, type SectorService } from "../services/workOrderService";
 
 // Interface para definir a tipagem exata das props recebidas

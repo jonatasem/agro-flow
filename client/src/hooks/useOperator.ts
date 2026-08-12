@@ -1,7 +1,32 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
 import { getErrorMessage } from "../utility/getErrorMessage";
-import type { Operator, CreateOperatorInput, UpdateOperatorInput } from "../types/Operator";
+
+//interface for Operator
+export interface Operator {
+  id: string;           
+  name: string;         
+  registration: string; 
+  city?: string;        
+  createdAt?: string;   
+}
+
+// interface for Operator input data when creating an operator
+export interface CreateOperatorInput {
+  name: string;         
+  registration: string; 
+  city?: string;        
+  password?: string;    
+}
+
+
+// interface for Operator input data when updating an operator
+export interface UpdateOperatorInput {
+  name?: string;
+  registration?: string;
+  city?: string;
+  password?: string;
+}
 
 export function useOperators() {
   const [operators, setOperators] = useState<Operator[]>([]);

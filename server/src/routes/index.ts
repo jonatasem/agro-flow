@@ -23,12 +23,14 @@ import { DeleteOperatorController } from "../controllers/Operator/DeleteOperator
 // WorkOrder Controllers
 import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
 import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js"; 
+import { DeleteWorkOrderController } from "../controllers/WorkOrder/DeleteWorkOrderController.js";
+import { UpdateWorkOrderController } from "../controllers/WorkOrder/UpdateWorkOrderController.js";
 
 // SectorService Controllers
 import { StartSectorServiceController } from "../controllers/SectorService/StartSectorServiceController.js";
+import { PauseSectorController } from "../controllers/SectorService/PauseSectorController.js";
+import { ResumeSectorController } from "../controllers/SectorService/ResumeSectorController.js";
 import { FinishSectorServiceController } from "../controllers/SectorService/FinishSectorServiceController.js";
-import { DeleteWorkOrderController } from "../controllers/WorkOrder/DeleteWorkOrderController.js";
-import { UpdateWorkOrderController } from "../controllers/WorkOrder/UpdateWorkOrderController.js";
 
 export async function routes(
   fastify: FastifyInstance,
@@ -92,6 +94,20 @@ export async function routes(
       "/sector-service/:id/start",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new StartSectorServiceController().handle(request, reply);
+      }
+    );
+
+    subFastify.put(
+      "/sector-service/:id/pause",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new PauseSectorController().handle(request, reply);
+      }
+    );
+
+    subFastify.put(
+      "/sector-service/:id/resume",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ResumeSectorController().handle(request, reply);
       }
     );
 

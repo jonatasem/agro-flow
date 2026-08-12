@@ -39,7 +39,7 @@ model Equipment {
 model Operator {
   id           String      @id @map("_id") @default(auto()) @db.ObjectId
   name         String
-  registration String      @unique // Adicionado @unique para evitar duplicidade de matrículas
+  registration String      @unique
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   city         String
@@ -66,24 +66,97 @@ model WorkOrder {
 }
 
 model SectorService {
-  id          String    @id @map("_id") @default(auto()) @db.ObjectId
-  workOrderId String    @db.ObjectId
-  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  id                   String        @id @map("_id") @default(auto()) @db.ObjectId
+  workOrderId          String        @db.ObjectId
+  workOrder            WorkOrder     @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
   setor                String    
-  status               String    @default("AGUARDANDO_MANUTENCAO") 
+  // Status possíveis: "AGUARDANDO_MANUTENCAO", "EM_ANDAMENTO", "PAUSADO_PECA", "PAUSADO_OUTRO_SETOR", "FINALIZADO"
+  status               String        @default("AGUARDANDO_MANUTENCAO") 
   qruDescricao         String    
-  solucaoTecnico       String    @default("") 
+  solucaoTecnico       String        @default("") 
   tipoCausa            String?   
   qth                  String
   city                 String 
-  criadoPorId          String    @db.ObjectId
-  criador              Collaborator @relation("CriadorServico", fields: [criadoPorId], references: [id])
-  tecnicoResponsavelId String?   @db.ObjectId
+  criadoPorId          String        @db.ObjectId
+  criador              Collaborator  @relation("CriadorServico", fields: [criadoPorId], references: [id])
+  tecnicoResponsavelId String?       @db.ObjectId
   tecnicoResponsavel   Collaborator? @relation("TecnicoResponsavel", fields: [tecnicoResponsavelId], references: [id])
-  dataCriacao          DateTime  @default(now())
+  dataCriacao          DateTime      @default(now())
   dataInicioManutencao DateTime? 
   dataFimManutencao    DateTime? 
-  tempoManutencao      Int?
+  tempoManutencao      Int?          // Em minutos (descontando as pausas)
+
+  // NOVAS RELAÇÕES
+  pauses               ServicePause[]
+  usedParts            UsedPart[]
+  usedTools            UsedTool[]
 
   @@map("sector_service")
+}
+
+// Histórico de Pausas da Manutenção
+model ServicePause {
+  id              String        @id @map("_id") @default(auto()) @db.ObjectId
+  sectorServiceId String        @db.ObjectId
+  sectorService   SectorService @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
+  reason          String        // Ex: "PAUSADO_PECA" ou "PAUSADO_OUTRO_SETOR"
+  description     String?       // Ex: "Aguardando conector 12V" ou "Aguardando liberação da Mecânica"
+  pausedAt        DateTime      @default(now())
+  resumedAt       DateTime?     // Preenchido quando o técnico clica em "Retomar"
+
+  @@map("service_pause")
+}
+
+// Catálogo de Peças / Insumos por Setor
+model Part {
+  id            String   @id @map("_id") @default(auto()) @db.ObjectId
+  name          String   // Ex: Fita Isolante, Conector Deutsch
+  partNumber    String?  
+  sector        String   // Ex: "Agricultura de Precisão", "Mecânica", "GERAL"
+  stockQuantity Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  usedParts UsedPart[]
+
+  @@map("part")
+}
+
+// Peças / Insumos Utilizados na Ordem
+model UsedPart {
+  id              String        @id @map("_id") @default(auto()) @db.ObjectId
+  sectorServiceId String        @db.ObjectId
+  sectorService   SectorService @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
+  partId          String        @db.ObjectId
+  part            Part          @relation(fields: [partId], references: [id])
+  quantity        Int           @default(1)
+  createdAt       DateTime      @default(now())
+
+  @@map("used_part")
+}
+
+// Catálogo de Ferramentas por Setor
+model Tool {
+  id        String   @id @map("_id") @default(auto()) @db.ObjectId
+  name      String   // Ex: Alicate de Bico, Multímetro, Torquímetro
+  sector    String   // Ex: "Agricultura de Precisão", "Mecânica", "GERAL"
+  status    String   @default("DISPONIVEL")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usedTools UsedTool[]
+
+  @@map("tool")
+}
+
+// Ferramentas Utilizadas na Ordem
+model UsedTool {
+  id              String        @id @map("_id") @default(auto()) @db.ObjectId
+  sectorServiceId String        @db.ObjectId
+  sectorService   SectorService @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
+  toolId          String        @db.ObjectId
+  tool            Tool          @relation(fields: [toolId], references: [id])
+  createdAt       DateTime      @default(now())
+
+  @@map("used_tool")
 }

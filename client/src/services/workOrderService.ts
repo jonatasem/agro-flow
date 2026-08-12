@@ -6,41 +6,41 @@ export interface SectorService {
   id: string;
   workOrderId: string;
   setor: string;
-  status: "AGUARDANDO_MANUTENCAO" | "EM_MANUTENCAO" | "FINALIZADO" | "CONCLUIDO";
+  status: "AGUARDANDO_MANUTENCAO" | "EM_MANUTENCAO" | "FINALIZADO";
   qruDescricao: string;
-  solucaoTecnico?: string;
-  tipoCausa?: string | null;
+  solucaoTecnico?: string; // pode ser nulo se ainda nao tiver concluido manutencao
+  tipoCausa?: string | null; // pode ser nulo se ainda nao tiver concluido manutencao
   qth: string;
   city: string;
   criadoPorId: string;
-  tecnicoResponsavelId?: string | null;
-  dataCriacao?: string;
-  dataInicioManutencao?: string | null;
-  dataFimManutencao?: string | null;
-  tempoManutencao?: number | null;
-  criador?: Collaborator;
-  tecnicoResponsavel?: Collaborator | null;
+  tecnicoResponsavelId: string;
+  dataCriacao: string;
+  dataInicioManutencao?: string | null; // pode ser nulo se ainda nao tiver iniciado manutencao
+  dataFimManutencao?: string | null; // pode ser nulo se ainda nao tiver iniciado manutencao
+  tempoManutencao?: number | null; // pode ser nulo se ainda nao tiver iniciado manutencao
+  criador: Collaborator;
+  tecnicoResponsavel: Collaborator;
 }
 
 export interface WorkOrder {
   id: string;
   equipmentId: string;
-  operatorId?: string | null;
+  operatorId: string;
   status: "ABERTA" | "EM_ANDAMENTO" | "FINALIZADA";
-  createdAt?: string;
+  createdAt: string;
   updatedAt?: string;
-  equipment?: Equipment;
+  equipment: Equipment;
   operator?: Collaborator | null;
   setores: SectorService[];
 }
 
 export interface CreateWorkOrderInput {
   fleet: string;
+  operatorId: string;
   setor: string;
   qruDescricao: string;
   qth: string;
   city: string;
-  operatorId?: string;
 }
 
 export type UpdateSectorInput = Partial<{

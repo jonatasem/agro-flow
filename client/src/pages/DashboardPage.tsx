@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useWorkOrders } from "../hooks/useWorkOrders";
-import { CreateWorkOrderModal } from "../components/CreateWorkOrderModal";
+import { CreateWorkOrderModal } from "../components/workOrder/CreateWorkOrderModal";
 import { EquipmentsPage } from "./EquipmentsPage";
 import { CollaboratorsPage } from "./CollaboratorsPage";
 import { OperatorsPage } from "./OperatorsPage";

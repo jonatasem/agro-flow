@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { workOrderService, type WorkOrder, type SectorService } from "../services/workOrderService";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { useAuth } from "../../hooks/useAuth";
+import { workOrderService, type WorkOrder, type SectorService } from "../../services/workOrderService";
+import { getErrorMessage } from "../../utility/getErrorMessage";
 
 interface WorkOrderCardProps {
   order: WorkOrder;
@@ -108,7 +108,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
             {order.equipment?.name || "Equipamento Desconhecido"}
           </h3>
           <span className="text-xs text-slate-500 block mt-0.5">
-            🚜 Prefixo: <span className="text-emerald-800 font-mono font-bold">#{order.equipment?.fleet || "N/A"}</span>
+            🚜 Frota: <span className="text-emerald-800 font-mono font-bold">#{order.equipment?.fleet || "N/A"}</span>
           </span>
         </div>
 
@@ -120,13 +120,13 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
       {/* Lista de Setores Mapeados */}
       <div className="space-y-3">
         {order.setores?.map((sector) => {
-          const isFinished = sector.status === "FINALIZADO" || sector.status === "CONCLUIDO";
+          const isFinished = sector.status === "FINALIZADO";
 
           return (
             <div key={sector.id} className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-extrabold text-emerald-800 flex items-center gap-1">
-                  🔧 Setor: {sector.setor}
+                  Setor: {sector.setor}
                 </span>
                 
                 <div className="flex items-center gap-2">
@@ -134,7 +134,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
                     {sector.status.replace("_", " ")}
                   </span>
 
-                  {/* 🚀 Exibido apenas se o usuário NÃO for Técnico e se o Setor NÃO estiver Finalizado */}
+                  {/* Exibido apenas se o usuário NÃO for Técnico e se o Setor NÃO estiver Finalizado */}
                   {!isTecnico && !isFinished && (
                     <div className="flex gap-1 border-l border-slate-200 pl-2">
                       <button
@@ -157,11 +157,20 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
               </div>
               
               <div className="flex justify-between items-center text-[10px] text-slate-500 font-medium">
-                <span>📍 Local: {sector.qth} - {sector.city}</span>
+                <span>Local: {sector.qth} - {sector.city}</span>
                 {sector.tecnicoResponsavel?.name && (
                   <span className="text-slate-700 font-semibold">👨‍🔧 Resp: {sector.tecnicoResponsavel.name}</span>
                 )}
               </div>
+
+              {order.operator && (
+                <div className="text-[11px] text-slate-400 pt-1 flex justify-between items-center border-t border-slate-100">
+                  <span>
+                    Operador: <span className="text-slate-700 font-semibold">{order.operator.name}</span>
+                  </span>
+                  
+                </div>
+              )}
 
               <div className="text-xs text-slate-700 leading-relaxed bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
                 <span className="font-bold text-slate-400 block mb-0.5 text-[10px] uppercase tracking-wider">Relato do QRU / Falha:</span>
@@ -229,10 +238,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
 
       {/* Rodapé do Card */}
       {order.operator && (
-        <div className="text-[11px] text-slate-400 pt-1 flex justify-between items-center border-t border-slate-100">
-          <span>
-            Operador Solicitante: <span className="text-slate-700 font-semibold">{order.operator.name}</span>
-          </span>
+        <div className="text-[11px] text-slate-400 pt-1 flex justify-end items-center border-t border-slate-100">
           {order.updatedAt && (
             <span>Última Alt: {formatDate(order.updatedAt)}</span>
           )}

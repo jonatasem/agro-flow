@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useEquipments } from "../hooks/useEquipment";
-import { workOrderService, type SectorService } from "../services/workOrderService";
-import { getErrorMessage } from "../utility/getErrorMessage";
-
+import { useEquipments } from "../../hooks/useEquipment";
+import { workOrderService, type SectorService } from "../../services/workOrderService";
+import { getErrorMessage } from "../../utility/getErrorMessage";
 
 interface CreateWorkOrderModalProps {
   isOpen: boolean;
@@ -10,6 +9,7 @@ interface CreateWorkOrderModalProps {
   onSuccess: () => void;
   initialSectorData?: SectorService | null;
   initialFleet?: string;
+  operatorId?: string;
 }
 
 export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
@@ -18,6 +18,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   onSuccess,
   initialSectorData,
   initialFleet = "",
+  operatorId = "",
 }) => {
   const { equipments, refetch: fetchEquipments } = useEquipments();
 
@@ -27,12 +28,12 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   const [qruDescricao, setQruDescricao] = useState(initialSectorData?.qruDescricao || "");
   const [qth, setQth] = useState(initialSectorData?.qth || "");
   const [city, setCity] = useState(initialSectorData?.city || "");
+  const [selectedOperatorId, setSelectedOperatorId] = useState(operatorId);
 
-  // 2. Estado para monitorar a transição das props (Padrão Oficial React para redefinição de estado)
+  // 2. Estado para monitorar a transição das props
   const [prevSector, setPrevSector] = useState(initialSectorData);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
-  // Sincroniza o formulário diretamente no ciclo de renderização (evita o erro do useEffect)
   if (isOpen !== prevIsOpen || initialSectorData !== prevSector) {
     setPrevIsOpen(isOpen);
     setPrevSector(initialSectorData);
@@ -42,12 +43,12 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
     setQruDescricao(initialSectorData?.qruDescricao || "");
     setQth(initialSectorData?.qth || "");
     setCity(initialSectorData?.city || "");
+    setSelectedOperatorId(operatorId);
   }
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 3. O useEffect agora cuida EXCLUSIVAMENTE de efeitos colaterais externos (buscar equipamentos)
   useEffect(() => {
     if (isOpen) {
       fetchEquipments();
@@ -59,7 +60,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!setor.trim() || !qruDescricao.trim() || !qth.trim() || !city.trim()) return;
+    if (!setor.trim() || !qruDescricao.trim() || !qth.trim() || !city.trim() || !selectedOperatorId.trim()) return;
 
     try {
       setLoading(true);
@@ -76,6 +77,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
         if (!fleet.trim()) return;
         await workOrderService.create({
           fleet,
+          operatorId: selectedOperatorId,
           setor,
           qruDescricao,
           qth,
@@ -177,6 +179,22 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
               />
             </div>
           </div>
+
+          {/* Campo do Operador corrigido e desacoplado do estado de cidade */}
+          {!initialSectorData && (
+            <div className="space-y-1">
+              <label className="font-semibold">ID / Matrícula do Operador *</label>
+              <input
+                type="text"
+                required
+                placeholder="Ex: 23805"
+                value={selectedOperatorId}
+                onChange={(e) => setSelectedOperatorId(e.target.value)}
+                disabled={loading}
+                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+              />
+            </div>
+          )}
 
           <div className="space-y-1">
             <label className="font-semibold">Descrição do QRU (Problema) *</label>
