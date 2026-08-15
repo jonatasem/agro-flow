@@ -20,7 +20,7 @@ export class CreateCollaboratorService {
 
     // Se esses dados nao forem fornecidos, de um erro
     if (!name || !role || !registration || !password || !city) {
-      throw new Error("Todos os campos são obrigatórios");
+      throw new Error("Preencha todos os campos.");
     }
 
     // Faz a busca da matricula para verificar se o colaborador ja nao esta cadastrado

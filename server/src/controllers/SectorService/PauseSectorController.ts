@@ -9,7 +9,9 @@ interface PauseSectorControllerProps {
 export class PauseSectorController {
     async handle(request: FastifyRequest, reply: FastifyReply) {
         const { id: sectorServiceId } = request.params as { id: string };
-        const { reason, description } = request.body as PauseSectorControllerProps;
+        
+        // O (request.body || {}) impede o crash se o body vier undefined
+        const { reason, description } = (request.body || {}) as PauseSectorControllerProps;
 
         const pauseService = new PauseSectorService();
 

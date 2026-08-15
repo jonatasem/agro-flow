@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { CreateWorkOrderService } from "../../services/WorkOrder/CreateWorkOrderService.js";
 
-interface CreateWorkServiceProsp {
+interface CreateWorkServiceProsps {
     fleet: string;
     operatorId: string;
     setor: string;
@@ -12,7 +12,7 @@ interface CreateWorkServiceProsp {
 
 export class CreateWorkOrderController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { fleet, operatorId, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProsp;
+    const { fleet, operatorId, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProsps;
 
     const criadoPor = (request as any).userId as string;
 

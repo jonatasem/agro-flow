@@ -8,7 +8,7 @@ interface StartSectorServiceProps {
 export class StartSectorServiceService {
     async execute({ sectorServiceId, tecnicoId }: StartSectorServiceProps ){
         if(!sectorServiceId){
-            throw new Error("O ID do serviço obrigatório");
+            throw new Error("O ID do serviço é obrigatório");
         }
 
         if(!tecnicoId){

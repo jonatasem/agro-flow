@@ -31,6 +31,10 @@ import { StartSectorServiceController } from "../controllers/SectorService/Start
 import { PauseSectorController } from "../controllers/SectorService/PauseSectorController.js";
 import { ResumeSectorController } from "../controllers/SectorService/ResumeSectorController.js";
 import { FinishSectorServiceController } from "../controllers/SectorService/FinishSectorServiceController.js";
+import { CreatePartController } from "../controllers/PartController/CreatePartController.js";
+import { ListPartController } from "../controllers/PartController/ListPartController.js";
+import { AddUsedPartController } from "../controllers/PartController/AddUsedPartController.js";
+import { CreateToolController } from "../controllers/ToolController/CreateToolController.js";
 
 export async function routes(
   fastify: FastifyInstance,
@@ -60,7 +64,7 @@ export async function routes(
   fastify.register(async function protectedRoutes(subFastify) {
     subFastify.addHook("preHandler", isAuthenticated);
 
-    // --- ROTAS DE ORDENS DE SERVIÇO (WORK ORDER) ---
+    // --- ROTAS DE ORDENS DE SERVIÇO ---
     subFastify.post(
       "/work-order",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -197,6 +201,38 @@ export async function routes(
         return new DeleteOperatorController().handle(request, reply);
       },
     );
+
+    // rotas para part
+    subFastify.post(
+      "/part", 
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new CreatePartController().handle(request, reply);
+      },
+    );
+
+    subFastify.get(
+      "/part", 
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ListPartController().handle(request, reply);
+      },
+    );
+
+    // rota para adicionar peça ao servico do setor
+    subFastify.post(
+      "/sector-service/:id/parts",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new AddUsedPartController().handle(request, reply);
+      }
+    );
+
+    // rota para cadastrar uma ferramenta
+    subFastify.post(
+      "/tool",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new CreateToolController().handle(request, reply);
+      }
+    );
+
   });
 }
 
