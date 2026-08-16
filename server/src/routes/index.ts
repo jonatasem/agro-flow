@@ -4,42 +4,57 @@ import {
   type FastifyRequest,
   type FastifyReply,
 } from "fastify";
+
+// Middleware de Autenticação JWT
 import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+
+// --- CONTROLLERS: Autenticação & Registro ---
 import { LoginCollaboratorController } from "../controllers/LoginCollaborator/LoginCollaboratorController.js";
 import { CheckRegistrationController } from "../controllers/LoginCollaborator/CheckRegistrationController.js";
+
+// --- CONTROLLERS: Colaborador ---
 import { CreateCollaboratorController } from "../controllers/Collaborator/CreateCollaboratorController.js";
 import { ListCollaboratorController } from "../controllers/Collaborator/ListCollaboratorController.js";
 import { DeleteCollaboratorController } from "../controllers/Collaborator/DeleteCollaboratorController.js";
 import { UpdateCollaboratorController } from "../controllers/Collaborator/UpdateCollaboratorController.js";
+
+// --- CONTROLLERS: Equipamento ---
 import { CreateEquipmentController } from "../controllers/Equipment/CreateEquipmentController.js";
 import { ListEquipmentController } from "../controllers/Equipment/ListEquipmentController.js";
 import { UpdateEquipmentController } from "../controllers/Equipment/UpdateEquipmentController.js";
 import { DeleteEquipmentController } from "../controllers/Equipment/DeleteEquipmentController.js";
+
+// --- CONTROLLERS: Operador ---
 import { CreateOperatorController } from "../controllers/Operator/CreateOperatorController.js";
 import { ListOperatorController } from "../controllers/Operator/ListOperatorController.js";
 import { UpdateOperatorController } from "../controllers/Operator/UpdateOperatorController.js";
 import { DeleteOperatorController } from "../controllers/Operator/DeleteOperatorController.js";
 
-// WorkOrder Controllers
+// --- CONTROLLERS: Ordem de Serviço (WorkOrder) ---
 import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
 import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js"; 
 import { DeleteWorkOrderController } from "../controllers/WorkOrder/DeleteWorkOrderController.js";
 import { UpdateWorkOrderController } from "../controllers/WorkOrder/UpdateWorkOrderController.js";
+import { GetWorkOrderByIdController } from "../controllers/WorkOrder/GetWorkOrderByIdController.js";
 
-// SectorService Controllers
+// --- CONTROLLERS: Atendimento de Setor (SectorService) ---
 import { StartSectorServiceController } from "../controllers/SectorService/StartSectorServiceController.js";
 import { PauseSectorController } from "../controllers/SectorService/PauseSectorController.js";
 import { ResumeSectorController } from "../controllers/SectorService/ResumeSectorController.js";
 import { FinishSectorServiceController } from "../controllers/SectorService/FinishSectorServiceController.js";
-import { CreatePartController } from "../controllers/PartController/CreatePartController.js";
-import { ListPartController } from "../controllers/PartController/ListPartController.js";
-import { AddUsedPartController } from "../controllers/PartController/AddUsedPartController.js";
-import { CreateToolController } from "../controllers/ToolController/CreateToolController.js";
+
+// --- CONTROLLERS: Dashboard & Métricas ---
+import { GetDashboardMetricsController } from "../controllers/Metrics/GetDashboardMetricsController.js";
 
 export async function routes(
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ) {
+  // =========================================================================
+  // ROTAS PÚBLICAS (Nenhum token JWT é exigido)
+  // =========================================================================
+
+  // Autenticação de colaborador
   fastify.post(
     "/login",
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -47,6 +62,7 @@ export async function routes(
     },
   );
 
+  // Cadastro inicial de colaborador
   fastify.post(
     "/collaborator",
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -54,6 +70,7 @@ export async function routes(
     },
   );
 
+  // Validação de matrícula existente
   fastify.post(
     "/login/check-registration",
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -61,10 +78,26 @@ export async function routes(
     }
   );
 
+  // =========================================================================
+  // ROTAS PROTEGIDAS (Exigem Header "Authorization: Bearer <token>")
+  // =========================================================================
   fastify.register(async function protectedRoutes(subFastify) {
+    // Hook executado antes de qualquer manipulador dentro deste bloco
     subFastify.addHook("preHandler", isAuthenticated);
 
-    // --- ROTAS DE ORDENS DE SERVIÇO ---
+    // -----------------------------------------------------------------------
+    // DASHBOARD & MÉTRICAS
+    // -----------------------------------------------------------------------
+    subFastify.get(
+      "/dashboard/metrics",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new GetDashboardMetricsController().handle(request, reply);
+      }
+    );
+
+    // -----------------------------------------------------------------------
+    // ORDENS DE SERVIÇO (WORK ORDER)
+    // -----------------------------------------------------------------------
     subFastify.post(
       "/work-order",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -79,21 +112,31 @@ export async function routes(
       },
     );
 
-    // --- ROTAS DE SECTOR SERVICE ---
+    subFastify.get(
+      "/work-order/:id",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new GetWorkOrderByIdController().handle(request, reply);
+      },
+    );
+
     subFastify.put(
-      "/sector-service/:id",
+      "/work-order/:id",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new UpdateWorkOrderController().handle(request, reply);
       }
     );
 
     subFastify.delete(
-      "/sector-service/:id",
+      "/work-order/:id",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new DeleteWorkOrderController().handle(request, reply);
       }
     );
 
+    // -----------------------------------------------------------------------
+    // FLUXO DE MANUTENÇÃO DO SETOR (SECTOR SERVICE)
+    // -----------------------------------------------------------------------
+    // Iniciar atendimento
     subFastify.put(
       "/sector-service/:id/start",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -101,6 +144,7 @@ export async function routes(
       }
     );
 
+    // Pausar atendimento (aguardando peça ou outro setor)
     subFastify.put(
       "/sector-service/:id/pause",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -108,6 +152,7 @@ export async function routes(
       }
     );
 
+    // Retomar atendimento pausado
     subFastify.put(
       "/sector-service/:id/resume",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -115,6 +160,7 @@ export async function routes(
       }
     );
 
+    // Finalizar atendimento e calcular tempo líquido
     subFastify.put(
       "/sector-service/:id/finish",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -122,7 +168,9 @@ export async function routes(
       }
     );
 
-    // --- ROTAS DE COLLABORATOR ---
+    // -----------------------------------------------------------------------
+    // COLABORADORES
+    // -----------------------------------------------------------------------
     subFastify.get(
       "/collaborator",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -144,7 +192,9 @@ export async function routes(
       },
     );
        
-    // --- ROTAS DE EQUIPMENT ---
+    // -----------------------------------------------------------------------
+    // EQUIPAMENTOS 
+    // -----------------------------------------------------------------------
     subFastify.get(
       "/equipment",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -173,7 +223,9 @@ export async function routes(
       },
     );
 
-    // --- ROTAS DE OPERATOR ---
+    // -----------------------------------------------------------------------
+    // OPERADORES
+    // -----------------------------------------------------------------------
     subFastify.get(
       "/operator",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -201,38 +253,6 @@ export async function routes(
         return new DeleteOperatorController().handle(request, reply);
       },
     );
-
-    // rotas para part
-    subFastify.post(
-      "/part", 
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreatePartController().handle(request, reply);
-      },
-    );
-
-    subFastify.get(
-      "/part", 
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListPartController().handle(request, reply);
-      },
-    );
-
-    // rota para adicionar peça ao servico do setor
-    subFastify.post(
-      "/sector-service/:id/parts",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new AddUsedPartController().handle(request, reply);
-      }
-    );
-
-    // rota para cadastrar uma ferramenta
-    subFastify.post(
-      "/tool",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreateToolController().handle(request, reply);
-      }
-    );
-
   });
 }
 

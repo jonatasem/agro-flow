@@ -1,51 +1,46 @@
 import prismaClient from "../../prisma/index.js";
 
 interface PauseSectorProps {
-    sectorServiceId: string;
-    reason: "PAUSADO_PECA" | "PAUSADO_OUTRO_SETOR";
-    description?: string;
+  sectorServiceId: string;
+  pauseReason: "FALTA_DE_PECA" | "AGUARDANDO_OUTRO_SETOR" | "OUTRO_MOTIVO";
+  observation: string;
 }
 
 export class PauseSectorService {
-    async execute({ sectorServiceId, reason, description }: PauseSectorProps) {
-        if (!sectorServiceId) {
-            throw new Error("O ID do serviço é obrigatório");
-        }
-
-        if (!reason || (reason !== "PAUSADO_PECA" && reason !== "PAUSADO_OUTRO_SETOR")) {
-            throw new Error("Informe um motivo válido para a pausa (PAUSADO_PECA ou PAUSADO_OUTRO_SETOR)");
-        }
-
-        const sectorService = await prismaClient.sectorService.findUnique({
-            where: { id: sectorServiceId }
-        });
-
-        if (!sectorService) {
-            throw new Error("Serviço não encontrado");
-        }
-
-        if (sectorService.status !== "EM_MANUTENCAO") {
-            throw new Error("Apenas serviços em manutenção podem ser pausados");
-        }
-
-        // Registrar o histórico da pausa
-        await prismaClient.servicePause.create({
-            data: {
-                sectorServiceId,
-                reason,
-                description: description || "",
-                pausedAt: new Date()
-            }
-        });
-
-        // Atualizar o status do serviço
-        const updatedService = await prismaClient.sectorService.update({
-            where: { id: sectorServiceId },
-            data: {
-                status: reason
-            }
-        });
-
-        return updatedService;
+  async execute({ sectorServiceId, pauseReason, observation }: PauseSectorProps) {
+    if (!sectorServiceId || !pauseReason) {
+      throw new Error("ID do serviço e motivo da pausa são obrigatórios.");
     }
+
+    const sectorService = await prismaClient.sectorService.findUnique({
+      where: { id: sectorServiceId },
+    });
+
+    if (!sectorService) {
+      throw new Error("Atendimento do setor não encontrado.");
+    }
+
+    if (sectorService.status !== "EM_ANDAMENTO") {
+      throw new Error("Apenas atendimentos em andamento podem ser pausados.");
+    }
+
+    const [updatedService] = await prismaClient.$transaction([
+      prismaClient.sectorService.update({
+        where: { id: sectorServiceId },
+        data: { status: "PAUSADO" },
+      }),
+    
+      prismaClient.servicePause.create({
+        data: {
+          sectorServiceId,
+          reason: pauseReason,
+          description: observation,
+          pausedAt: new Date(),
+        },
+      }),
+    ]);
+
+
+    return updatedService;
+  }
 }
