@@ -3,7 +3,7 @@ import prismaClient from "../../prisma/index.js";
 interface FinishSectorServiceProps {
     sectorServiceId: string;
     solucaoTecnico: string;
-    tipoCausa?: string | undefined;
+    tipoCausa?: string;
     tecnicoId: string;
 }
 
@@ -12,7 +12,7 @@ export class FinishSectorServiceService {
         sectorServiceId,
         solucaoTecnico,
         tipoCausa,
-        tecnicoId,
+        tecnicoId
     }: FinishSectorServiceProps) {
         if (!sectorServiceId) {
             throw new Error("O ID do serviço é obrigatório.");

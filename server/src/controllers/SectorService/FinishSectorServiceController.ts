@@ -4,15 +4,13 @@ import { FinishSectorServiceService } from "../../services/SectorService/FinishS
 interface FinishSectorServiceProps {
   solucaoTecnico: string;
   tipoCausa: string;
-  usedPartIds: { partId: string; quantity: number }[];
-  usedToolIds: string[];
 }
 
 export class FinishSectorServiceController {
     async handle(request: FastifyRequest, reply: FastifyReply) {
         const { id: sectorServiceId } = request.params as { id: string };
 
-        const { solucaoTecnico, tipoCausa, usedPartIds, usedToolIds } = request.body as FinishSectorServiceProps;
+        const { solucaoTecnico, tipoCausa } = request.body as FinishSectorServiceProps;
 
         const tecnicoId = request.userId;
 
@@ -27,9 +25,7 @@ export class FinishSectorServiceController {
                 sectorServiceId,
                 solucaoTecnico,
                 tipoCausa,
-                tecnicoId,
-                usedPartIds,
-                usedToolIds
+                tecnicoId
             });
 
             return reply.status(200).send(result);
