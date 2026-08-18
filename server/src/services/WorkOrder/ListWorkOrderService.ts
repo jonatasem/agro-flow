@@ -16,9 +16,9 @@ export class ListWorkOrderService {
       where: whereClause,
       include: {
         equipment: true,
-        operator: true,
         setores: {
           include: {
+            operator: true,
             criador: {
               select: {
                 id: true,

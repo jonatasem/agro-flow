@@ -1,35 +1,28 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import prismaClient from "../../prisma/index.js";
+import { UpdateEquipmentService } from "../../services/Equipment/UpdateEquipmentService.js";
 
-interface UpdateEquipmentProps {
-  name?: string;
-  fleet?: string;
+interface UpdateEquipmentBody {
+  name?: string | undefined;
+  fleet?: string | undefined;
 }
 
 export class UpdateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.params as { id: string };
+    const { name, fleet } = (request.body || {}) as UpdateEquipmentBody;
 
-    const { name, fleet } = request.body as UpdateEquipmentProps;
+    const updateEquipmentService = new UpdateEquipmentService();
 
-    const equipmentExists = await prismaClient.equipment.findUnique({
-      where : { id },
-    });
+    try {
+      const updatedEquipment = await updateEquipmentService.execute({
+        id,
+        name,
+        fleet,
+      });
 
-    if(!equipmentExists) {
-      throw new Error("Esse equipamento não existe")
+      return reply.status(200).send(updatedEquipment);
+    } catch (error: any) {
+      return reply.status(400).send({ error: error.message });
     }
-
-    const updateData = {
-      ...(name !== undefined && { name }),
-      ...(fleet !== undefined && { fleet }),
-    };
-
-    const result = await prismaClient.equipment.update({
-      where: { id },
-      data: updateData,
-    });
-
-    return reply.send(result);
   }
 }

@@ -89,7 +89,7 @@ export async function routes(
     // DASHBOARD & MÉTRICAS
     // -----------------------------------------------------------------------
     subFastify.get(
-      "/dashboard/metrics",
+      "/metrics",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new GetDashboardMetricsController().handle(request, reply);
       }
@@ -257,3 +257,4 @@ export async function routes(
 }
 
 export default routes;
+

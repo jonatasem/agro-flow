@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
-import { DashboardPage } from '../pages/DashboardPage';
-import { UserProfile } from '../pages/UserProfile';
-import { LoginPage } from '../pages/LoginPage';
+import { DashboardPage } from '../pages/Dashboard/DashboardPage';
+import { UserProfile } from '../pages/Profile/UserProfile';
+import { LoginPage } from '../pages/Login/LoginPage';
 import { ProtectedRoute } from './ProtectedRoute';
-import { CollaboratorsPage } from '../pages/CollaboratorsPage';
+import { CollaboratorsPage } from '../pages/Collaborators/CollaboratorsPage';
 
 export const AppRoutes = () => {
   return (

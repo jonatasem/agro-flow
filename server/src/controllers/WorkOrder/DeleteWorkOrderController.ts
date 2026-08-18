@@ -6,17 +6,17 @@ interface DeleteWorkOrderParams {
 }
 
 export class DeleteWorkOrderController {
-  async handle(req: FastifyRequest, res: FastifyReply) {
-    const { id } = req.params as DeleteWorkOrderParams;
+  async handle(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as DeleteWorkOrderParams;
 
     const deleteWorkOrderService = new DeleteWorkOrderService();
 
     try {
       const result = await deleteWorkOrderService.execute({ id });
 
-      return res.send(result);
+      return reply.status(200).send(result);
     } catch (error: any) {
-      return res.status(400).send({ error: error.message });
+      return reply.status(400).send({ error: error.message });
     }
   }
 }

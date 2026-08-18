@@ -1,10 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { CreateEquipmentService } from "../../services/Equipment/CreateEquipmentService.js";
-
-interface CreateEquipmentProps {
-  name: string;
-  fleet: string;
-}
+import { CreateEquipmentService, type CreateEquipmentProps } from "../../services/Equipment/CreateEquipmentService.js";
 
 export class CreateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {

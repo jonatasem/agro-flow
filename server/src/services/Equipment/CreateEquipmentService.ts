@@ -1,6 +1,6 @@
 import prismaClient from "../../prisma/index.js";
 
-interface CreateEquipmentProps {
+export interface CreateEquipmentProps {
   name: string;
   fleet: string;
 }

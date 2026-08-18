@@ -1,12 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { UpdateCollaboratorService } from "../../services/Collaborator/UpdateCollaboratorService.js";
-
-interface UpdateCollaboratorProps {
-  name?: string | undefined;
-  registration?: string | undefined;
-  city?: string | undefined;
-  status?: boolean | undefined;
-}
+import { UpdateCollaboratorService, type UpdateCollaboratorProps } from "../../services/Collaborator/UpdateCollaboratorService.js";
 
 export class UpdateCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {

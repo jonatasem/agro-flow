@@ -16,7 +16,7 @@ export class CreateOperatorService {
       where: { registration },
     });
 
-    if(!registrationExists){
+    if(registrationExists){
       throw new Error("Já existe um funcionário cadastrado com essa matrícula")
     }
   

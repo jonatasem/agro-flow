@@ -20,8 +20,8 @@ export class PauseSectorService {
       throw new Error("Atendimento do setor não encontrado.");
     }
 
-    if (sectorService.status !== "EM_ANDAMENTO") {
-      throw new Error("Apenas atendimentos em andamento podem ser pausados.");
+    if (sectorService.status !== "EM_MANUTENCAO") {
+      throw new Error("Apenas atendimentos em manutenção podem ser pausados.");
     }
 
     const [updatedService] = await prismaClient.$transaction([
@@ -29,7 +29,7 @@ export class PauseSectorService {
         where: { id: sectorServiceId },
         data: { status: "PAUSADO" },
       }),
-    
+
       prismaClient.servicePause.create({
         data: {
           sectorServiceId,
@@ -39,7 +39,6 @@ export class PauseSectorService {
         },
       }),
     ]);
-
 
     return updatedService;
   }

@@ -1,29 +1,28 @@
 import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { useWorkOrders } from "../hooks/useWorkOrders";
-import { CreateWorkOrderModal } from "../components/workOrder/CreateWorkOrderModal";
-import { EquipmentsPage } from "./EquipmentsPage";
-import { CollaboratorsPage } from "./CollaboratorsPage";
-import { OperatorsPage } from "./OperatorsPage";
-import { type SectorService } from "../services/workOrderService";
-import { Header } from "../components/Header";
-import { HistoryPage } from "./HistoryPage";
-import { ActiveWorkOrdersPage } from "./ActiveWorkOrdersPage";
+import { useAuth } from "../../hooks/useAuth";
+import { useWorkOrders } from "../../hooks/useWorkOrders";
+import { CreateWorkOrderModal } from "../../components/workOrder/CreateWorkOrderModal";
+import { EquipmentsPage } from "../Equipments/EquipmentsPage";
+import { CollaboratorsPage } from "../Collaborators/CollaboratorsPage";
+import { OperatorsPage } from "../Operators/OperatorsPage";
+import { type SectorService } from "../../services/workOrderService";
+import { Header } from "../../components/Header";
+import { HistoryPage } from "../History/HistoryPage";
+import { ActiveWorkOrdersPage } from "../WorkOrders/ActiveWorkOrdersPage";
 
 type TabType = "work-orders" | "history" | "equipments" | "operators" | "collaborators";
 
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const { workOrders, loading, error, refetch } = useWorkOrders();
+  
   const [activeTab, setActiveTab] = useState<TabType>("work-orders");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSector, setSelectedSector] = useState<SectorService | null>(null);
   const [selectedFleet, setSelectedFleet] = useState<string>("");
 
-  // Normalização do cargo para validação flexível de regras
   const normalizedRole = user?.role?.toLowerCase().trim() || "";
 
-  // 🚀 Permissão restrita: Admin, Líder, Gerente e Supervisor
   const canManageAndCreate = [
     "admin",
     "líder",
@@ -45,11 +44,20 @@ export const DashboardPage: React.FC = () => {
     setIsModalOpen(true);   
   };
 
-  // Separação lógica de Ordens Ativas e Histórico Concluído
   const activeWorkOrders = (workOrders || []).filter((order) => {
     if (order.status === "FINALIZADA") return false;
+
     if (order.setores && order.setores.length > 0) {
-      return order.setores.some((sector) => sector.status !== "FINALIZADO");
+      return order.setores.some((sector) => {
+        const isNotFinished = sector.status !== "FINALIZADO";
+
+        const matchesSector =
+          canManageAndCreate ||
+          !user?.sector ||
+          sector.setor?.toLowerCase().trim() === user.sector?.toLowerCase().trim();
+
+        return isNotFinished && matchesSector;
+      });
     }
     return true;
   });
@@ -64,7 +72,6 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 p-4 md:p-6 space-y-6">
-      {/* Topo do Sistema */}
       <Header 
         user={user} 
         handleCreateOpen={handleCreateOpen} 
@@ -72,7 +79,6 @@ export const DashboardPage: React.FC = () => {
         canCreate={canManageAndCreate}
       />
 
-      {/* KPI Cards Informativos da Operação Zilor */}
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ativas em Campo</span>
@@ -95,7 +101,6 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Navegação por Abas */}
       <nav className="max-w-6xl mx-auto flex gap-2 border-b border-slate-200 pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTab("work-orders")}
@@ -141,7 +146,6 @@ export const DashboardPage: React.FC = () => {
           👨‍🌾 Operadores
         </button>
 
-        {/* Exibição condicional da aba de Colaboradores */}
         {canManageAndCreate && (
           <button
             onClick={() => setActiveTab("collaborators")}
@@ -156,7 +160,6 @@ export const DashboardPage: React.FC = () => {
         )}
       </nav>
 
-      {/* Conteúdo Renderizado da Aba */}
       <main className="max-w-6xl mx-auto space-y-4">
         {activeTab === "work-orders" && (
           <ActiveWorkOrdersPage 
@@ -179,7 +182,6 @@ export const DashboardPage: React.FC = () => {
 
         {activeTab === "equipments" && <EquipmentsPage />}
         {activeTab === "operators" && <OperatorsPage />}
-        
         {activeTab === "collaborators" && canManageAndCreate && <CollaboratorsPage />}
       </main>
 

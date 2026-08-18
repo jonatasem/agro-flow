@@ -1,6 +1,6 @@
 import prismaClient from "../../prisma/index.js";
 
-interface UpdateCollaboratorProps {
+export interface UpdateCollaboratorProps {
   id: string;
   name?: string | undefined;
   registration?: string | undefined;

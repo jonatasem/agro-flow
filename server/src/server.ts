@@ -8,8 +8,8 @@ const app = fastify({
 
 const start = async () => {
   await app.register(cors, {
-    origin: "*", //temporário
-    methods: ["GET", "POST", "PUT", "UPDATE", "PATCH", "DELETE", "OPTIONS"],
+    origin: "*", // temporário
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
 
@@ -18,7 +18,7 @@ const start = async () => {
   try {
     await app.listen({
       port: 3333,
-      host: "0.0.0.0", //temporário
+      host: "0.0.0.0", // temporário
     });
     console.log("Server is running on port 3333");
   } catch (err) {

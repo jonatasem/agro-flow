@@ -6,18 +6,19 @@ export interface SectorService {
   id: string;
   workOrderId: string;
   setor: string;
-  status: "AGUARDANDO_MANUTENCAO" | "EM_MANUTENCAO" | "FINALIZADO";
+  status: "AGUARDANDO_MANUTENCAO" | "EM_MANUTENCAO" | "PAUSADO" | "FINALIZADO";
   qruDescricao: string;
-  solucaoTecnico?: string; // pode ser nulo se ainda nao tiver concluido manutencao
-  tipoCausa?: string | null; // pode ser nulo se ainda nao tiver concluido manutencao
+  solucaoTecnico?: string;
+  tipoCausa?: string | null;
+  motivoPausa?: string | null;
   qth: string;
   city: string;
   criadoPorId: string;
   tecnicoResponsavelId: string;
   dataCriacao: string;
-  dataInicioManutencao?: string | null; // pode ser nulo se ainda nao tiver iniciado manutencao
-  dataFimManutencao?: string | null; // pode ser nulo se ainda nao tiver iniciado manutencao
-  tempoManutencao?: number | null; // pode ser nulo se ainda nao tiver iniciado manutencao
+  dataInicioManutencao?: string | null;
+  dataFimManutencao?: string | null;
+  tempoManutencao?: number | null;
   criador: Collaborator;
   tecnicoResponsavel: Collaborator;
 }
@@ -69,19 +70,33 @@ export const workOrderService = {
     return response.data;
   },
 
-  // 🚀 Atualiza o setor individual enviando PUT para /sector-service/:sectorId
   updateSector: async (sectorId: string, data: UpdateSectorInput): Promise<SectorService> => {
     const response = await api.put<SectorService>(`/sector-service/${sectorId}`, data);
     return response.data;
   },
 
-  // Deleta o setor via ID do setor
   deleteSector: async (sectorId: string): Promise<void> => {
     await api.delete(`/sector-service/${sectorId}`);
   },
 
   startSector: async (sectorServiceId: string): Promise<SectorService> => {
     const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/start`);
+    return response.data;
+  },
+
+  pauseSector: async (
+  sectorServiceId: string, 
+  motivoPausa: string
+): Promise<SectorService> => {
+  const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/pause`, {
+    reason: "OUTRO_MOTIVO",
+    description: motivoPausa,
+  });
+  return response.data;
+},
+
+  resumeSector: async (sectorServiceId: string): Promise<SectorService> => {
+    const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/resume`);
     return response.data;
   },
 

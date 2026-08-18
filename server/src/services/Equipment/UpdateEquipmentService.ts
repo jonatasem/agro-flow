@@ -1,19 +1,19 @@
 import prismaClient from "../../prisma/index.js";
 
-interface UpdateEquipmentProps {
+// Interface com as propriedades reais do modelo Equipment
+export interface UpdateEquipmentProps {
   id: string;
-  name?: string;
-  fleet?: string;
-  city?: string;
-  status?: boolean;
+  name?: string | undefined;
+  fleet?: string | undefined;
 }
 
 export class UpdateEquipmentService {
-  async execute({ id, name, fleet, city, status }: UpdateEquipmentProps) {
+  async execute({ id, name, fleet }: UpdateEquipmentProps) {
     if (!id) {
-      throw new Error("O ID do equipamento é obrigatório para atualização");
+      throw new Error("O ID do equipamento é obrigatório para atualização.");
     }
 
+    // Verifica se o equipamento existe
     const equipmentExists = await prismaClient.equipment.findUnique({
       where: { id },
     });
@@ -22,24 +22,23 @@ export class UpdateEquipmentService {
       throw new Error("Equipamento não encontrado.");
     }
 
-    // Se tiver uma frota, verifique se a frota que escolher já nao existe
-    if(fleet && fleet !== equipmentExists.fleet){
+    // Valida se a nova frota já está cadastrada em outro equipamento
+    if (fleet && fleet !== equipmentExists.fleet) {
       const fleetInUse = await prismaClient.equipment.findUnique({
         where: { fleet },
       });
 
-      if(!fleetInUse){
+      // Correção: lança erro se a frota JA existir
+      if (fleetInUse) {
         throw new Error("Esta frota já está em uso por outro equipamento.");
       }
     }
 
-    // Filtra os dados diferente de undefined
+    // Filtra apenas os atributos enviados na requisição
     const updateData = {
       ...(name !== undefined && { name }),
       ...(fleet !== undefined && { fleet }),
-      ...(city !== undefined && { city }),
-      ...(status !== undefined && { status }),
-    }
+    };
 
     const result = await prismaClient.equipment.update({
       where: { id },

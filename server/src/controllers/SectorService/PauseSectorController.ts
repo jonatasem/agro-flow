@@ -2,29 +2,28 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { PauseSectorService } from "../../services/SectorService/PauseSectorService.js";
 
 interface PauseSectorControllerProps { 
-    reason: "PAUSADO_PECA" | "PAUSADO_OUTRO_SETOR";
-    description: string;
+  reason: "FALTA_DE_PECA" | "AGUARDANDO_OUTRO_SETOR" | "OUTRO_MOTIVO";
+  description: string;
 }
 
 export class PauseSectorController {
-    async handle(request: FastifyRequest, reply: FastifyReply) {
-        const { id: sectorServiceId } = request.params as { id: string };
-        
-        // O (request.body || {}) impede o crash se o body vier undefined
-        const { reason, description } = (request.body || {}) as PauseSectorControllerProps;
+  async handle(request: FastifyRequest, reply: FastifyReply) {
+    const { id: sectorServiceId } = request.params as { id: string };
+    
+    const { reason, description } = (request.body || {}) as PauseSectorControllerProps;
 
-        const pauseService = new PauseSectorService();
+    const pauseService = new PauseSectorService();
 
-        try {
-            const result = await pauseService.execute({
-                sectorServiceId,
-                reason,
-                description
-            });
+    try {
+      const result = await pauseService.execute({
+        sectorServiceId,
+        pauseReason: reason,       // Mapeado para o nome esperado pelo Service
+        observation: description,  // Mapeado para o nome esperado pelo Service
+      });
 
-            return reply.status(200).send(result);
-        } catch (error: any) {
-            return reply.status(400).send({ error: error.message });
-        }
+      return reply.status(200).send(result);
+    } catch (error: any) {
+      return reply.status(400).send({ error: error.message });
     }
+  }
 }

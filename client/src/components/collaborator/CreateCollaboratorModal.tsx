@@ -16,18 +16,18 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   onSuccess,
   initialData,
 }) => {
-  // Inicialização direta do estado através do initialData (sem uso de useEffect para evitar avisos de re-renderização em cadeia)
   const [name, setName] = useState(initialData?.name || "");
   const [registration, setRegistration] = useState(initialData?.registration || "");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState(initialData?.role || "TECNICO");
+  const [sector, setSector] = useState(initialData?.sector || "");
   const [city, setCity] = useState(initialData?.city || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
   
     if (!name.trim() || !registration.trim() || (!initialData && !password.trim())) return;
@@ -40,6 +40,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
         name,
         registration,
         role,
+        sector,
         city,
       };
     
@@ -56,7 +57,8 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
       setName("");
       setRegistration("");
       setPassword("");
-      setRole("TECNICO");
+      setRole("");
+      setSector("");
       setCity("");
       onSuccess();
       onClose();
@@ -128,6 +130,21 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
                 <option value="ADMIN">Administrador</option>
               </select>
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-slate-700 font-semibold">Setor do Técnico</label>
+            <select
+              value={sector}
+              onChange={(e) => setSector(e.target.value)}
+              disabled={loading}
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
+            >
+              <option value="">Selecione o Setor</option>
+              <option value="AGRICULTURA_PRECISAO">Agricultura de Precisão</option>
+              <option value="MECANICA">Mecânica / Oficina</option>
+              <option value="GERAL">Geral</option>
+            </select>
           </div>
 
           <div className="space-y-1">

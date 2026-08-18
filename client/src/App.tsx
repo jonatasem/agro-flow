@@ -1,5 +1,5 @@
 import { ProtectedRoute } from "./routes/ProtectedRoute";
-import { DashboardPage } from "./pages/DashboardPage";
+import { DashboardPage } from "./pages/Dashboard/DashboardPage";
 
 export default function App() {
   return (

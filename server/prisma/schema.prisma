@@ -1,179 +1,106 @@
 generator client {
-  // Define que a biblioteca gerada utilizará o provedor para JavaScript/TypeScript
   provider = "prisma-client-js"
 }
 
-// Configuração da conexão com a base de dados
 datasource db {
-  // Define o provedor do banco de dados
   provider = "mongodb"
-  // Obtém a string de conexão a partir da variável de ambiente DATABASE_URL
   url      = env("DATABASE_URL")
 }
 
-// Modelo de dados que representa os colaboradores (usuários do sistema)
 model Collaborator {
-  // Campo de chave primária mapeado para o ID padrão do MongoDB (_id)
   id           String   @id @map("_id") @default(auto()) @db.ObjectId
-  // Nome completo do colaborador
   name         String
-  // Cargo ou função desempenhada pelo colaborador
   role         String
-  // Número de matrícula único do colaborador
+  sector       String
   registration String   @unique
-  // Hash da senha do colaborador para autenticação
   password     String
-  // Cidade de atuação do colaborador
   city         String
-  // Indica se o colaborador está ativo no sistema
   status       Boolean  @default(false)
-  // Data e hora do cadastro do colaborador
   createdAt    DateTime @default(now())
-  // Data e hora da última atualização do cadastro
   updatedAt    DateTime @updatedAt
 
-  // Relação com os atendimentos criados por este colaborador
   servicosCriados   SectorService[] @relation("CriadorServico")
-  // Relação com os atendimentos assumidos por este colaborador como técnico
   servicosAtendidos SectorService[] @relation("TecnicoResponsavel")
 
-  // Mapeia o modelo para a coleção 'collaborator' no MongoDB
   @@map("collaborator")
 }
 
-// Modelo de dados que representa a frota de equipamentos
 model Equipment {
-  // Campo de chave primária mapeado para o ID padrão do MongoDB (_id)
   id        String      @id @map("_id") @default(auto()) @db.ObjectId
-  // Nome ou modelo descritivo do equipamento
   name      String
-  // Identificador da frota, devendo ser único no sistema
   fleet     String      @unique
-  // Data e hora do cadastro do equipamento
   createdAt DateTime    @default(now())
-  // Data e hora da última alteração no cadastro do equipamento
   updatedAt DateTime    @updatedAt
 
-  // Lista de ordens de serviço associadas a este equipamento
   workOrder WorkOrder[]
 
-  // Mapeia o modelo para a coleção 'equipment' no MongoDB
   @@map("equipment")
 }
 
-// Modelo de dados que representa os operadores dos equipamentos
 model Operator {
-  // Campo de chave primária mapeado para o ID padrão do MongoDB (_id)
-  id           String      @id @map("_id") @default(auto()) @db.ObjectId
-  // Nome do operador
+  id           String          @id @map("_id") @default(auto()) @db.ObjectId
   name         String
-  // Número de matrícula único do operador
-  registration String      @unique
-  // Data e hora de criação do registro
-  createdAt    DateTime    @default(now())
-  // Data e hora da última atualização do registro
-  updatedAt    DateTime    @updatedAt
-  // Cidade de lotação do operador
+  registration String          @unique
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
   city         String
-  // Estado ativo/inativo do cadastro do operador
-  status       Boolean     @default(true)
+  status       Boolean         @default(true)
 
-  // Lista de ordens de serviço abertas por este operador
-  workOrders   WorkOrder[]
+  sectorServices SectorService[]
 
-  // Mapeia o modelo para a coleção 'operator' no MongoDB
   @@map("operator")
 }
 
-// Modelo de dados da Ordem de Serviço principal
 model WorkOrder {
-  // Campo de chave primária mapeado para o ID padrão do MongoDB (_id)
   id          String          @id @map("_id") @default(auto()) @db.ObjectId
-  // Identificador do equipamento vinculado
   equipmentId String          @db.ObjectId
-  // Relação com o modelo Equipment
   equipment   Equipment       @relation(fields: [equipmentId], references: [id])
-  // Identificador opcional do operador solicitante
-  operatorId  String?         @db.ObjectId
-  // Relação opcional com o modelo Operator
-  operator    Operator?       @relation(fields: [operatorId], references: [id])
-  // Status global da ordem de serviço (padrão: "ABERTA")
   status      String          @default("ABERTA") 
-  // Data e hora de abertura da ordem de serviço
   createdAt   DateTime        @default(now())
-  // Data e hora da última atualização na ordem de serviço
   updatedAt   DateTime        @updatedAt
 
-  // Atendimentos dos setores vinculados a esta ordem de serviço
   setores     SectorService[]
 
-  // Mapeia o modelo para a coleção 'work_order' no MongoDB
   @@map("work_order")
 }
 
-// Modelo de dados para o atendimento do setor responsável dentro da O.S.
 model SectorService {
-  // Campo de chave primária mapeado para o ID padrão do MongoDB (_id)
   id                   String        @id @map("_id") @default(auto()) @db.ObjectId
-  // Identificador da Ordem de Serviço pai
   workOrderId          String        @db.ObjectId
-  // Relação com a Ordem de Serviço com remoção em cascata
   workOrder            WorkOrder     @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
-  // Nome do setor responsável (ex: "Mecânica", "Elétrica")
   setor                String    
-  // Status do atendimento no setor (padrão: "AGUARDANDO_MANUTENCAO")
   status               String        @default("AGUARDANDO_MANUTENCAO") 
-  // Descrição do problema relatado na solicitação
   qruDescricao         String    
-  // Descrição detalhada da solução informada pelo técnico
   solucaoTecnico       String        @default("") 
-  // Classificação do motivo ou tipo de causa da falha
   tipoCausa            String?   
-  // Localização física/posição do equipamento no momento da abertura
   qth                  String
-  // Cidade da realização do atendimento
   city                 String 
-  // Identificador do colaborador que cadastrou o atendimento
+
+  operatorId           String        @db.ObjectId
+  operator             Operator      @relation(fields: [operatorId], references: [id])
+
   criadoPorId          String        @db.ObjectId
-  // Relação com o colaborador criador
   criador              Collaborator  @relation("CriadorServico", fields: [criadoPorId], references: [id])
-  // Identificador do técnico responsável pela execução
   tecnicoResponsavelId String?       @db.ObjectId
-  // Relação opcional com o colaborador técnico responsável
   tecnicoResponsavel   Collaborator? @relation("TecnicoResponsavel", fields: [tecnicoResponsavelId], references: [id])
-  // Data e hora de criação do atendimento no setor
   dataCriacao          DateTime      @default(now())
-  // Carimbo de data/hora do momento em que o técnico iniciou o trabalho
   dataInicioManutencao DateTime? 
-  // Carimbo de data/hora da conclusão da manutenção
   dataFimManutencao    DateTime? 
-  // Tempo de atendimento em minutos (descontando o tempo de pausas)
   tempoManutencao      Int?          
 
-  // Relação com o histórico de registros de pausas deste serviço
   pauses               ServicePause[]
 
-  // Mapeia o modelo para a coleção 'sector_service' no MongoDB
   @@map("sector_service")
 }
 
-// Modelo de dados para o histórico de pausas do serviço
 model ServicePause {
-  // Campo de chave primária mapeado para o ID padrão do MongoDB (_id)
   id              String        @id @map("_id") @default(auto()) @db.ObjectId
-  // Identificador do atendimento do setor vinculado
   sectorServiceId String        @db.ObjectId
-  // Relação com o atendimento do setor com remoção em cascata
   sectorService   SectorService @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
-  // Motivo da interrupção (ex: "FALTA_DE_PECA", "AGUARDANDO_OUTRO_SETOR")
   reason          String        
-  // Observação detalhada sobre a causa da pausa
   description     String?       
-  // Data e hora em que o atendimento foi pausado
   pausedAt        DateTime      @default(now())
-  // Data e hora em que o atendimento foi retomado
   resumedAt       DateTime?     
 
-  // Mapeia o modelo para a coleção 'service_pause' no MongoDB
   @@map("service_pause")
 }

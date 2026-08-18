@@ -10,26 +10,28 @@ interface UpdateWorkOrderBody {
   tipoCausa?: string | undefined;
   status?: string | undefined;
   tecnicoResponsavelId?: string | undefined;
+  operatorId?: string | undefined;
 }
 
 export class UpdateWorkOrderController {
-  async handle(req: FastifyRequest, res: FastifyReply) {
-    const { id } = req.params as { id: string };
-    const { 
-      setor, 
-      qruDescricao, 
-      qth, 
-      city, 
-      solucaoTecnico, 
-      tipoCausa, 
-      status, 
-      tecnicoResponsavelId 
-    } = (req.body as UpdateWorkOrderBody);
+  async handle(request: FastifyRequest, reply: FastifyReply) {
+    const { id } = request.params as { id: string };
+    const {
+      setor,
+      qruDescricao,
+      qth,
+      city,
+      solucaoTecnico,
+      tipoCausa,
+      status,
+      tecnicoResponsavelId,
+      operatorId,
+    } = (request.body || {}) as UpdateWorkOrderBody;
 
     const updateWorkOrderService = new UpdateWorkOrderService();
 
     try {
-      const updatedWorkOrder = await updateWorkOrderService.execute({
+      const updatedSector = await updateWorkOrderService.execute({
         id,
         setor,
         qruDescricao,
@@ -39,11 +41,12 @@ export class UpdateWorkOrderController {
         tipoCausa,
         status,
         tecnicoResponsavelId,
+        operatorId,
       });
 
-      return res.status(200).send(updatedWorkOrder);
+      return reply.status(200).send(updatedSector);
     } catch (error: any) {
-      return res.status(400).send({ error: error.message });
+      return reply.status(400).send({ error: error.message });
     }
   }
 }

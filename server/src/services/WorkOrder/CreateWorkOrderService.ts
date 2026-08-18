@@ -32,10 +32,8 @@ export class CreateWorkOrderService {
       throw new Error("Equipamento não encontrado");
     }
 
-    // 1. Verifica se a string já é um ObjectId de 24 caracteres do MongoDB
     const isObjectId = /^[0-9a-fA-F]{24}$/.test(operatorId);
 
-    // 2. Busca o operador pelo ObjectId ou pela matrícula
     const operatorExists = await prismaClient.operator.findFirst({
       where: isObjectId
         ? { id: operatorId }
@@ -53,11 +51,12 @@ export class CreateWorkOrderService {
       },
     });
 
-    // Se existir O.S. aberta, cadastra o novo setor dentro dela
+    // Se existir O.S. aberta, vincula o operador diretamente ao novo setor
     if (activeWorkOrder) {
       await prismaClient.sectorService.create({
         data: {
           workOrderId: activeWorkOrder.id,
+          operatorId: operatorExists.id,
           setor,
           qruDescricao,
           qth,
@@ -71,9 +70,9 @@ export class CreateWorkOrderService {
         where: { id: activeWorkOrder.id },
         include: {
           equipment: true,
-          operator: true,
           setores: {
             include: {
+              operator: true,
               criador: {
                 select: { id: true, name: true, role: true },
               },
@@ -86,14 +85,14 @@ export class CreateWorkOrderService {
       });
     }
 
-    // Se não existir O.S. aberta, cria uma nova
+    // Se não existir O.S. aberta, cria a O.S. sem operatorId e insere no setor
     const newWorkOrder = await prismaClient.workOrder.create({
       data: {
         equipmentId: equipment.id,
-        operatorId: operatorExists.id,
         status: "ABERTA",
         setores: {
           create: {
+            operatorId: operatorExists.id,
             setor,
             qruDescricao,
             qth,
@@ -105,9 +104,9 @@ export class CreateWorkOrderService {
       },
       include: {
         equipment: true,
-        operator: true,
         setores: {
           include: {
+            operator: true,
             criador: {
               select: { id: true, name: true, role: true },
             },

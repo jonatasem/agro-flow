@@ -22,8 +22,8 @@ export class CreateOperatorController {
       });
 
       return reply.status(201).send(result);    
-    } catch(error: any){
-      return reply.status(400).send({error});
+    } catch (error: any) {
+      return reply.status(400).send({ error: error.message });
     }
   }
 }

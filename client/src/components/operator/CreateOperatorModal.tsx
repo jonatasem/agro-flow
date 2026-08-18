@@ -16,7 +16,6 @@ export const CreateOperatorModal: React.FC<ModalProps> = ({
   const [name, setName] = useState("");
   const [registration, setRegistration] = useState("");
   const [city, setCity] = useState("");
-  const [password, setPassword] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,13 +35,11 @@ export const CreateOperatorModal: React.FC<ModalProps> = ({
         name,
         registration,
         city,
-        password,
       });
 
       setName("");
       setRegistration("");
       setCity("");
-      setPassword("");
       
       onSuccess();
       onClose();
@@ -118,18 +115,6 @@ export const CreateOperatorModal: React.FC<ModalProps> = ({
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all disabled:opacity-50"
               />
             </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700">Senha de Acesso (Opcional)</label>
-            <input
-              type="password"
-              placeholder="Crie uma senha de acesso"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all disabled:opacity-50"
-            />
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">

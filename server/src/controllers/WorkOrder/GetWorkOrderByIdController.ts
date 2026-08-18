@@ -8,10 +8,11 @@ export class GetWorkOrderByIdController {
     const getWorkOrderByIdService = new GetWorkOrderByIdService();
 
     try {
-      const workOrder = await getWorkOrderByIdService.execute(workOrderId);
+      const workOrder = await getWorkOrderByIdService.execute({ workOrderId });
       return reply.status(200).send(workOrder);
     } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
+      const statusCode = error.message === "Ordem de Serviço não encontrada." ? 404 : 400;
+      return reply.status(statusCode).send({ error: error.message });
     }
   }
 }

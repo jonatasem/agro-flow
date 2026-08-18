@@ -1,15 +1,33 @@
-import React from "react";
-import { useAuth } from "../hooks/useAuth";
+import React, { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { EditProfileModal } from "../../components/profile/EditProfileModal";
 
-export const UserProfile: React.FC = () => {
+interface UserProfileProps {
+  onClose: () => void;
+}
+
+export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
   const { user } = useAuth();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-emerald-950/5">
+      {/* Container com 'relative' para posicionar o botão fechar */}
+      <div className="relative bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-emerald-950/5">
         
+        {/* Botão Fechar (X) */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+            title="Fechar"
+          >
+            ✕
+          </button>
+        )}
+
         {/* Cabeçalho do Perfil */}
-        <div className="text-center space-y-2 border-b border-slate-100 pb-5">
+        <div className="text-center space-y-2 border-b border-slate-100 pb-5 pt-2">
           <div className="w-16 h-16 bg-emerald-600 text-white font-black text-2xl rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-emerald-600/20">
             {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
           </div>
@@ -54,6 +72,13 @@ export const UserProfile: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl transition-all shadow-md shadow-emerald-600/20"
+            >
+              Editar Perfil
+            </button>
           </div>
         ) : (
           <div className="text-center text-xs text-slate-400 py-4">
@@ -61,6 +86,12 @@ export const UserProfile: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Edição */}
+      <EditProfileModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+      />
     </div>
   );
 };
