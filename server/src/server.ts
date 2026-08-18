@@ -8,7 +8,7 @@ const app = fastify({
 
 const start = async () => {
   await app.register(cors, {
-    origin: "*", // temporário
+    origin: "https://agro-flow-phi.vercel.app",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
