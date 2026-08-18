@@ -9,8 +9,9 @@ import { type SectorService } from "../../services/workOrderService";
 import { Header } from "../../components/Header";
 import { HistoryPage } from "../History/HistoryPage";
 import { ActiveWorkOrdersPage } from "../WorkOrders/ActiveWorkOrdersPage";
+import { MetricsPage } from "../Metrics/MetricsPage";
 
-type TabType = "work-orders" | "history" | "equipments" | "operators" | "collaborators";
+type TabType = "work-orders" | "history" | "equipments" | "operators" | "collaborators" | "metrics";
 
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -147,16 +148,29 @@ export const DashboardPage: React.FC = () => {
         </button>
 
         {canManageAndCreate && (
-          <button
-            onClick={() => setActiveTab("collaborators")}
-            className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
-              activeTab === "collaborators"
-                ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                : "bg-white text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200"
-            }`}
-          >
-            👥 Colaboradores
-          </button>
+          <>
+            <button
+              onClick={() => setActiveTab("collaborators")}
+              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+                activeTab === "collaborators"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                  : "bg-white text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200"
+              }`}
+            >
+              👥 Colaboradores
+            </button>
+
+            <button
+              onClick={() => setActiveTab("metrics")}
+              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+                activeTab === "metrics"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                  : "bg-white text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200"
+              }`}
+            >
+              📊 Métricas
+            </button>
+          </>
         )}
       </nav>
 
@@ -183,6 +197,7 @@ export const DashboardPage: React.FC = () => {
         {activeTab === "equipments" && <EquipmentsPage />}
         {activeTab === "operators" && <OperatorsPage />}
         {activeTab === "collaborators" && canManageAndCreate && <CollaboratorsPage />}
+        {activeTab === "metrics" && canManageAndCreate && <MetricsPage />}
       </main>
 
       <CreateWorkOrderModal
