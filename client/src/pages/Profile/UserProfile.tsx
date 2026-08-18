@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 
+// Ajuste aqui: adicionada a '?' para tornar a prop opcional
 interface UserProfileProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
@@ -15,7 +16,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
       {/* Container com 'relative' para posicionar o botão fechar */}
       <div className="relative bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-emerald-950/5">
         
-        {/* Botão Fechar (X) */}
+        {/* Botão Fechar (X) - exibe apenas se onClose for informado */}
         {onClose && (
           <button
             onClick={onClose}

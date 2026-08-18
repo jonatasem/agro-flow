@@ -10,7 +10,6 @@ interface UpdateWorkOrderBody {
   tipoCausa?: string | undefined;
   status?: string | undefined;
   tecnicoResponsavelId?: string | undefined;
-  operatorId?: string | undefined;
 }
 
 export class UpdateWorkOrderController {
@@ -25,7 +24,6 @@ export class UpdateWorkOrderController {
       tipoCausa,
       status,
       tecnicoResponsavelId,
-      operatorId,
     } = (request.body || {}) as UpdateWorkOrderBody;
 
     const updateWorkOrderService = new UpdateWorkOrderService();
@@ -41,7 +39,6 @@ export class UpdateWorkOrderController {
         tipoCausa,
         status,
         tecnicoResponsavelId,
-        operatorId,
       });
 
       return reply.status(200).send(updatedSector);
