@@ -1,19 +1,20 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import {
-  CreateCollaboratorService,
-  type CreateCollaboratorProps,
-} from "../../services/Collaborator/CreateCollaboratorService.js";
+import { CreateCollaboratorService } from "../../services/Collaborator/CreateCollaboratorService.js";
 
 export class CreateCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    // Pega todos os campos do corpo da requisição.
-    const { name, role, sector, registration, password, city } =
-      request.body as CreateCollaboratorProps;
+    const { name, role, sector, registration, password, city } = request.body as any;
 
-    // chama o serviço pra executar.
+    // Extrai o cargo autenticado
+    const userRole = request.userRole || request.user?.role;
+
+    // Se o middleware por algum motivo falhar ou não injetar o papel, barra antes da Service
+    if (!userRole) {
+      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+    }
+
     const collaboratorService = new CreateCollaboratorService();
 
-    // Cadastra no banco de dados.
     try {
       const collaborator = await collaboratorService.execute({
         name,
@@ -22,13 +23,15 @@ export class CreateCollaboratorController {
         registration,
         password,
         city,
+        userRole,
       });
 
-      // Retorna o funcionario cadastrado.
       return reply.status(201).send(collaborator);
     } catch (error: any) {
-      // Ou um erro
-      return reply.status(400).send({ error: error.message });
+      const isPermissionError = error.message?.includes("Acesso negado");
+      const statusCode = isPermissionError ? 403 : 400;
+
+      return reply.status(statusCode).send({ error: error.message });
     }
   }
 }
