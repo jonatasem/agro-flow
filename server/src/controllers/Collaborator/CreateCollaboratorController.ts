@@ -6,7 +6,7 @@ export class CreateCollaboratorController {
     const { name, role, sector, registration, password, city } = request.body as any;
 
     // Extrai o cargo autenticado
-    const userRole = request.userRole || request.user?.role;
+    const userRole = request.userRole;
 
     // Se o middleware por algum motivo falhar ou não injetar o papel, barra antes da Service
     if (!userRole) {

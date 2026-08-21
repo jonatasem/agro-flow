@@ -62,14 +62,6 @@ export async function routes(
     },
   );
 
-  // Cadastro inicial de colaborador
-  fastify.post(
-    "/collaborator",
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      return new CreateCollaboratorController().handle(request, reply);
-    },
-  );
-
   // Validação de matrícula existente
   fastify.post(
     "/login/check-registration",
@@ -189,6 +181,14 @@ export async function routes(
       "/collaborator/:id",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new DeleteCollaboratorController().handle(request, reply);
+      },
+    );
+
+    // Cadastro inicial de colaborador
+    subFastify.post(
+      "/collaborator",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new CreateCollaboratorController().handle(request, reply);
       },
     );
        
