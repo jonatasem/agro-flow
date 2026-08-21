@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { AxiosError } from "axios";
-import { dashboardService, type DashboardFilters, type DashboardMetrics } from "../services/dashboardService";
+import {
+  dashboardService,
+  type DashboardFilters,
+  type DashboardMetrics,
+} from "../services/dashboardService";
+import { getErrorMessage } from "../utility/getErrorMessage";
+
+export type { DashboardFilters, DashboardMetrics };
 
 export function useDashboardMetrics(initialFilters?: DashboardFilters) {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -8,27 +14,36 @@ export function useDashboardMetrics(initialFilters?: DashboardFilters) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchMetrics = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await dashboardService.getMetrics(filters);
+      setMetrics(data);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Falha ao carregar dados do dashboard."));
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
   useEffect(() => {
-    let isCancelled = false;
+    let isMounted = true;
 
     async function loadData() {
       try {
+        setLoading(true);
+        setError(null);
         const data = await dashboardService.getMetrics(filters);
-        if (!isCancelled) {
+        if (isMounted) {
           setMetrics(data);
-          setError(null);
         }
       } catch (err: unknown) {
-        if (!isCancelled) {
-          console.error("Erro ao carregar métricas do dashboard:", err);
-          let message = "Falha ao carregar os dados do dashboard.";
-          if (err instanceof AxiosError && err.response?.data?.message) {
-            message = err.response.data.message;
-          }
-          setError(message);
+        if (isMounted) {
+          setError(getErrorMessage(err, "Falha ao carregar dados do dashboard."));
         }
       } finally {
-        if (!isCancelled) {
+        if (isMounted) {
           setLoading(false);
         }
       }
@@ -37,26 +52,8 @@ export function useDashboardMetrics(initialFilters?: DashboardFilters) {
     loadData();
 
     return () => {
-      isCancelled = true;
+      isMounted = false;
     };
-  }, [filters]);
-
-  const refetch = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await dashboardService.getMetrics(filters);
-      setMetrics(data);
-    } catch (err: unknown) {
-      console.error("Erro ao carregar métricas do dashboard:", err);
-      let message = "Falha ao carregar os dados do dashboard.";
-      if (err instanceof AxiosError && err.response?.data?.message) {
-        message = err.response.data.message;
-      }
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
   }, [filters]);
 
   const updateFilters = useCallback((action: React.SetStateAction<DashboardFilters>) => {
@@ -70,6 +67,6 @@ export function useDashboardMetrics(initialFilters?: DashboardFilters) {
     error,
     filters,
     setFilters: updateFilters,
-    refetch,
+    refetch: fetchMetrics,
   };
 }

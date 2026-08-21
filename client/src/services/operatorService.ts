@@ -1,24 +1,23 @@
-import { api } from "../services/api";
+import { api } from "./api";
 
 export interface Operator {
-  id: string;            
-  name: string;          
-  role: string;      
+  id: string;
+  name: string;
+  role?: string;
   registration: string;
-  city: string;     
-  status: boolean;  
-  createdAt: string;
+  city?: string;
+  status?: boolean;
+  createdAt?: string;
   updatedAt?: string;
 }
 
-// Cria a tipagem de entrada removendo os campos gerenciados automaticamente pelo banco de dados.
-export type CreateOperatorInput = Omit<Operator, "id" | "createdAt" | "updatedAt">;
+export type CreateOperatorInput = Omit<Operator, "id" | "createdAt" | "updatedAt"> & {
+  password?: string;
+};
 
-// Transforma todas as propriedades de criação em opcionais para permitir atualizações parciais.
 export type UpdateOperatorInput = Partial<CreateOperatorInput>;
 
-export const OperatorService = {
-  
+export const operatorService = {
   getAll: async (): Promise<Operator[]> => {
     const response = await api.get<Operator[]>("/operator");
     return response.data;
@@ -26,7 +25,7 @@ export const OperatorService = {
 
   getById: async (id: string): Promise<Operator> => {
     const response = await api.get<Operator>(`/operator/${id}`);
-    return response.data; // Retorna os detalhes do registro localizado.
+    return response.data;
   },
 
   create: async (payload: CreateOperatorInput): Promise<Operator> => {

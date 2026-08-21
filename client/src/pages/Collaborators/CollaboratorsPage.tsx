@@ -20,12 +20,12 @@ export const CollaboratorsPage: React.FC = () => {
 
   const filteredCollaborators = Array.isArray(collaborators)
     ? collaborators.filter((collab) => {
-        const term = search.toLowerCase();
+        const term = search.toLowerCase().trim();
+        if (!term) return true;
+
         const nameMatch = collab.name?.toLowerCase().includes(term);
         const roleMatch = collab.role?.toLowerCase().includes(term);
-        const regMatch = collab.registration
-          ? collab.registration.toLowerCase().includes(term)
-          : false;
+        const regMatch = collab.registration?.toLowerCase().includes(term);
 
         return nameMatch || roleMatch || regMatch;
       })
@@ -75,7 +75,7 @@ export const CollaboratorsPage: React.FC = () => {
           />
           <button
             onClick={refetch}
-            className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200/80 text-xs text-slate-600 rounded-xl transition-colors shadow-sm"
+            className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200/80 text-xs text-slate-600 rounded-xl transition-colors shadow-sm cursor-pointer"
             title="Atualizar"
           >
             🔄
@@ -85,7 +85,7 @@ export const CollaboratorsPage: React.FC = () => {
               setEditingCollaborator(null);
               setIsModalOpen(true);
             }}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-emerald-600/20 whitespace-nowrap"
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-emerald-600/20 whitespace-nowrap cursor-pointer"
           >
             + Colaborador
           </button>
@@ -100,7 +100,7 @@ export const CollaboratorsPage: React.FC = () => {
 
       {loading ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200/80 shadow-sm text-center">
-          <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
           <p className="text-xs font-bold text-slate-500">Carregando colaboradores...</p>
         </div>
       ) : filteredCollaborators.length === 0 ? (
@@ -127,7 +127,7 @@ export const CollaboratorsPage: React.FC = () => {
                   )}
                   <button
                     onClick={() => handleEdit(c)}
-                    className="p-1 text-slate-400 hover:text-emerald-600 text-xs transition-colors"
+                    className="p-1 text-slate-400 hover:text-emerald-600 text-xs transition-colors cursor-pointer"
                     title="Editar"
                   >
                     ✏️
@@ -135,7 +135,7 @@ export const CollaboratorsPage: React.FC = () => {
                   <button
                     onClick={() => handleDelete(c.id, c.name)}
                     disabled={deletingId === c.id}
-                    className="p-1 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50"
+                    className="p-1 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
                     title="Excluir"
                   >
                     {deletingId === c.id ? "⏳" : "🗑️"}

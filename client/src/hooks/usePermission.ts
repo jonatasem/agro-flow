@@ -4,12 +4,11 @@ import { normalizeRole, ROLE_PERMISSIONS, type Permission } from '../utils/permi
 export function usePermission() {
   const { user } = useAuth();
 
+  const role = user?.role ? normalizeRole(user.role) : '';
+
   const hasPermission = (permission: Permission): boolean => {
-    if (!user?.role) return false;
-
-    const normalizedRole = normalizeRole(user.role);
-    const userPermissions = ROLE_PERMISSIONS[normalizedRole] || [];
-
+    if (!role) return false;
+    const userPermissions = ROLE_PERMISSIONS[role] || [];
     return userPermissions.includes(permission);
   };
 
@@ -17,5 +16,5 @@ export function usePermission() {
     return permissions.some((permission) => hasPermission(permission));
   };
 
-  return { hasPermission, hasAnyPermission };
+  return { hasPermission, hasAnyPermission, role };
 }

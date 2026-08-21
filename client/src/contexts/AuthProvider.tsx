@@ -3,12 +3,14 @@ import { api } from "../services/api";
 import { AuthContext, type User } from "./AuthContext";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const storedToken = localStorage.getItem("@agroflow:token");
-  const storedUser = localStorage.getItem("@agroflow:user");
-  const parsedUser = (() => {
+  // Lazy state: lê do localStorage apenas no carregamento inicial da aplicação
+  const [user, setUser] = useState<User | null>(() => {
+    const storedToken = localStorage.getItem("@agroflow:token");
+    const storedUser = localStorage.getItem("@agroflow:user");
+
     if (storedToken && storedUser) {
       try {
-        return JSON.parse(storedUser);
+        return JSON.parse(storedUser) as User;
       } catch {
         localStorage.removeItem("@agroflow:token");
         localStorage.removeItem("@agroflow:user");
@@ -16,12 +18,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     return null;
-  })();
+  });
 
-  const [user, setUser] = useState<User | null>(parsedUser);
   const [loading] = useState(false);
 
-  // Função para atualizar os dados do perfil logado
   const updateUser = (data: Partial<User>) => {
     setUser((prevUser) => {
       if (!prevUser) return null;
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const checkRegistration = async (registration: string) => {
-    const response = await api.post("/login/check-registration", { registration });
+    const response = await api.post<{ name: string }>("/login/check-registration", { registration });
     return response.data;
   };
 

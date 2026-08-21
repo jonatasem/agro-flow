@@ -1,24 +1,33 @@
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
-// Cria e exporta uma instância personalizada do Axios com configurações padrão.
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Configura um interceptor que altera a requisição automaticamente antes que ela seja enviada ao servidor.
-api.interceptors.request.use((config) => {
-  
-  // Busca o token de autenticação JWT salvo no localStorage do navegador.
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem("@agroflow:token");
-  
-  // Se o token existir no armazenamento local do usuário, entra na condição.
-  if (token) {
-    // Garante que o objeto de cabeçalhos (headers) está inicializado para evitar erros de tipo undefined.
-    config.headers = config.headers || {};
-    // Adiciona o token JWT no cabeçalho Authorization usando o formato padrão 'Bearer'.
+
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
-  // Retorna a configuração modificada para que o Axios continue com o envio da requisição.
+
   return config;
 });
+
+// Trata erro 401 globalmente limpando o storage e redirecionando
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("@agroflow:token");
+      localStorage.removeItem("@agroflow:user");
+
+      // Evita o reload/redirecionamento forçado se o erro 401 for gerado na própria tela de login
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);

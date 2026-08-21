@@ -1,6 +1,6 @@
 import { api } from "./api";
 import { type Collaborator } from "./collaboratorService";
-import { type Equipment } from "../hooks/useEquipment";
+import { type Equipment } from "./equipmentService";
 
 export interface SectorService {
   id: string;
@@ -85,15 +85,15 @@ export const workOrderService = {
   },
 
   pauseSector: async (
-  sectorServiceId: string, 
-  motivoPausa: string
-): Promise<SectorService> => {
-  const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/pause`, {
-    reason: "OUTRO_MOTIVO",
-    description: motivoPausa,
-  });
-  return response.data;
-},
+    sectorServiceId: string,
+    motivoPausa: string
+  ): Promise<SectorService> => {
+    const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/pause`, {
+      reason: "OUTRO_MOTIVO",
+      description: motivoPausa,
+    });
+    return response.data;
+  },
 
   resumeSector: async (sectorServiceId: string): Promise<SectorService> => {
     const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/resume`);
@@ -101,10 +101,10 @@ export const workOrderService = {
   },
 
   finishSector: async (
-    sectorServiceId: string, 
+    sectorServiceId: string,
     data: { solucaoTecnico: string; tipoCausa?: string }
   ): Promise<SectorService> => {
     const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/finish`, data);
     return response.data;
-  }
+  },
 };

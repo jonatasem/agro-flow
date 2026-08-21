@@ -1,74 +1,132 @@
 import { useState, useEffect, useCallback } from "react";
-import { workOrderService, type WorkOrder } from "../services/workOrderService";
+import { api } from "../services/api";
 import { getErrorMessage } from "../utility/getErrorMessage";
+import { type WorkOrder } from "../services/workOrderService";
+
+export type { WorkOrder };
 
 export function useWorkOrders() {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Memoriza a função de busca usando useCallback para evitar que ela seja recriada a cada renderização da página.
   const fetchWorkOrders = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      // Executa a chamada HTTP para obter todas as ordens de serviço.
-      const data = await workOrderService.getAll();
-      // Atualiza o estado com as novas ordens recebidas.
-      setWorkOrders(data);
+      const response = await api.get<WorkOrder[]>("/work-order");
+      setWorkOrders(response.data);
     } catch (err: unknown) {
-      // Captura a falha, trata o formato e atualiza a mensagem de erro na tela.
       setError(getErrorMessage(err, "Erro ao carregar Ordens de Serviço."));
     } finally {
-      // Garante o desligamento do indicador de carregamento após o término da requisição.
       setLoading(false);
     }
-  }, []); // Array de dependências vazio indica que esta função nunca mudará de referência na memória.
+  }, []);
 
-  // Efeito colateral executado automaticamente apenas uma vez quando o componente é montado na tela.
   useEffect(() => {
-    // Variável de controle para verificar se o componente ainda continua ativo/montado na tela.
     let isMounted = true;
 
-    // Função interna assíncrona responsável por disparar a carga inicial de dados.
     async function loadData() {
       try {
-        // Limpa possíveis mensagens de erro antigas.
         setError("");
-        // Faz a requisição inicial para trazer as ordens de serviço do back-end.
-        const data = await workOrderService.getAll();
-        // Se o usuário não saiu da tela enquanto a requisição rodava, atualiza os dados.
+        const response = await api.get<WorkOrder[]>("/work-order");
         if (isMounted) {
-          setWorkOrders(data);
+          setWorkOrders(response.data);
         }
       } catch (err: unknown) {
-        // Se o componente continuar montado, atualiza o estado com a mensagem de erro.
         if (isMounted) {
           setError(getErrorMessage(err, "Erro ao carregar Ordens de Serviço."));
         }
       } finally {
-        // Se o componente continuar montado, desliga o estado de carregamento inicial.
         if (isMounted) {
           setLoading(false);
         }
       }
     }
 
-    // Executa a função de carga que foi declarada logo acima.
     loadData();
 
-    // Função de limpeza (cleanup) executada automaticamente se o componente for desmontado da tela.
     return () => {
-      // Altera a flag para falso, cancelando atualizações de estado pendentes e evitando vazamento de memória (Memory Leak).
       isMounted = false;
     };
-  }, []); // Array de dependências vazio garante que o efeito rode apenas no nascimento do componente.
+  }, []);
 
-  // Retorna os estados e a função de atualização manual (refetch) para os componentes que consumirem o hook.
+  const createWorkOrder = async (payload: Partial<WorkOrder>) => {
+    try {
+      const response = await api.post<WorkOrder>("/work-order", payload);
+      setWorkOrders((prev) => [...prev, response.data]);
+      return response.data;
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao criar Ordem de Serviço."), { cause: err });
+    }
+  };
+
+  const updateWorkOrder = async (id: string, payload: Partial<WorkOrder>) => {
+    try {
+      const response = await api.put<WorkOrder>(`/work-order/${id}`, payload);
+      setWorkOrders((prev) => prev.map((item) => (item.id === id ? response.data : item)));
+      return response.data;
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao atualizar Ordem de Serviço."), { cause: err });
+    }
+  };
+
+  const deleteWorkOrder = async (id: string) => {
+    try {
+      await api.delete(`/work-order/${id}`);
+      setWorkOrders((prev) => prev.filter((item) => item.id !== id));
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao remover Ordem de Serviço."), { cause: err });
+    }
+  };
+
+  const startSectorService = async (sectorServiceId: string) => {
+    try {
+      await api.put(`/sector-service/${sectorServiceId}/start`);
+      await fetchWorkOrders();
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao iniciar atendimento."), { cause: err });
+    }
+  };
+
+  const pauseSectorService = async (sectorServiceId: string, description: string, reason = "OUTRO_MOTIVO") => {
+    try {
+      await api.put(`/sector-service/${sectorServiceId}/pause`, { reason, description });
+      await fetchWorkOrders();
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao pausar atendimento."), { cause: err });
+    }
+  };
+
+  const resumeSectorService = async (sectorServiceId: string) => {
+    try {
+      await api.put(`/sector-service/${sectorServiceId}/resume`);
+      await fetchWorkOrders();
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao retomar atendimento."), { cause: err });
+    }
+  };
+
+  const finishSectorService = async (sectorServiceId: string, payload?: { solucaoTecnico: string; tipoCausa?: string }) => {
+    try {
+      await api.put(`/sector-service/${sectorServiceId}/finish`, payload);
+      await fetchWorkOrders();
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao finalizar atendimento."), { cause: err });
+    }
+  };
+
   return {
     workOrders,
     loading,
     error,
     refetch: fetchWorkOrders,
+    createWorkOrder,
+    updateWorkOrder,
+    deleteWorkOrder,
+    startSectorService,
+    pauseSectorService,
+    resumeSectorService,
+    finishSectorService,
   };
 }

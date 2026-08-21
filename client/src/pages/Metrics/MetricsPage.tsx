@@ -37,7 +37,7 @@ export const MetricsPage: React.FC = () => {
         <p className="text-sm font-bold">{error}</p>
         <button
           onClick={refetch}
-          className="px-4 py-2 bg-red-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-red-700 transition-all"
+          className="px-4 py-2 bg-red-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-red-700 transition-all cursor-pointer"
         >
           Tentar Novamente
         </button>
@@ -64,7 +64,7 @@ export const MetricsPage: React.FC = () => {
           </h3>
           <button
             onClick={refetch}
-            className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-all"
+            className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-all cursor-pointer"
           >
             🔄 Atualizar Dados
           </button>
@@ -106,7 +106,7 @@ export const MetricsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-slate-400 block mb-1">Causa</label>
+            <label className="text-[10px] font-bold text-slate-400 block mb-1">Tipo de Causa</label>
             <input
               type="text"
               name="tipoCausa"
@@ -211,9 +211,9 @@ export const MetricsPage: React.FC = () => {
         </div>
 
         {/* TOP OPERADORES SOLICITANTES */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4 md:col-span-2">
           <h3 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-            👨‍🌾 Operadores com Mais Aberturas
+            👨‍🌾 Operadores com Mais Soluções/Solicitações
           </h3>
 
           {topOperators.length === 0 ? (
@@ -242,7 +242,7 @@ export const MetricsPage: React.FC = () => {
         </div>
 
         {/* LINHA DO TEMPO */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4 md:col-span-2">
           <h3 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
             📅 Volume Diário de Chamados
           </h3>
