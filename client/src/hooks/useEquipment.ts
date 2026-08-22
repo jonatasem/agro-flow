@@ -5,7 +5,7 @@ import {
   type CreateEquipmentInput,
   type UpdateEquipmentInput,
 } from "../services/equipmentService";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export type { Equipment, CreateEquipmentInput, UpdateEquipmentInput };
 
@@ -14,10 +14,10 @@ export function useEquipments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchEquipments = useCallback(async () => {
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      setError("");
       const data = await equipmentService.getAll();
       setEquipments(data);
     } catch (err: unknown) {
@@ -30,25 +30,19 @@ export function useEquipments() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadData() {
-      try {
-        setError("");
-        const data = await equipmentService.getAll();
-        if (isMounted) {
-          setEquipments(data);
-        }
-      } catch (err: unknown) {
+    equipmentService
+      .getAll()
+      .then((data) => {
+        if (isMounted) setEquipments(data);
+      })
+      .catch((err: unknown) => {
         if (isMounted) {
           setError(getErrorMessage(err, "Erro ao carregar equipamentos."));
         }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadData();
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -88,7 +82,7 @@ export function useEquipments() {
     equipments,
     loading,
     error,
-    refetch: fetchEquipments,
+    refetch,
     createEquipment,
     updateEquipment,
     deleteEquipment,

@@ -4,7 +4,7 @@ import {
   type DashboardFilters,
   type DashboardMetrics,
 } from "../services/dashboardService";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export type { DashboardFilters, DashboardMetrics };
 

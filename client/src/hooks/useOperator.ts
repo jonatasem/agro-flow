@@ -5,7 +5,7 @@ import {
   type CreateOperatorInput,
   type UpdateOperatorInput,
 } from "../services/operatorService";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export type { Operator, CreateOperatorInput, UpdateOperatorInput };
 
@@ -14,10 +14,10 @@ export function useOperators() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchOperators = useCallback(async () => {
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      setError("");
       const data = await operatorService.getAll();
       setOperators(data);
     } catch (err: unknown) {
@@ -30,25 +30,19 @@ export function useOperators() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadData() {
-      try {
-        setError("");
-        const data = await operatorService.getAll();
-        if (isMounted) {
-          setOperators(data);
-        }
-      } catch (err: unknown) {
+    operatorService
+      .getAll()
+      .then((data) => {
+        if (isMounted) setOperators(data);
+      })
+      .catch((err: unknown) => {
         if (isMounted) {
           setError(getErrorMessage(err, "Erro ao carregar operadores."));
         }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadData();
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -88,7 +82,7 @@ export function useOperators() {
     operators,
     loading,
     error,
-    refetch: fetchOperators,
+    refetch,
     createOperator,
     updateOperator,
     deleteOperator,

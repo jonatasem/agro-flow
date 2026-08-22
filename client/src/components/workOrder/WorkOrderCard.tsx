@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { workOrderService, type WorkOrder, type SectorService } from "../../services/workOrderService";
-import { getErrorMessage } from "../../utility/getErrorMessage";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 interface WorkOrderCardProps {
   order: WorkOrder;

@@ -1,15 +1,26 @@
 import React, { useState } from "react";
 import { useEquipments } from "../../hooks/useEquipment";
+import { useAuth } from "../../hooks/useAuth";
+import { PERMISSIONS, hasPermission } from "../../utils/permission";
 import { CreateEquipmentModal } from "../../components/equipment/CreateEquipmentModal";
+import { type Equipment } from "../../services/equipmentService";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 export const EquipmentsPage: React.FC = () => {
-  const { equipments, loading, error, refetch } = useEquipments();
+  const { user } = useAuth();
+  const { equipments, loading, error, refetch, deleteEquipment } = useEquipments();
+  
+  const canManage = hasPermission(user?.role, PERMISSIONS.EQUIPMENT_CREATE);
+
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filtered = Array.isArray(equipments)
     ? equipments.filter((eq) => {
-        const term = search.toLowerCase();
+        const term = search.toLowerCase().trim();
+        if (!term) return true;
         return (
           eq.name?.toLowerCase().includes(term) ||
           eq.fleet?.toLowerCase().includes(term)
@@ -17,16 +28,43 @@ export const EquipmentsPage: React.FC = () => {
       })
     : [];
 
+  const handleEdit = (equipment: Equipment) => {
+    if (!canManage) return;
+    setEditingEquipment(equipment);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, fleet: string) => {
+    if (!canManage) return;
+    if (!window.confirm(`Tem certeza que deseja excluir o equipamento frota #${fleet}?`)) {
+      return;
+    }
+
+    try {
+      setDeletingId(id);
+      await deleteEquipment(id);
+    } catch (err: unknown) {
+      alert(getErrorMessage(err, "Erro ao excluir equipamento."));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingEquipment(null);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Cabeçalho da Seção */}
+      {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">
             Equipamentos e Maquinários
           </h1>
           <p className="text-xs text-slate-500">
-            Frota agrícola cadastrada na Unidade Zilor
+            Frota agrícola cadastrada
           </p>
         </div>
 
@@ -41,18 +79,23 @@ export const EquipmentsPage: React.FC = () => {
 
           <button
             onClick={refetch}
-            className="px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-xs text-slate-600 rounded-xl shadow-sm transition-colors"
+            className="px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-xs text-slate-600 rounded-xl shadow-sm transition-colors cursor-pointer"
             title="Atualizar lista"
           >
             🔄
           </button>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-emerald-600/15 whitespace-nowrap"
-          >
-            + Novo Equipamento
-          </button>
+          {canManage && (
+            <button
+              onClick={() => {
+                setEditingEquipment(null);
+                setIsModalOpen(true);
+              }}
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-emerald-600/15 whitespace-nowrap cursor-pointer"
+            >
+              + Novo Equipamento
+            </button>
+          )}
         </div>
       </div>
 
@@ -83,19 +126,45 @@ export const EquipmentsPage: React.FC = () => {
                 </span>
                 <h3 className="font-bold text-slate-800 text-sm">{item.name}</h3>
               </div>
-              <div className="w-8 h-8 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 text-sm">
-                🚜
+
+              <div className="flex items-center gap-2">
+                {canManage && (
+                  <div className="flex items-center gap-1 mr-1">
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="p-1.5 text-slate-400 hover:text-emerald-600 text-xs transition-colors cursor-pointer"
+                      title="Editar"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id, item.fleet)}
+                      disabled={deletingId === item.id}
+                      className="p-1.5 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                      title="Excluir"
+                    >
+                      {deletingId === item.id ? "⏳" : "🗑️"}
+                    </button>
+                  </div>
+                )}
+                <div className="w-8 h-8 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 text-sm">
+                  🚜
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <CreateEquipmentModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={refetch}
-      />
+      {canManage && (
+        <CreateEquipmentModal
+          key={editingEquipment?.id || (isModalOpen ? "open" : "closed")}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSuccess={refetch}
+          initialData={editingEquipment}
+        />
+      )}
     </div>
   );
 };

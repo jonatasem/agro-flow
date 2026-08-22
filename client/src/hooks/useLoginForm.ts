@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "./useAuth";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export function useLoginForm() {
   const { checkRegistration, signIn } = useAuth();
@@ -24,7 +24,7 @@ export function useLoginForm() {
     setIsSubmitting(true);
 
     try {
-      const data = await checkRegistration(registration);
+      const data = await checkRegistration(registration.trim());
       setCollaboratorName(data.name);
       setStep(2);
     } catch (err: unknown) {
@@ -43,7 +43,7 @@ export function useLoginForm() {
     setIsSubmitting(true);
 
     try {
-      await signIn(registration, password);
+      await signIn(registration.trim(), password);
       navigate("/dashboard");
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Palavra-passe incorreta ou erro ao entrar."));
@@ -55,6 +55,7 @@ export function useLoginForm() {
   const handleBackToStep1 = () => {
     setStep(1);
     setPassword("");
+    setCollaboratorName("");
     setError("");
   };
 

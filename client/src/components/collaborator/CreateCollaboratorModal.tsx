@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { api } from "../../services/api";
-import { getErrorMessage } from "../../utility/getErrorMessage";
-import type { Collaborator } from "../../services/collaboratorService";
+import {
+  collaboratorService,
+  type Collaborator,
+} from "../../services/collaboratorService";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 interface ModalProps {
   isOpen: boolean;               
@@ -16,6 +18,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   onSuccess,
   initialData,
 }) => {
+  // Inicialização direta do estado com base na prop inicial
   const [name, setName] = useState(initialData?.name || "");
   const [registration, setRegistration] = useState(initialData?.registration || "");
   const [password, setPassword] = useState("");
@@ -27,7 +30,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
     if (!name.trim() || !registration.trim() || (!initialData && !password.trim())) return;
@@ -36,33 +39,23 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
       setLoading(true);
       setError("");
 
-      const payload: Record<string, string> = {
+      const payload = {
         name,
         registration,
         role,
         sector,
         city,
+        ...(password.trim() ? { password } : {}),
       };
     
-      if (password.trim()) {
-        payload.password = password;
-      }
-    
       if (initialData?.id) {
-        await api.put(`/collaborator/${initialData.id}`, payload);
+        await collaboratorService.update(initialData.id, payload);
       } else {
-        await api.post("/collaborator", payload);
+        await collaboratorService.create(payload);
       }
     
-      setName("");
-      setRegistration("");
-      setPassword("");
-      setRole("");
-      setSector("");
-      setCity("");
       onSuccess();
       onClose();
-
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Erro ao salvar dados do colaborador. Verifique as informações."));
     } finally {
@@ -77,7 +70,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
           <h2 className="text-lg font-bold text-slate-800">
             {initialData ? "Editar Colaborador" : "Novo Colaborador"}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm font-bold">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">
             ✕
           </button>
         </div>
@@ -133,7 +126,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-700 font-semibold">Setor do Técnico</label>
+            <label className="text-xs text-slate-700 font-semibold">Setor</label>
             <select
               value={sector}
               onChange={(e) => setSector(e.target.value)}
@@ -163,7 +156,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-700 font-semibold">Cidade / Base</label>
+            <label className="text-xs text-slate-700 font-semibold">Cidade / Filial</label>
             <input
               type="text"
               placeholder="Ex: Sertãozinho - SP"
@@ -179,7 +172,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-semibold rounded-xl transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-semibold rounded-xl transition-colors cursor-pointer"
             >
               Cancelar
             </button>
@@ -187,7 +180,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-indigo-600/20"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
             >
               {loading ? "Salvando..." : initialData ? "Salvar Alterações" : "Cadastrar"}
             </button>

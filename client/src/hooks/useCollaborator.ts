@@ -5,7 +5,7 @@ import {
   type CreateCollaboratorInput,
   type UpdateCollaboratorInput,
 } from "../services/collaboratorService";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export type { Collaborator, CreateCollaboratorInput, UpdateCollaboratorInput };
 
@@ -14,10 +14,11 @@ export function useCollaborator() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchCollaborators = useCallback(async () => {
+  // Função para recarregar manualmente (ex: botão de refetch)
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      setError("");
       const data = await collaboratorService.getAll();
       setCollaborators(data);
     } catch (err: unknown) {
@@ -27,28 +28,23 @@ export function useCollaborator() {
     }
   }, []);
 
+  // Busca inicial assíncrona com controle de desmontagem (evita setState síncrono no efeito)
   useEffect(() => {
     let isMounted = true;
 
-    async function loadData() {
-      try {
-        setError("");
-        const data = await collaboratorService.getAll();
-        if (isMounted) {
-          setCollaborators(data);
-        }
-      } catch (err: unknown) {
+    collaboratorService
+      .getAll()
+      .then((data) => {
+        if (isMounted) setCollaborators(data);
+      })
+      .catch((err: unknown) => {
         if (isMounted) {
           setError(getErrorMessage(err, "Erro ao carregar colaboradores."));
         }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadData();
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -88,7 +84,7 @@ export function useCollaborator() {
     collaborators,
     loading,
     error,
-    refetch: fetchCollaborators,
+    refetch,
     createCollaborator,
     updateCollaborator,
     deleteCollaborator,

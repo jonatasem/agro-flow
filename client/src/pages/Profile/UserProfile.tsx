@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 
-// Ajuste aqui: adicionada a '?' para tornar a prop opcional
 interface UserProfileProps {
   onClose?: () => void;
 }
@@ -13,14 +12,12 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col items-center justify-center p-4">
-      {/* Container com 'relative' para posicionar o botão fechar */}
-      <div className="relative bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-emerald-950/5">
+      <div className="relative bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-slate-200/50">
         
-        {/* Botão Fechar (X) - exibe apenas se onClose for informado */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors"
+            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
             title="Fechar"
           >
             ✕
@@ -59,7 +56,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
                     Unidade / Polo
                   </span>
                   <span className="text-xs font-bold text-slate-700 block mt-0.5">
-                    📍 {user.city || "Zilor Principal"}
+                    📍 {user.city || "Não informada"}
                   </span>
                 </div>
 
@@ -76,7 +73,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
 
             <button
               onClick={() => setIsEditOpen(true)}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl transition-all shadow-md shadow-emerald-600/20"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
             >
               Editar Perfil
             </button>
@@ -88,7 +85,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
         )}
       </div>
 
-      {/* Modal de Edição */}
       <EditProfileModal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}

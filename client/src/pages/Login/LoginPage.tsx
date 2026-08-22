@@ -61,7 +61,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting || !registration.trim()}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isSubmitting ? "A verificar..." : "Avançar"}
             </button>
@@ -77,7 +77,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleBackToStep1}
-                className="text-xs text-emerald-700 hover:text-emerald-900 font-semibold underline"
+                className="text-xs text-emerald-700 hover:text-emerald-900 font-semibold underline cursor-pointer"
               >
                 Trocar
               </button>
@@ -103,7 +103,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting || !password.trim()}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isSubmitting ? "A entrar..." : "Entrar no Sistema"}
             </button>

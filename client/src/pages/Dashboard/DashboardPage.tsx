@@ -16,6 +16,16 @@ import { type SectorService } from "../../services/workOrderService";
 
 type TabType = "work-orders" | "history" | "equipments" | "operators" | "collaborators" | "metrics";
 
+// Helper para ignorar acentos, espaços extras e diferenças de caixa
+const normalizeText = (text?: string) =>
+  text
+    ? text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+    : "";
+
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const { workOrders, loading, error, refetch } = useWorkOrders();
@@ -31,6 +41,8 @@ export const DashboardPage: React.FC = () => {
   const canManageCollaborators = hasPermission(PERMISSIONS.COLLABORATOR_MANAGE);
   const canViewMetrics = hasPermission(PERMISSIONS.METRICS_VIEW);
   const canAccessAdminTabs = hasAnyPermission([PERMISSIONS.COLLABORATOR_MANAGE, PERMISSIONS.METRICS_VIEW]);
+
+  const userSector = user?.sector;
 
   const handleCreateOpen = () => {
     if (!canCreateWorkOrder) return;
@@ -49,23 +61,35 @@ export const DashboardPage: React.FC = () => {
   const activeWorkOrders = (workOrders || []).filter((order) => {
     if (order.status === "FINALIZADA") return false;
 
+    // Líderes/Admins ou usuários sem setor cadastrado enxergam todas as OS ativas
+    if (canAccessAdminTabs || !userSector) {
+      return true;
+    }
+
+    // Para técnicos, verifica se há algum setor pendente na OS que corresponda ao seu setor
     if (order.setores && order.setores.length > 0) {
       return order.setores.some((sector) => {
         const isNotFinished = sector.status !== "FINALIZADO";
-
-        const matchesSector =
-          canAccessAdminTabs ||
-          !user?.sector ||
-          sector.setor?.toLowerCase().trim() === user.sector?.toLowerCase().trim();
-
-        return isNotFinished && matchesSector;
+        const matchesUserSector = normalizeText(sector.setor) === normalizeText(userSector);
+        return isNotFinished && matchesUserSector;
       });
     }
+
     return true;
   });
 
   // Filtragem do Histórico (Ordens Concluídas)
   const completedWorkOrders = (workOrders || []).filter((order) => {
+    const matchesUserScope =
+      canAccessAdminTabs ||
+      !userSector ||
+      (order.setores &&
+        order.setores.some(
+          (sector) => normalizeText(sector.setor) === normalizeText(userSector)
+        ));
+
+    if (!matchesUserScope) return false;
+
     if (order.status === "FINALIZADA") return true;
     if (order.setores && order.setores.length > 0) {
       return order.setores.every((sector) => sector.status === "FINALIZADO");

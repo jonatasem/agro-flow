@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useCollaborator } from "../../hooks/useCollaborator";
+import { useAuth } from "../../hooks/useAuth";
+import { PERMISSIONS, hasPermission } from "../../utils/permission";
 import { CreateCollaboratorModal } from "../../components/collaborator/CreateCollaboratorModal";
 import { type Collaborator } from "../../services/collaboratorService";
-import { getErrorMessage } from "../../utility/getErrorMessage";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 export const CollaboratorsPage: React.FC = () => {
+  const { user } = useAuth();
   const {
     collaborators,
     loading,
@@ -12,6 +15,9 @@ export const CollaboratorsPage: React.FC = () => {
     refetch,
     deleteCollaborator,
   } = useCollaborator();
+
+  // Proteção em nível de componente: verifica se a role do usuário permite gerenciamento
+  const canManage = hasPermission(user?.role, PERMISSIONS.COLLABORATOR_MANAGE);
 
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +38,8 @@ export const CollaboratorsPage: React.FC = () => {
     : [];
 
   const handleDelete = async (id: string, name: string) => {
+    if (!canManage) return;
+
     if (!window.confirm(`Tem certeza que deseja excluir o colaborador "${name}"?`)) {
       return;
     }
@@ -47,6 +55,7 @@ export const CollaboratorsPage: React.FC = () => {
   };
 
   const handleEdit = (collaborator: Collaborator) => {
+    if (!canManage) return;
     setEditingCollaborator(collaborator);
     setIsModalOpen(true);
   };
@@ -80,15 +89,19 @@ export const CollaboratorsPage: React.FC = () => {
           >
             🔄
           </button>
-          <button
-            onClick={() => {
-              setEditingCollaborator(null);
-              setIsModalOpen(true);
-            }}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-emerald-600/20 whitespace-nowrap cursor-pointer"
-          >
-            + Colaborador
-          </button>
+
+          {/* Oculta o botão de criar colaborador caso o usuário não possua permissão */}
+          {canManage && (
+            <button
+              onClick={() => {
+                setEditingCollaborator(null);
+                setIsModalOpen(true);
+              }}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl transition-all shadow-md shadow-emerald-600/20 whitespace-nowrap cursor-pointer"
+            >
+              + Colaborador
+            </button>
+          )}
         </div>
       </div>
 
@@ -125,21 +138,27 @@ export const CollaboratorsPage: React.FC = () => {
                       Matrícula: {c.registration}
                     </span>
                   )}
-                  <button
-                    onClick={() => handleEdit(c)}
-                    className="p-1 text-slate-400 hover:text-emerald-600 text-xs transition-colors cursor-pointer"
-                    title="Editar"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => handleDelete(c.id, c.name)}
-                    disabled={deletingId === c.id}
-                    className="p-1 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
-                    title="Excluir"
-                  >
-                    {deletingId === c.id ? "⏳" : "🗑️"}
-                  </button>
+
+                  {/* Oculta os botões de edição e exclusão de cada card para perfis não autorizados */}
+                  {canManage && (
+                    <>
+                      <button
+                        onClick={() => handleEdit(c)}
+                        className="p-1 text-slate-400 hover:text-emerald-600 text-xs transition-colors cursor-pointer"
+                        title="Editar"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id, c.name)}
+                        disabled={deletingId === c.id}
+                        className="p-1 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                        title="Excluir"
+                      >
+                        {deletingId === c.id ? "⏳" : "🗑️"}
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -160,13 +179,16 @@ export const CollaboratorsPage: React.FC = () => {
         </div>
       )}
 
-      <CreateCollaboratorModal
-        key={editingCollaborator?.id || (isModalOpen ? "open" : "closed")}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSuccess={refetch}
-        initialData={editingCollaborator}
-      />
+      {/* Trava adicional de renderização do modal */}
+      {canManage && (
+        <CreateCollaboratorModal
+          key={editingCollaborator?.id || (isModalOpen ? "open" : "closed")}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSuccess={refetch}
+          initialData={editingCollaborator}
+        />
+      )}
     </div>
   );
 };

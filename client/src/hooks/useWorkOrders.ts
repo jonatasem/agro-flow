@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
-import { getErrorMessage } from "../utility/getErrorMessage";
+import { getErrorMessage } from "../utils/getErrorMessage";
 import { type WorkOrder } from "../services/workOrderService";
 
 export type { WorkOrder };
@@ -10,6 +10,7 @@ export function useWorkOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Função para recarregamento manual (ex: botão de refetch ou após ações)
   const fetchWorkOrders = useCallback(async () => {
     try {
       setLoading(true);
@@ -23,15 +24,16 @@ export function useWorkOrders() {
     }
   }, []);
 
+  // Busca inicial executada com a montagem do componente
   useEffect(() => {
     let isMounted = true;
 
-    async function loadData() {
+    async function loadInitialData() {
       try {
-        setError("");
         const response = await api.get<WorkOrder[]>("/work-order");
         if (isMounted) {
           setWorkOrders(response.data);
+          setError("");
         }
       } catch (err: unknown) {
         if (isMounted) {
@@ -44,7 +46,7 @@ export function useWorkOrders() {
       }
     }
 
-    loadData();
+    loadInitialData();
 
     return () => {
       isMounted = false;
@@ -80,42 +82,6 @@ export function useWorkOrders() {
     }
   };
 
-  const startSectorService = async (sectorServiceId: string) => {
-    try {
-      await api.put(`/sector-service/${sectorServiceId}/start`);
-      await fetchWorkOrders();
-    } catch (err: unknown) {
-      throw new Error(getErrorMessage(err, "Erro ao iniciar atendimento."), { cause: err });
-    }
-  };
-
-  const pauseSectorService = async (sectorServiceId: string, description: string, reason = "OUTRO_MOTIVO") => {
-    try {
-      await api.put(`/sector-service/${sectorServiceId}/pause`, { reason, description });
-      await fetchWorkOrders();
-    } catch (err: unknown) {
-      throw new Error(getErrorMessage(err, "Erro ao pausar atendimento."), { cause: err });
-    }
-  };
-
-  const resumeSectorService = async (sectorServiceId: string) => {
-    try {
-      await api.put(`/sector-service/${sectorServiceId}/resume`);
-      await fetchWorkOrders();
-    } catch (err: unknown) {
-      throw new Error(getErrorMessage(err, "Erro ao retomar atendimento."), { cause: err });
-    }
-  };
-
-  const finishSectorService = async (sectorServiceId: string, payload?: { solucaoTecnico: string; tipoCausa?: string }) => {
-    try {
-      await api.put(`/sector-service/${sectorServiceId}/finish`, payload);
-      await fetchWorkOrders();
-    } catch (err: unknown) {
-      throw new Error(getErrorMessage(err, "Erro ao finalizar atendimento."), { cause: err });
-    }
-  };
-
   return {
     workOrders,
     loading,
@@ -124,9 +90,5 @@ export function useWorkOrders() {
     createWorkOrder,
     updateWorkOrder,
     deleteWorkOrder,
-    startSectorService,
-    pauseSectorService,
-    resumeSectorService,
-    finishSectorService,
   };
 }
