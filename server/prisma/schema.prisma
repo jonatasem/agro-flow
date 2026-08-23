@@ -96,7 +96,7 @@ model SectorService {
 model ServicePause {
   id              String        @id @map("_id") @default(auto()) @db.ObjectId
   sectorServiceId String        @db.ObjectId
-  sectorService   SectorService @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
+  sectorService   SectorService? @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
   reason          String        
   description     String?       
   pausedAt        DateTime      @default(now())
