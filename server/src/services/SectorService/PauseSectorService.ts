@@ -27,7 +27,10 @@ export class PauseSectorService {
     const [updatedService] = await prismaClient.$transaction([
       prismaClient.sectorService.update({
         where: { id: sectorServiceId },
-        data: { status: "PAUSADO" },
+        data: { 
+          status: "PAUSADO",
+          motivoPausa: observation,
+        },
       }),
 
       prismaClient.servicePause.create({

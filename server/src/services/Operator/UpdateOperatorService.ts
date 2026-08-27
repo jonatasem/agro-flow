@@ -1,20 +1,16 @@
 import prismaClient from "../../prisma/index.js";
-import { CheckRegistrationService } from "../LoginCollaborator/CheckRegistrationService.js";
 
 interface UpdateOperatorProps {
   id: string;
-  name?: string;
-  registration?: string;
-  city?: string;
-  status?: boolean;
+  name?: string | undefined;
+  registration?: string | undefined;
+  city?: string | undefined;
+  status?: boolean | undefined;
+  userRole: string;
 }
 
 export class UpdateOperatorService {
   async execute({ id, name, registration, city, status }: UpdateOperatorProps) {
-    if (!id) {
-      throw new Error("O ID do funcionário é obrigatório para atualização");
-    }
-
     const operatorExists = await prismaClient.operator.findUnique({
       where: { id },
     });
@@ -22,8 +18,7 @@ export class UpdateOperatorService {
     if (!operatorExists) {
       throw new Error("Funcionário não encontrado.");
     }
-    
-
+      
     if (registration && registration !== operatorExists.registration ) {
       const registrationInUse = await prismaClient.operator.findUnique({
         where: { registration },

@@ -10,6 +10,10 @@ export class LoginCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { registration, password } = request.body as LoginCollaboratorProps;
 
+    if (!registration || !password) {
+      throw new Error("Matrícula e senha são obrigatórias");
+    }
+
     const loginService = new LoginCollaboratorService();
 
     try {

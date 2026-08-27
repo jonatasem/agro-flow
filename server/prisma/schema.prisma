@@ -73,6 +73,7 @@ model SectorService {
   qruDescricao         String    
   solucaoTecnico       String        @default("") 
   tipoCausa            String?   
+  motivoPausa          String?       // <--- CAMPO ADICIONADO
   qth                  String
   city                 String 
 

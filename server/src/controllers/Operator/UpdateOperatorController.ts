@@ -1,47 +1,54 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import prismaClient from "../../prisma/index.js";
+import { UpdateOperatorService } from "../../services/Operator/UpdateOperatorService.js";
 
-interface UpdateOperatorProps {
-  name?: string;
-  registration?: string;
-  city?: string;
-  status?: boolean;
+export interface UpdateOperatorProps {
+  id: string;
+  name?: string | undefined;
+  registration?: string | undefined;
+  city?: string | undefined;
 }
 
 export class UpdateOperatorController {
-  async handle(request: FastifyRequest, reply: FastifyReply) {
+  async handle(request:FastifyRequest, reply:FastifyReply) {
+
+    // Extrai o cargo autenticado
+    const userRole = request.userRole;
+
+    if (!userRole) {
+      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+    }
+
     const { id } = request.params as { id: string };
 
-    const { name, registration, city, status } = request.body as UpdateOperatorProps;
-
-    if (!id) {
-      return reply.status(400).send({
-        error: "O ID do funcionário é obrigatório para a atualização.",
-      });
+    if(!id){
+      throw new Error("O id do operador é necessario!")
     }
 
-    const operatorExists = await prismaClient.operator.findUnique({
-      where: { id },
-    });
+    const { name, registration, city } = request.body as UpdateOperatorProps;
 
-    if (!operatorExists) {
-      return reply.status(404).send({
-        error: "Funcionário não encontrado.",
-      });
+    // Valida se ao menos um campo foi enviado
+    if (name === undefined && registration === undefined && city === undefined) {
+      return reply.status(400).send({ error: "Informe ao menos um campo para atualização." });
     }
 
-    const updateData = {
-      ...(name !== undefined && { name }),
-      ...(registration !== undefined && { registration }),
-      ...(city !== undefined && { city }),
-      ...(status !== undefined && { status }),
-    };
+    const updateCollaboratorService = new UpdateOperatorService();
 
-    const updateOperator = await prismaClient.operator.update({
-      where: { id },
-      data: updateData,
-    });
+    try {
+      const result = await updateCollaboratorService.execute({
+        id,
+        name,
+        registration,
+        city,
+        userRole
+      });
 
-    return reply.send(updateOperator);
+      return reply.status(200).send(result);
+    } catch (error: any) {
+      const isPermissionError = error.message?.includes("Acesso negado");
+      const statusCode = isPermissionError ? 403 : 400;
+
+      return reply.status(statusCode).send({ error: error.message });
+    }
+
   }
 }

@@ -5,14 +5,11 @@ export interface UpdateEquipmentProps {
   id: string;
   name?: string | undefined;
   fleet?: string | undefined;
+  userRole: string;
 }
 
 export class UpdateEquipmentService {
   async execute({ id, name, fleet }: UpdateEquipmentProps) {
-    if (!id) {
-      throw new Error("O ID do equipamento é obrigatório para atualização.");
-    }
-
     // Verifica se o equipamento existe
     const equipmentExists = await prismaClient.equipment.findUnique({
       where: { id },
@@ -28,7 +25,6 @@ export class UpdateEquipmentService {
         where: { fleet },
       });
 
-      // Correção: lança erro se a frota JA existir
       if (fleetInUse) {
         throw new Error("Esta frota já está em uso por outro equipamento.");
       }

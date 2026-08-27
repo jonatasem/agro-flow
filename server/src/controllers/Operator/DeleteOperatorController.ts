@@ -3,6 +3,13 @@ import { DeleteOperatorService } from "../../services/Operator/DeleteOperatorSer
 
 export class DeleteOperatorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
+    // Extrai o cargo autenticado
+    const userRole = request.userRole;
+
+    // Se o middleware falhar ou não injetar o papel, barra antes do Service
+    if (!userRole) {
+      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+    }
     
     const { id } = request.params as { id:string }
 

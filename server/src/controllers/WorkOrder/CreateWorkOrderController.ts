@@ -12,15 +12,17 @@ interface CreateWorkServiceProps {
 
 export class CreateWorkOrderController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { fleet, operatorId, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProps;
-
-    const criadoPor = (request as any).userId as string;
+    const criadoPor = request.userId;
 
     if (!criadoPor) {
       return reply
         .status(401)
         .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
+   
+    const { fleet, operatorId, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProps;
+
+
 
     const workOrderService = new CreateWorkOrderService();
 

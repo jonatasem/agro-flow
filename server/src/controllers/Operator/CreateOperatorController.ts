@@ -9,8 +9,19 @@ interface CreateOperatorProps {
 
 export class CreateOperatorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    
+    // Extrai o cargo autenticado
+    const userRole = request.userRole;
+
+    // Se o middleware falhar ou não injetar o papel, barra antes do Service
+    if (!userRole) {
+      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+    }
+
     const { name, registration, city } = request.body as CreateOperatorProps;
+
+    if (!name || !registration || !city) {
+      throw new Error("Todos os campos são obrigatórios");
+    }
 
     const operatorService = new CreateOperatorService();
 
@@ -18,7 +29,8 @@ export class CreateOperatorController {
       const result = await operatorService.execute({
         name,
         registration,
-        city
+        city,
+        userRole
       });
 
       return reply.status(201).send(result);    

@@ -6,7 +6,11 @@ import {
 
 export class CheckRegistrationController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { registration } = (request.body || {}) as CheckProps;
+    const { registration } = request.body as CheckProps;
+    
+    if (!registration) {
+      throw new Error("A matrícula é obrigatória.");
+    }
 
     const checkService = new CheckRegistrationService();
 

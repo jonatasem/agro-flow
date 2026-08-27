@@ -1,15 +1,20 @@
 import prismaClient from "../../prisma/index.js";
+import { isManagement } from "../../config/roles.js";
 
 interface DeleteCollaboratorProps {
   id: string;
+  userRole: string;
 }
 
 export class DeleteCollaboratorService {
-  async execute({id}: DeleteCollaboratorProps) {
-    if (!id) {
-      throw new Error("Id do funcionario não encontrado.");
+  async execute({ id, userRole }: DeleteCollaboratorProps) {
+    // Validação do RBAC
+    if (!isManagement(userRole)) {
+      throw new Error(
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para deletar colaboradores."
+      );
     }
-
+    
     const findCollaborator = await prismaClient.collaborator.findUnique({
       where: { id },
     });
@@ -25,4 +30,3 @@ export class DeleteCollaboratorService {
     return { message: "Funcionário deletado com sucesso." };
   }
 }
-

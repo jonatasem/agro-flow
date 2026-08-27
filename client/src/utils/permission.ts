@@ -24,6 +24,7 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   gerente: Object.values(PERMISSIONS),
   supervisor: Object.values(PERMISSIONS),
   lider: Object.values(PERMISSIONS),
+  coa: Object.values(PERMISSIONS),
 
   tecnico: [
     PERMISSIONS.EQUIPMENT_VIEW,

@@ -94,38 +94,38 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl">
+    <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white border border-neutral-200 p-6 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl">
         
-        <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-          <h2 className="text-lg font-bold text-white">
+        <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
+          <h2 className="text-lg font-bold text-neutral-950">
             {initialSectorData ? "Editar Setor da Ordem de Serviço" : "Nova Ordem de Serviço"}
           </h2>
           <button
             onClick={onClose}
             type="button"
-            className="text-slate-400 hover:text-white font-bold cursor-pointer"
+            className="text-neutral-500 hover:text-neutral-800 font-bold cursor-pointer"
           >
             ✕
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs p-3 rounded-xl">
+          <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs text-slate-300">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs text-neutral-700">
           {!initialSectorData && (
             <div className="space-y-1">
-              <label className="font-semibold">Frota / Equipamento *</label>
+              <label className="font-semibold text-neutral-800">Frota / Equipamento *</label>
               <select
                 required
                 value={fleet}
                 onChange={(e) => setFleet(e.target.value)}
                 disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
               >
                 <option value="">Selecione o equipamento...</option>
                 {equipments.map((eq) => (
@@ -138,7 +138,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
           )}
 
           <div className="space-y-1">
-            <label className="font-semibold">Setor Afetado *</label>
+            <label className="font-semibold text-neutral-800">Setor Afetado *</label>
             <input
               type="text"
               required
@@ -146,13 +146,13 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
               value={setor}
               onChange={(e) => setSetor(e.target.value)}
               disabled={loading}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-semibold">QTH (Local/Fazenda) *</label>
+              <label className="font-semibold text-neutral-800">QTH (Local/Fazenda) *</label>
               <input
                 type="text"
                 required
@@ -160,12 +160,12 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
                 value={qth}
                 onChange={(e) => setQth(e.target.value)}
                 disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold">Cidade *</label>
+              <label className="font-semibold text-neutral-800">Cidade *</label>
               <input
                 type="text"
                 required
@@ -173,14 +173,14 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
               />
             </div>
           </div>
 
           {!initialSectorData && (
             <div className="space-y-1">
-              <label className="font-semibold">ID / Matrícula do Operador *</label>
+              <label className="font-semibold text-neutral-800">ID / Matrícula do Operador *</label>
               <input
                 type="text"
                 required
@@ -188,13 +188,13 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
                 value={selectedOperatorId}
                 onChange={(e) => setSelectedOperatorId(e.target.value)}
                 disabled={loading}
-                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
               />
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="font-semibold">Descrição do QRU (Problema) *</label>
+            <label className="font-semibold text-neutral-800">Descrição do QRU (Problema) *</label>
             <textarea
               required
               rows={3}
@@ -202,7 +202,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
               value={qruDescricao}
               onChange={(e) => setQruDescricao(e.target.value)}
               disabled={loading}
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
             />
           </div>
 
@@ -211,7 +211,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-semibold disabled:opacity-50 cursor-pointer transition-colors"
             >
               Cancelar
             </button>
@@ -219,7 +219,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
             >
               {loading ? "Salvando..." : initialSectorData ? "Salvar Alterações" : "Abrir Ordem de Serviço"}
             </button>

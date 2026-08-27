@@ -6,9 +6,20 @@ const app = fastify({
   logger: false,
 });
 
+const urlDevelop = process.env.URL_DEVELOP;
+const port = process.env.PORT;
+
+if (!urlDevelop) {
+  throw new Error("Informe a url do frontend.");
+}
+
+if (!port) {
+  throw new Error("Informe uma porta.");
+}
+
 const start = async () => {
   await app.register(cors, {
-    origin: "https://agro-flow-phi.vercel.app",
+    origin: urlDevelop,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
@@ -17,18 +28,14 @@ const start = async () => {
 
   try {
     await app.listen({
-      port: 3333,
-      host: "0.0.0.0", // temporário
+      port: Number(port),
+      host: "0.0.0.0",
     });
-    console.log("Server is running on port 3333");
+    console.log(`Server is running on port ${port}`);
   } catch (err) {
-    app.log.error(err);
+    console.error(err);
     process.exit(1);
   }
 };
 
 start();
-
-// Jonatas Elieser Moreira
-// Todos os direitos reservados
-// 2026

@@ -4,14 +4,11 @@ interface CreateOperatorProps {
   name: string;
   registration: string;
   city: string;
+  userRole: string;
 }
 
 export class CreateOperatorService {
   async execute({ name, registration, city }: CreateOperatorProps) {
-    if (!name || !registration || !city) {
-      throw new Error("Todos os campos são obrigatórios");
-    }
-
     const registrationExists = await prismaClient.operator.findUnique({
       where: { registration },
     });

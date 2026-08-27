@@ -1,14 +1,19 @@
 import prismaClient from "../../prisma/index.js";
+import { isManagement } from "../../config/roles.js";
 
 export interface CreateEquipmentProps {
   name: string;
   fleet: string;
+  userRole: string;
 }
 
 export class CreateEquipmentService {
-  async execute({ name, fleet }: CreateEquipmentProps) {
-    if (!name || !fleet) {
-      throw new Error("Todos os campos são obrigatórios.");
+  async execute({ name, fleet, userRole }: CreateEquipmentProps) {
+    // Validação do RBAC
+    if (!isManagement(userRole)) {
+      throw new Error(
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+      );
     }
 
     const fleetExists = await prismaClient.equipment.findUnique({

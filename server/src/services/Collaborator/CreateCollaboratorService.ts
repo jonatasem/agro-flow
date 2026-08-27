@@ -13,28 +13,22 @@ export interface CreateCollaboratorProps {
 }
 
 export class CreateCollaboratorService {
-  async execute({
-    name,
-    role,
-    sector,
-    registration,
-    password,
-    city,
-    userRole,
-  }: CreateCollaboratorProps) {
-
+  async execute(
+    { 
+      name, 
+      role, 
+      sector, 
+      registration, 
+      password, 
+      city, 
+      userRole 
+    }: CreateCollaboratorProps) {
     // Validação do RBAC
     if (!isManagement(userRole)) {
       throw new Error(
         "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
       );
     }
-
-    // Validação dos campos do novo colaborador
-    if (!name || !role || !sector || !registration || !password || !city) {
-      throw new Error("Preencha todos os campos obrigatórios.");
-    }
-
     // Verifica se existe algum usuario utilizando essa matricula
     const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: { registration },
