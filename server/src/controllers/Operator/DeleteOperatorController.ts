@@ -21,7 +21,7 @@ export class DeleteOperatorController {
 
     const operatorService = new DeleteOperatorService();
 
-    const operator = await operatorService.execute({ id });
+    const operator = await operatorService.execute({ id, userRole });
 
     reply.status(200).send(operator);
   }

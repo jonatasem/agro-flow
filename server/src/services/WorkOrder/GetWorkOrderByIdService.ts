@@ -1,11 +1,18 @@
 import prismaClient from "../../prisma/index.js";
+import { isManagement } from "../../config/roles.js";
 
 interface GetWorkOrderByIdProps {
   workOrderId: string;
+  userRole: string;
 }
 
 export class GetWorkOrderByIdService {
-  async execute({ workOrderId }: GetWorkOrderByIdProps) {
+  async execute({ workOrderId, userRole }: GetWorkOrderByIdProps) {
+    if (!isManagement(userRole)) {
+      throw new Error(
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+      );
+    }
     if (!workOrderId) {
       throw new Error("ID da Ordem de Serviço é obrigatório.");
     }

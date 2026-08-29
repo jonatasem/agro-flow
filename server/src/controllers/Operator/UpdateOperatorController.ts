@@ -15,20 +15,26 @@ export class UpdateOperatorController {
     const userRole = request.userRole;
 
     if (!userRole) {
-      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+      return reply
+      .status(401)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { id } = request.params as { id: string };
 
     if(!id){
-      throw new Error("O id do operador é necessario!")
+      return reply
+      .status(401)
+      .send({ error: "O id do operador é necessario!" });
     }
 
     const { name, registration, city } = request.body as UpdateOperatorProps;
 
     // Valida se ao menos um campo foi enviado
     if (name === undefined && registration === undefined && city === undefined) {
-      return reply.status(400).send({ error: "Informe ao menos um campo para atualização." });
+      return reply
+      .status(400)
+      .send({ error: "Informe ao menos um campo para atualização." });
     }
 
     const updateCollaboratorService = new UpdateOperatorService();

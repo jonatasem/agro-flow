@@ -7,13 +7,17 @@ export class DeleteCollaboratorController {
     const userRole = request.userRole;
 
     if (!userRole) {
-      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+      return reply
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { id } = request.params as { id: string };
 
     if (!id) {
-      throw new Error("Id do funcionário não informado.");
+      return reply
+        .status(400)
+        .send({ error: "Id do funcionário não informado." });
     }
 
     const collaboratorService = new DeleteCollaboratorService();

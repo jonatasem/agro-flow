@@ -4,20 +4,21 @@ interface PauseSectorProps {
   sectorServiceId: string;
   pauseReason: "FALTA_DE_PECA" | "AGUARDANDO_OUTRO_SETOR" | "OUTRO_MOTIVO";
   observation: string;
+  tecnicoId: string;
 }
 
 export class PauseSectorService {
-  async execute({ sectorServiceId, pauseReason, observation }: PauseSectorProps) {
-    if (!sectorServiceId || !pauseReason) {
-      throw new Error("ID do serviço e motivo da pausa são obrigatórios.");
-    }
-
+  async execute({ sectorServiceId, pauseReason, observation, tecnicoId }: PauseSectorProps) {
     const sectorService = await prismaClient.sectorService.findUnique({
       where: { id: sectorServiceId },
     });
 
     if (!sectorService) {
       throw new Error("Atendimento do setor não encontrado.");
+    }
+
+    if (sectorService.tecnicoResponsavelId !== tecnicoId) {
+        throw new Error("Apenas o técnico que iniciou a manutenção pode pausa-la.");
     }
 
     if (sectorService.status !== "EM_MANUTENCAO") {

@@ -9,7 +9,27 @@ interface PauseSectorControllerProps {
 export class PauseSectorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { id: sectorServiceId } = request.params as { id: string };
-    const { reason, description } = (request.body || {}) as PauseSectorControllerProps;
+    const { reason, description } = request.body as PauseSectorControllerProps;
+
+    const tecnicoId = request.userId;
+
+    if (!tecnicoId) {
+      return reply
+        .status(401)
+        .send({ error: "Não autorizado. Técnico não identificado." });
+    }
+
+    if (!sectorServiceId) {
+      return reply
+        .status(400)
+        .send({ error: "ID do serviço é obrigatório." });
+    }
+    
+    if(!reason || !description){
+      return reply
+      .status(400)
+      .send({ error: "O motivo e a descrição são obrigatórios para pausar uma O.S." });
+    }
 
     const pauseService = new PauseSectorService();
 
@@ -18,6 +38,7 @@ export class PauseSectorController {
         sectorServiceId,
         pauseReason: reason,
         observation: description,
+        tecnicoId
       });
 
       return reply.status(200).send(result);

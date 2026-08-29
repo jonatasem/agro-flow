@@ -11,20 +11,26 @@ export class UpdateEquipmentController {
     const userRole = request.userRole;
 
     if (!userRole) {
-      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+      return reply
+      .status(401)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { id } = request.params as { id: string };
 
     if (!id) {
-      return reply.status(400).send({ error: "O ID do equipamento é obrigatório para atualização." });
+      return reply
+      .status(400)
+      .send({ error: "O ID do equipamento é obrigatório para atualização." });
     }
 
     const { name, fleet } = request.body as UpdateEquipmentBody;
 
     // Garante que ao menos um campo foi enviado para atualização
     if (name === undefined && fleet === undefined) {
-      return reply.status(400).send({ error: "Informe ao menos um campo para atualização." });
+      return reply
+      .status(400)
+      .send({ error: "Informe ao menos um campo para atualização." });
     }
 
     const updateEquipmentService = new UpdateEquipmentService();

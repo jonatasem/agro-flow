@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma/index.js";
+import { isManagement } from "../../config/roles.js";
 
 interface UpdateWorkOrderProps {
   id: string;
@@ -14,7 +15,13 @@ interface UpdateWorkOrderProps {
 }
 
 export class UpdateWorkOrderService {
-  async execute(data: UpdateWorkOrderProps) {
+  async execute(data: UpdateWorkOrderProps, userRole: string) {
+    if (!isManagement(userRole)) {
+      throw new Error(
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar ordens de serviço."
+      );
+    }
+
     const {
       id,
       setor,
@@ -28,10 +35,6 @@ export class UpdateWorkOrderService {
       operatorId,
     } = data;
 
-    if (!id) {
-      throw new Error("O ID do setor da ordem de serviço é obrigatório.");
-    }
-
     const orderSectorExists = await prismaClient.sectorService.findUnique({
       where: { id },
     });
@@ -40,19 +43,14 @@ export class UpdateWorkOrderService {
       throw new Error("Setor da ordem de serviço não encontrado.");
     }
 
-    let resolvedOperatorId: string | undefined;
-
     if (operatorId) {
-      const isObjectId = /^[0-9a-fA-F]{24}$/.test(operatorId);
-      const operatorExists = await prismaClient.operator.findFirst({
-        where: isObjectId ? { id: operatorId } : { registration: operatorId },
+      const operatorExists = await prismaClient.operator.findUnique({
+        where: { id: operatorId },
       });
 
       if (!operatorExists) {
-        throw new Error("Operador não encontrado com esta matrícula/ID.");
+        throw new Error("Operador não encontrado com este ID.");
       }
-
-      resolvedOperatorId = operatorExists.id;
     }
 
     const updateData = {
@@ -64,7 +62,7 @@ export class UpdateWorkOrderService {
       ...(tipoCausa !== undefined && { tipoCausa }),
       ...(status !== undefined && { status }),
       ...(tecnicoResponsavelId !== undefined && { tecnicoResponsavelId }),
-      ...(resolvedOperatorId !== undefined && { operatorId: resolvedOperatorId }),
+      ...(operatorId !== undefined && { operatorId }),
     };
 
     const updatedSector = await prismaClient.sectorService.update({

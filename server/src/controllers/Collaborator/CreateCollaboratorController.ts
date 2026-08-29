@@ -12,19 +12,20 @@ export interface CreateCollaboratorProps {
 
 export class CreateCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    // Extrai o cargo autenticado
     const userRole = request.userRole;
 
-    // Se o middleware falhar ou não injetar o papel, barra antes do Service
     if (!userRole) {
-      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+      return reply
+      .status(401)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { name, role, sector, registration, password, city } = request.body as CreateCollaboratorProps;
 
-    // Validação dos campos do novo colaborador
     if (!name || !role || !sector || !registration || !password || !city) {
-      throw new Error("Preencha todos os campos obrigatórios.");
+      return reply
+        .status(400)
+        .send({ error: "Preencha todos os campos obrigatórios." });
     }
 
     const collaboratorService = new CreateCollaboratorService();

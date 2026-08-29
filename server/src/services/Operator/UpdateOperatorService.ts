@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma/index.js";
+import { isManagement } from "../../config/roles.js";
 
 interface UpdateOperatorProps {
   id: string;
@@ -10,7 +11,13 @@ interface UpdateOperatorProps {
 }
 
 export class UpdateOperatorService {
-  async execute({ id, name, registration, city, status }: UpdateOperatorProps) {
+  async execute({ id, name, registration, city, status, userRole }: UpdateOperatorProps) {
+    if (!isManagement(userRole)) {
+      throw new Error(
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+      );
+    }
+
     const operatorExists = await prismaClient.operator.findUnique({
       where: { id },
     });

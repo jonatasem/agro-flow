@@ -1,3 +1,4 @@
+import { isManagement } from "../../config/roles.js";
 import prismaClient from "../../prisma/index.js";
 
 interface CreateOperatorProps {
@@ -8,7 +9,13 @@ interface CreateOperatorProps {
 }
 
 export class CreateOperatorService {
-  async execute({ name, registration, city }: CreateOperatorProps) {
+  async execute({ name, registration, city, userRole }: CreateOperatorProps) {
+    if (!isManagement(userRole)) {
+      throw new Error(
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+      );
+    }
+
     const registrationExists = await prismaClient.operator.findUnique({
       where: { registration },
     });

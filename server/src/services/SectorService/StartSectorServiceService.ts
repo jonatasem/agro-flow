@@ -7,14 +7,6 @@ interface StartSectorServiceProps {
 
 export class StartSectorServiceService {
     async execute({ sectorServiceId, tecnicoId }: StartSectorServiceProps ){
-        if(!sectorServiceId){
-            throw new Error("O ID do serviço é obrigatório");
-        }
-
-        if(!tecnicoId){
-            throw new Error("O ID do tecnico é obrigatório");
-        }
-
         const sectorService = await prismaClient.sectorService.findUnique({
             where: {id: sectorServiceId}
         });

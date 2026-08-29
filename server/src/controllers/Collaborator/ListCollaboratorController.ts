@@ -6,7 +6,9 @@ export class ListCollaboratorController {
     const userRole = request.userRole;
 
     if (!userRole) {
-      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+      return reply
+      .status(401)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const listService = new ListCollaboratorService();

@@ -14,20 +14,26 @@ export class UpdateCollaboratorController {
     const userRole = request.userRole;
 
     if (!userRole) {
-      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+      return reply
+      .status(401)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { id } = request.params as { id: string };
 
     if(!id){
-      throw new Error("O id do colaborador é necessario!")
+      return reply
+      .status(400)
+      .send({ error: "O id do colaborador é necessario!" });
     }
 
     const { name, registration, city, status } = request.body as UpdateCollaboratorProps;
 
     // Valida se ao menos um campo foi enviado
     if (name === undefined && registration === undefined && city === undefined && status === undefined) {
-      return reply.status(400).send({ error: "Informe ao menos um campo para atualização." });
+      return reply
+      .status(400)
+      .send({ error: "Informe ao menos um campo para atualização." });
     }
 
     const updateCollaboratorService = new UpdateCollaboratorService();

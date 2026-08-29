@@ -11,7 +11,9 @@ export class LoginCollaboratorController {
     const { registration, password } = request.body as LoginCollaboratorProps;
 
     if (!registration || !password) {
-      throw new Error("Matrícula e senha são obrigatórias");
+      return reply
+      .status(400)
+      .send({ error: "Matrícula e senha são obrigatórias." });
     }
 
     const loginService = new LoginCollaboratorService();

@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma/index.js";
+import { isManagement } from "../../config/roles.js";
 
 interface CreateWorkOrderProps {
   fleet: string;
@@ -8,12 +9,16 @@ interface CreateWorkOrderProps {
   qth: string;
   city: string;
   criadoPor: string;
+  userRole: string;
 }
 
 export class CreateWorkOrderService {
-  async execute({ fleet, operatorId, setor, qruDescricao, qth, city, criadoPor }: CreateWorkOrderProps) {
-    if (!fleet || !operatorId || !setor || !qruDescricao || !qth || !city || !criadoPor) {
-      throw new Error("Todos os campos são obrigatórios");
+  async execute({ fleet, operatorId, setor, qruDescricao, qth, city, criadoPor, userRole }: CreateWorkOrderProps) {
+
+    if (!isManagement(userRole)) {
+      throw new Error(
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+      );
     }
 
     const collaboratorExists = await prismaClient.collaborator.findUnique({
@@ -29,21 +34,18 @@ export class CreateWorkOrderService {
     });
 
     if (!equipment) {
-      throw new Error("Equipamento não encontrado");
+      throw new Error("Equipamento não encontrado.");
     }
 
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(operatorId);
-
-    const operatorExists = await prismaClient.operator.findFirst({
-      where: isObjectId
-        ? { id: operatorId }
-        : { registration: operatorId }
-    });
+    const operatorExists = await prismaClient.operator.findUnique({
+      where: { id: operatorId }
+    })
 
     if (!operatorExists) {
-      throw new Error("Operador não encontrado com esta matrícula/ID.");
+      throw new Error("Operador não encontrado no banco de dados.");
     }
 
+    // Se existir O.S. aberta com a mesma frota do equipamento
     const activeWorkOrder = await prismaClient.workOrder.findFirst({
       where: {
         equipmentId: equipment.id,
@@ -51,7 +53,7 @@ export class CreateWorkOrderService {
       },
     });
 
-    // Se existir O.S. aberta, vincula o operador diretamente ao novo setor
+    // vincula o operador diretamente ao novo setor do mesmo equipamento
     if (activeWorkOrder) {
       await prismaClient.sectorService.create({
         data: {

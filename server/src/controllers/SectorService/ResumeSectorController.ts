@@ -4,7 +4,13 @@ import { ResumeSectorService } from "../../services/SectorService/ResumeSectorSe
 export class ResumeSectorController {
     async handle(request: FastifyRequest, reply: FastifyReply) {
         const { id: sectorServiceId } = request.params as { id: string };
-
+        
+        if (!sectorServiceId) {
+             return reply
+            .status(401)
+            .send({ error: "O ID do serviço é obrigatório." });
+        }
+        
         const resumeService = new ResumeSectorService();
 
         try {

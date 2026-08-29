@@ -12,17 +12,31 @@ interface CreateWorkServiceProps {
 
 export class CreateWorkOrderController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
+    // Extrai o cargo autenticado
+    const userRole = request.userRole;
+
+    // Se o middleware falhar ou não injetar o papel, barra antes do Service
+    if (!userRole) {
+      return reply
+      .status(401)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
+    }
+
     const criadoPor = request.userId;
 
     if (!criadoPor) {
       return reply
-        .status(401)
-        .send({ error: "Sessão inválida ou usuário não autenticado." });
+      .status(400)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
    
     const { fleet, operatorId, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProps;
 
-
+    if (!fleet || !operatorId || !setor || !qruDescricao || !qth || !city || !criadoPor) {
+      return reply
+      .status(400)
+      .send({ error: "Todos os campos são obrigatórios." });
+    }
 
     const workOrderService = new CreateWorkOrderService();
 
@@ -35,6 +49,7 @@ export class CreateWorkOrderController {
         qth,
         city,
         criadoPor,
+        userRole
       });
 
       return reply.status(201).send(result);

@@ -3,7 +3,7 @@ import prismaClient from "../../prisma/index.js";
 interface FinishSectorServiceProps {
     sectorServiceId: string;
     solucaoTecnico: string;
-    tipoCausa?: string;
+    tipoCausa: string;
     tecnicoId: string;
 }
 
@@ -14,14 +14,6 @@ export class FinishSectorServiceService {
         tipoCausa,
         tecnicoId
     }: FinishSectorServiceProps) {
-        if (!sectorServiceId) {
-            throw new Error("O ID do serviço é obrigatório.");
-        }
-
-        if (!solucaoTecnico) {
-            throw new Error("A solução técnica é necessária para finalizar a os.");
-        }
-
         // Busca o serviço e as pausas registradas
         const sectorService = await prismaClient.sectorService.findUnique({
             where: { id: sectorServiceId },
@@ -48,7 +40,7 @@ export class FinishSectorServiceService {
 
         const dataFim = new Date();
 
-        // 1. Cálculo de tempo de pausas (em milissegundos)
+        // Cálculo de tempo de pausas (em milissegundos)
         let totalPauseMs = 0;
         if (sectorService.pauses && sectorService.pauses.length > 0) {
             for (const pause of sectorService.pauses) {
@@ -58,14 +50,14 @@ export class FinishSectorServiceService {
             }
         }
 
-        // 2. Tempo líquido descontando as pausas
+        // Tempo líquido descontando as pausas
         const diferencaEmMilissegundos = (dataFim.getTime() - dataInicio.getTime()) - totalPauseMs;
         const tempoManutencaoEmMinutos = Math.max(
             1,
             Math.round(diferencaEmMilissegundos / 60000)
         );
 
-        // 3. Atualizar o serviço do setor
+        //  Atualizar o serviço do setor
         const updatedService = await prismaClient.sectorService.update({
             where: { id: sectorServiceId },
             data: {
@@ -80,7 +72,7 @@ export class FinishSectorServiceService {
             }
         });
 
-        // 4. Verificar se todos os setores da O.S. foram finalizados
+        // Verificar se todos os setores da O.S. foram finalizados
         const totalServicosDaOrdem = await prismaClient.sectorService.count({
             where: { workOrderId: sectorService.workOrderId },
         });
@@ -92,6 +84,7 @@ export class FinishSectorServiceService {
             },
         });
 
+        // Finaliza a os global
         if (totalServicosDaOrdem === servicosFinalizadosDaOrdem) {
             await prismaClient.workOrder.update({
                 where: { id: sectorService.workOrderId },

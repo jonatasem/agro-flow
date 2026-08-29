@@ -7,16 +7,21 @@ export class ListEquipmentController {
     const userRole = request.userRole;
 
     if (!userRole) {
-      return reply.status(401).send({ error: "Sessão inválida ou usuário não autenticado." });
+      return reply
+      .status(401)
+      .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const listEquipmentService = new ListEquipmentService();
     
     try {
       const result = await listEquipmentService.execute();
-      reply.status(200).send(result);
+      return reply.status(200).send(result);
     } catch(error: any){
-      reply.status(400).send({error});
+      const isPermissionError = error.message?.includes("Acesso negado");
+      const statusCode = isPermissionError ? 403 : 400;
+
+      return reply.status(statusCode).send({ error: error.message });
     }
   }
 }
