@@ -9,6 +9,7 @@ interface WorkOrderCardProps {
   onRefresh: () => void;
 }
 
+// Subcomponente individual para renderização de cada setor da OS
 const SectorItem: React.FC<{
   sector: SectorService;
   order: WorkOrder;
@@ -39,36 +40,61 @@ const SectorItem: React.FC<{
   const [motivoPausa, setMotivoPausa] = useState("");
   const [showPauseInput, setShowPauseInput] = useState(false);
 
-  const isFinished = sector.status === "FINALIZADO";
+  const isFinished = sector.status === "FINALIZADO" || order.status === "FINALIZADA";
+  const isLoading = loadingAction === sector.id;
 
+  // Formatação legível de data e hora
+  const formatDateTime = (dateString?: string | null) => {
+    if (!dateString) return null;
+    return new Date(dateString).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Submissão do formulário de finalização
   const handleSubmitFinish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!solucao.trim()) return;
-    await onFinishRepair(sector.id, solucao, causa);
-    setSolucao("");
-    setCausa("");
+    try {
+      await onFinishRepair(sector.id, solucao, causa);
+      setSolucao("");
+      setCausa("");
+    } catch {
+      // Erro gerenciado no componente pai
+    }
   };
 
+  // Submissão do motivo de pausa
   const handleConfirmPause = async () => {
     const trimmedMotivo = motivoPausa.trim();
     if (!trimmedMotivo) return;
-    await onPauseRepair(sector.id, trimmedMotivo);
-    setMotivoPausa("");
-    setShowPauseInput(false);
+    try {
+      await onPauseRepair(sector.id, trimmedMotivo);
+      setMotivoPausa("");
+      setShowPauseInput(false);
+    } catch {
+      // Erro gerenciado no componente pai
+    }
   };
 
   return (
     <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+      {/* Cabeçalho do Setor */}
       <div className="flex justify-between items-center text-xs">
         <span className="font-extrabold text-emerald-800 flex items-center gap-1">
           Setor: {sector.setor}
         </span>
         
         <div className="flex items-center gap-2">
+          {/* Badge formatando sublinhas de forma global */}
           <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-md ${getStatusBadge(sector.status)}`}>
-            {sector.status.replace("_", " ")}
+            {sector.status.replace(/_/g, " ")}
           </span>
 
+          {/* Botões de Ação Administrativa (Editar e Excluir) */}
           {!isTecnico && !isFinished && (
             <div className="flex gap-1 border-l border-slate-200 pl-2">
               <button
@@ -89,19 +115,28 @@ const SectorItem: React.FC<{
           )}
         </div>
       </div>
-      
-      <div className="flex justify-between items-center text-[10px] text-slate-500 font-medium">
-        <span>Local: {sector.qth} - {sector.city}</span>
+
+      {/* Dados do Chamado: Localização, Operador, Solicitante e Técnico */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10px] text-slate-600 bg-white/60 p-2 rounded-lg border border-slate-200/60">
+        <div>📍 <b>Local:</b> {sector.qth} - {sector.city}</div>
+        {sector.operator?.name && (
+          <div>👨‍🌾 <b>Operador:</b> {sector.operator.name} {sector.operator.registration ? `(#${sector.operator.registration})` : ''}</div>
+        )}
+        {sector.criador?.name && (
+          <div>📝 <b>Aberto por:</b> {sector.criador.name} {sector.criador.role ? `(${sector.criador.role})` : ''}</div>
+        )}
         {sector.tecnicoResponsavel?.name && (
-          <span className="text-slate-700 font-semibold">👨‍🔧 Resp: {sector.tecnicoResponsavel.name}</span>
+          <div>👨‍🔧 <b>Técnico Resp:</b> {sector.tecnicoResponsavel.name}</div>
         )}
       </div>
 
+      {/* Relato da Falha / Descrição do QRU */}
       <div className="text-xs text-slate-700 leading-relaxed bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
         <span className="font-bold text-slate-400 block mb-0.5 text-[10px] uppercase tracking-wider">Relato do QRU / Falha:</span>
         {sector.qruDescricao}
       </div>
 
+      {/* Exibição do Motivo quando Pausado */}
       {sector.status === "PAUSADO" && (
         <div className="text-xs text-amber-900 bg-amber-50 p-3 rounded-xl border border-amber-200">
           <span className="font-bold text-amber-800 block text-[10px] uppercase tracking-wider">Motivo da Pausa:</span>
@@ -109,30 +144,43 @@ const SectorItem: React.FC<{
         </div>
       )}
 
+      {/* Solução Aplicada e Métricas de Tempo após Conclusão/Registro */}
       {sector.solucaoTecnico && (
-        <div className="text-xs text-emerald-900 bg-emerald-50 p-3 rounded-xl border border-emerald-200/80">
+        <div className="text-xs text-emerald-900 bg-emerald-50 p-3 rounded-xl border border-emerald-200/80 space-y-1">
           <span className="font-bold text-emerald-800 block text-[10px] uppercase tracking-wider">Solução Aplicada:</span>
-          {sector.solucaoTecnico}
-          {sector.tipoCausa && (
-            <span className="block text-[10px] text-emerald-700 font-medium mt-1">
-              Causa: {sector.tipoCausa}
-            </span>
-          )}
+          <p>{sector.solucaoTecnico}</p>
+          
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-emerald-800 pt-1 border-t border-emerald-200/60 mt-1">
+            {sector.tipoCausa && (
+              <span><b>Causa:</b> {sector.tipoCausa}</span>
+            )}
+            {sector.tempoManutencao !== null && sector.tempoManutencao !== undefined && (
+              <span>⏱️ <b>Tempo de Reparo:</b> {sector.tempoManutencao} min</span>
+            )}
+            {sector.dataInicioManutencao && (
+              <span><b>Início:</b> {formatDateTime(sector.dataInicioManutencao)}</span>
+            )}
+            {sector.dataFimManutencao && (
+              <span><b>Fim:</b> {formatDateTime(sector.dataFimManutencao)}</span>
+            )}
+          </div>
         </div>
       )}
 
-      {sector.status === "AGUARDANDO_MANUTENCAO" && (
+      {/* Botão para Iniciar Manutenção */}
+      {!isFinished && sector.status === "AGUARDANDO_MANUTENCAO" && (
         <button
           type="button"
           disabled={loadingAction !== null}
           onClick={() => onStartRepair(sector.id)}
           className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm shadow-emerald-600/15 disabled:opacity-50 mt-2"
         >
-          {loadingAction === sector.id ? "Iniciando..." : "▶️ Iniciar Manutenção"}
+          {isLoading ? "Iniciando..." : "▶️ Iniciar Manutenção"}
         </button>
       )}
 
-      {sector.status === "EM_MANUTENCAO" && (
+      {/* Controles de Atendimento (Pausar ou Finalizar) */}
+      {!isFinished && sector.status === "EM_MANUTENCAO" && (
         <div className="space-y-2 pt-2 border-t border-slate-200 mt-2">
           {!showPauseInput ? (
             <button
@@ -197,30 +245,33 @@ const SectorItem: React.FC<{
               disabled={loadingAction !== null || !solucao.trim()}
               className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm shadow-emerald-600/15 disabled:opacity-50"
             >
-              {loadingAction === sector.id ? "Processando..." : "✅ Finalizar Atendimento"}
+              {isLoading ? "Processando..." : "✅ Finalizar Atendimento"}
             </button>
           </form>
         </div>
       )}
 
-      {sector.status === "PAUSADO" && (
+      {/* Botão para Retomar Atendimento Pausado */}
+      {!isFinished && sector.status === "PAUSADO" && (
         <button
           type="button"
           disabled={loadingAction !== null}
           onClick={() => onResumeRepair(sector.id)}
           className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm disabled:opacity-50 mt-2"
         >
-          {loadingAction === sector.id ? "Retomando..." : "▶️ Retomar Atendimento"}
+          {isLoading ? "Retomando..." : "▶️ Retomar Atendimento"}
         </button>
       )}
     </div>
   );
 };
 
+// Componente principal do Card de Ordem de Serviço
 export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSector, onRefresh }) => {
   const { user } = useAuth();
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
+  // Formatação de data completa com hora
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
     return new Date(dateString).toLocaleDateString("pt-BR", {
@@ -235,6 +286,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
   const userRoleLower = user?.role?.toLowerCase().trim() || "";
   const isTecnico = userRoleLower.includes("tecnico") || userRoleLower.includes("técnico");
 
+  // Estilização das badges de status
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "FINALIZADA":
@@ -251,6 +303,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
+  // Handler para remover setor
   const handleDeleteSector = async (sectorId: string) => {
     if (!window.confirm("Deseja realmente remover este setor da Ordem de Serviço?")) return;
     try {
@@ -261,6 +314,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
+  // Handler para iniciar atendimento
   const handleStartRepair = async (sectorServiceId: string) => {
     try {
       setLoadingAction(sectorServiceId);
@@ -273,6 +327,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
+  // Handler para pausar atendimento
   const handlePauseRepair = async (sectorServiceId: string, motivoPausa: string) => {
     if (!motivoPausa?.trim()) {
       alert("O motivo da pausa é obrigatório.");
@@ -284,11 +339,13 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
       onRefresh();
     } catch (err: unknown) {
       alert(getErrorMessage(err, "Erro ao pausar atendimento do setor."));
+      throw err;
     } finally {
       setLoadingAction(null);
     }
   };
 
+  // Handler para retomar atendimento
   const handleResumeRepair = async (sectorServiceId: string) => {
     try {
       setLoadingAction(sectorServiceId);
@@ -301,6 +358,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
+  // Handler para finalizar atendimento
   const handleFinishRepair = async (sectorServiceId: string, solucao: string, causa?: string) => {
     try {
       setLoadingAction(sectorServiceId);
@@ -311,6 +369,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
       onRefresh();
     } catch (err: unknown) {
       alert(getErrorMessage(err, "Erro ao finalizar manutenção do setor."));
+      throw err;
     } finally {
       setLoadingAction(null);
     }
@@ -318,6 +377,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
 
   return (
     <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm hover:border-emerald-300 transition-all">
+      {/* Cabeçalho da Ordem de Serviço */}
       <div className="flex justify-between items-start gap-4 border-b border-slate-100 pb-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -339,10 +399,11 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
         </div>
 
         <span className={`px-2.5 py-1 border text-[10px] font-extrabold rounded-lg uppercase tracking-wider ${getStatusBadge(order.status)}`}>
-          {order.status.replace("_", " ")}
+          {order.status.replace(/_/g, " ")}
         </span>
       </div>
 
+      {/* Lista de Setores da Ordem de Serviço */}
       <div className="space-y-3">
         {order.setores?.map((sector) => (
           <SectorItem
@@ -362,11 +423,10 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
         ))}
       </div>
 
-      {order.operator && (
+      {/* Rodapé com data da última atualização */}
+      {order.updatedAt && (
         <div className="text-[11px] text-slate-400 pt-1 flex justify-end items-center border-t border-slate-100">
-          {order.updatedAt && (
-            <span>Última Alt: {formatDate(order.updatedAt)}</span>
-          )}
+          <span>Última Alt: {formatDate(order.updatedAt)}</span>
         </div>
       )}
     </div>

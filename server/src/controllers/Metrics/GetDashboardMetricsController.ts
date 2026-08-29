@@ -3,28 +3,12 @@ import { GetDashboardMetricsService, type DashboardFiltersProps } from "../../se
 
 export class GetDashboardMetricsController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const {
-      startDate,
-      endDate,
-      equipmentId,
-      operatorId,
-      tecnicoId,
-      setor,
-      tipoCausa,
-    } = request.query as DashboardFiltersProps;
+    const filters = request.query as DashboardFiltersProps;
 
     const getDashboardMetricsService = new GetDashboardMetricsService();
 
     try {
-      const metrics = await getDashboardMetricsService.execute({
-        startDate,
-        endDate,
-        equipmentId,
-        operatorId,
-        tecnicoId,
-        setor,
-        tipoCausa,
-      });
+      const metrics = await getDashboardMetricsService.execute(filters);
 
       return reply.status(200).send(metrics);
     } catch (error: any) {

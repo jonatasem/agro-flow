@@ -12,11 +12,10 @@ import { ActiveWorkOrdersPage } from "../WorkOrders/ActiveWorkOrdersPage";
 import { HistoryPage } from "../History/HistoryPage";
 import { MetricsPage } from "../Metrics/MetricsPage";
 import { Header } from "../../components/Header";
-import { type SectorService } from "../../services/workOrderService";
+import { type WorkOrder, type SectorService } from "../../services/workOrderService";
 
 type TabType = "work-orders" | "history" | "equipments" | "operators" | "collaborators" | "metrics";
 
-// Helper para ignorar acentos, espaços extras e diferenças de caixa
 const normalizeText = (text?: string) =>
   text
     ? text
@@ -25,6 +24,15 @@ const normalizeText = (text?: string) =>
         .replace(/[\u0300-\u036f]/g, "")
         .trim()
     : "";
+
+// Função auxiliar centralizada para verificar se a ordem está totalmente concluída
+const isOrderCompleted = (order: WorkOrder): boolean => {
+  if (order.status === "FINALIZADA") return true;
+  if (order.setores && order.setores.length > 0) {
+    return order.setores.every((sector) => sector.status === "FINALIZADO");
+  }
+  return false;
+};
 
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -36,7 +44,6 @@ export const DashboardPage: React.FC = () => {
   const [selectedSector, setSelectedSector] = useState<SectorService | null>(null);
   const [selectedFleet, setSelectedFleet] = useState<string>("");
 
-  // Permissões derivadas do RBAC centralizado
   const canCreateWorkOrder = hasPermission(PERMISSIONS.WORK_ORDER_CREATE);
   const canManageCollaborators = hasPermission(PERMISSIONS.COLLABORATOR_MANAGE);
   const canViewMetrics = hasPermission(PERMISSIONS.METRICS_VIEW);
@@ -57,16 +64,14 @@ export const DashboardPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Filtragem das Ordens Ativas levando em consideração setor do usuário e permissões
+  // Filtragem das Ordens Ativas (exclui ordens 100% finalizadas)
   const activeWorkOrders = (workOrders || []).filter((order) => {
-    if (order.status === "FINALIZADA") return false;
+    if (isOrderCompleted(order)) return false;
 
-    // Líderes/Admins ou usuários sem setor cadastrado enxergam todas as OS ativas
     if (canAccessAdminTabs || !userSector) {
       return true;
     }
 
-    // Para técnicos, verifica se há algum setor pendente na OS que corresponda ao seu setor
     if (order.setores && order.setores.length > 0) {
       return order.setores.some((sector) => {
         const isNotFinished = sector.status !== "FINALIZADO";
@@ -78,8 +83,10 @@ export const DashboardPage: React.FC = () => {
     return true;
   });
 
-  // Filtragem do Histórico (Ordens Concluídas)
+  // Filtragem do Histórico
   const completedWorkOrders = (workOrders || []).filter((order) => {
+    if (!isOrderCompleted(order)) return false;
+
     const matchesUserScope =
       canAccessAdminTabs ||
       !userSector ||
@@ -88,13 +95,7 @@ export const DashboardPage: React.FC = () => {
           (sector) => normalizeText(sector.setor) === normalizeText(userSector)
         ));
 
-    if (!matchesUserScope) return false;
-
-    if (order.status === "FINALIZADA") return true;
-    if (order.setores && order.setores.length > 0) {
-      return order.setores.every((sector) => sector.status === "FINALIZADO");
-    }
-    return false;
+    return matchesUserScope;
   });
 
   return (
