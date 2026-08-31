@@ -28,7 +28,7 @@ export interface SectorService {
   dataInicioManutencao?: string | null;
   dataFimManutencao?: string | null;
   tempoManutencao?: number | null; // Duração em minutos
-  operator?: SectorOperator | null; // Dados do operador vinculado ao setor
+  operator: SectorOperator; // Dados do operador vinculado ao setor
   criador: Collaborator; // Usuário que abriu o chamado
   tecnicoResponsavel?: Collaborator | null; // Técnico que atendeu o setor
   pauses?: unknown[]; // Histórico de pausas do setor
@@ -43,7 +43,7 @@ export interface WorkOrder {
   createdAt: string;
   updatedAt?: string;
   equipment: Equipment;
-  operator?: Collaborator | null;
+  operator?: Collaborator;
   setores: SectorService[];
 }
 

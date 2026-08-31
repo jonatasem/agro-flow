@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { workOrderService, type WorkOrder, type SectorService } from "../../services/workOrderService";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { formatRepairTime } from "../../utils/formatRepairTime";
 
 interface WorkOrderCardProps {
   order: WorkOrder;
@@ -155,7 +156,7 @@ const SectorItem: React.FC<{
               <span><b>Causa:</b> {sector.tipoCausa}</span>
             )}
             {sector.tempoManutencao !== null && sector.tempoManutencao !== undefined && (
-              <span>⏱️ <b>Tempo de Reparo:</b> {sector.tempoManutencao} min</span>
+              <span>⏱️ <b>Tempo de Reparo:</b> {formatRepairTime(sector.tempoManutencao)}</span>
             )}
             {sector.dataInicioManutencao && (
               <span><b>Início:</b> {formatDateTime(sector.dataInicioManutencao)}</span>

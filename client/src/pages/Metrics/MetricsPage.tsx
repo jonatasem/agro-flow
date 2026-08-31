@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useDashboardMetrics } from "../../hooks/useDashboardMetrics";
+import { formatRepairTime } from "../../utils/formatRepairTime";
 
 export const MetricsPage: React.FC = () => {
   const initialFilters = useMemo(() => {
@@ -24,7 +25,7 @@ export const MetricsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-3">
+      <div className="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm text-center space-y-3">
         <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
         <p className="text-xs text-slate-500 font-medium">Carregando métricas e indicadores...</p>
       </div>
@@ -127,23 +128,23 @@ export const MetricsPage: React.FC = () => {
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Horas Indisponíveis</span>
-          <span className="text-2xl font-black text-amber-600 mt-1 block">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tempo Indisponível Total</span>
+          <span className="text-2xl font-black text-amber-600 mt-1 block truncate">
+            {formatRepairTime(overview?.totalDowntimeMinutes)}
+          </span>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Horas Totais de Parada</span>
+          <span className="text-2xl font-black text-orange-600 mt-1 block">
             {overview?.totalDowntimeHours || 0} h
           </span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Minutos Indisponíveis</span>
-          <span className="text-2xl font-black text-orange-600 mt-1 block">
-            {overview?.totalDowntimeMinutes || 0} min
-          </span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">MTTR (Tempo Médio Reparo)</span>
-          <span className="text-2xl font-black text-emerald-600 mt-1 block">
-            {overview?.averageRepairTimeMinutes || 0} min
+          <span className="text-2xl font-black text-emerald-600 mt-1 block truncate">
+            {formatRepairTime(overview?.averageRepairTimeMinutes)}
           </span>
         </div>
       </div>
@@ -169,7 +170,7 @@ export const MetricsPage: React.FC = () => {
                         #{eq.fleet} - {eq.name}
                       </span>
                       <span className="text-slate-500 font-semibold">
-                        {eq.count} OS ({eq.totalMinutes} min)
+                        {eq.count} OS ({formatRepairTime(eq.totalMinutes)})
                       </span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">

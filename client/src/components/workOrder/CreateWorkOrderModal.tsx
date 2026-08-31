@@ -58,7 +58,14 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!setor.trim() || !qruDescricao.trim() || !qth.trim() || !city.trim() || (!initialSectorData && (!fleet.trim() || !selectedOperatorId.trim()))) {
+    // Extrai o ID aceitando tanto 'id' quanto '_id' do MongoDB
+    const sectorId = initialSectorData?.id || (initialSectorData as unknown as { _id?: string })?._id;
+
+    if (!setor.trim() || !qruDescricao.trim() || !qth.trim() || !city.trim()) {
+      return;
+    }
+
+    if (!initialSectorData && (!fleet.trim() || !selectedOperatorId.trim())) {
       return;
     }
 
@@ -66,8 +73,12 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
       setLoading(true);
       setError("");
 
-      if (initialSectorData?.id) {
-        await workOrderService.updateSector(initialSectorData.id, {
+      if (initialSectorData) {
+        if (!sectorId) {
+          throw new Error("Identificador do setor inválido ou ausente.");
+        }
+
+        await workOrderService.updateSector(sectorId, {
           setor,
           qruDescricao,
           qth,

@@ -23,13 +23,13 @@ export class CreateCollaboratorService {
       city, 
       userRole 
     }: CreateCollaboratorProps) {
-    // Validação do RBAC
+
     if (!isManagement(userRole)) {
       throw new Error(
         "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
       );
     }
-    // Verifica se existe algum usuario utilizando essa matricula
+
     const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: { registration },
     });
@@ -38,7 +38,6 @@ export class CreateCollaboratorService {
       throw new Error("Esta matrícula já está cadastrada no sistema.");
     }
 
-    // Mistura a senha
     const hashedPassword = await hash(password, 8);
 
     const collaborator = await prismaClient.collaborator.create({
@@ -53,9 +52,7 @@ export class CreateCollaboratorService {
       },
     });
 
-    // Não retorna a senha !importante
     const { password: _, ...collaboratorWithoutPassword } = collaborator;
-
     return collaboratorWithoutPassword;
   }
 }

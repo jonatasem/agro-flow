@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useWorkOrders } from "../../hooks/useWorkOrders";
+import { useHistory } from "../../hooks/useHistory";
 import { usePermission } from "../../hooks/usePermission";
 import { PERMISSIONS } from "../../utils/permission";
 
@@ -25,7 +26,6 @@ const normalizeText = (text?: string) =>
         .trim()
     : "";
 
-// Função auxiliar centralizada para verificar se a ordem está totalmente concluída
 const isOrderCompleted = (order: WorkOrder): boolean => {
   if (order.status === "FINALIZADA") return true;
   if (order.setores && order.setores.length > 0) {
@@ -37,6 +37,7 @@ const isOrderCompleted = (order: WorkOrder): boolean => {
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const { workOrders, loading, error, refetch } = useWorkOrders();
+  const { completedWorkOrders: historyWorkOrders } = useHistory();
   const { hasPermission, hasAnyPermission } = usePermission();
 
   const [activeTab, setActiveTab] = useState<TabType>("work-orders");
@@ -64,7 +65,7 @@ export const DashboardPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Filtragem das Ordens Ativas (exclui ordens 100% finalizadas)
+  // Filtragem das Ordens Ativas
   const activeWorkOrders = (workOrders || []).filter((order) => {
     if (isOrderCompleted(order)) return false;
 
@@ -81,21 +82,6 @@ export const DashboardPage: React.FC = () => {
     }
 
     return true;
-  });
-
-  // Filtragem do Histórico
-  const completedWorkOrders = (workOrders || []).filter((order) => {
-    if (!isOrderCompleted(order)) return false;
-
-    const matchesUserScope =
-      canAccessAdminTabs ||
-      !userSector ||
-      (order.setores &&
-        order.setores.some(
-          (sector) => normalizeText(sector.setor) === normalizeText(userSector)
-        ));
-
-    return matchesUserScope;
   });
 
   return (
@@ -121,7 +107,7 @@ export const DashboardPage: React.FC = () => {
             Ordens Concluídas
           </span>
           <span className="text-2xl font-black text-slate-700 mt-1 block">
-            {completedWorkOrders.length}
+            {historyWorkOrders.length}
           </span>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
@@ -163,7 +149,7 @@ export const DashboardPage: React.FC = () => {
               : "bg-white text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200"
           }`}
         >
-          📜 Histórico ({completedWorkOrders.length})
+          📜 Histórico ({historyWorkOrders.length})
         </button>
 
         <button
@@ -227,12 +213,7 @@ export const DashboardPage: React.FC = () => {
         )}
 
         {activeTab === "history" && (
-          <HistoryPage
-            refetch={refetch}
-            loading={loading}
-            completedWorkOrders={completedWorkOrders}
-            onEditSector={handleEditSectorOpen}
-          />
+          <HistoryPage onEditSector={handleEditSectorOpen} />
         )}
 
         {activeTab === "equipments" && <EquipmentsPage />}

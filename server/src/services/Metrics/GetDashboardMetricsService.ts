@@ -1,8 +1,5 @@
 import prismaClient from "../../prisma/index.js";
 
-/**
- * Interface que define os filtros opcionais aceitos pela requisição do dashboard.
- */
 export interface DashboardFiltersProps {
   startDate?: string;
   endDate?: string;
@@ -13,19 +10,9 @@ export interface DashboardFiltersProps {
   tipoCausa?: string;
 }
 
-/**
- * Serviço responsável por recuperar e agregar métricas de ordens de serviço
- * para alimentação dos indicadores e gráficos do dashboard.
- */
 export class GetDashboardMetricsService {
-  /**
-   * Orquestra a busca no banco de dados e a consolidação dos dados.
-   * 
-   * @param filters Filtros de busca recebidos na requisição HTTP.
-   * @returns Objeto com KPIs gerais, distribuições, Top 10 e série temporal.
-   */
   async execute(filters: DashboardFiltersProps) {
-    // 1. Sanitiza e calcula o intervalo de datas válido (padrão: últimos 30 dias)
+    // Sanitiza e calcula o intervalo de datas válido (padrão: últimos 30 dias)
     const { start, end } = this.parseDateRange(filters.startDate, filters.endDate);
 
     // 2. Constrói dinamicamente a cláusula WHERE do Prisma via spread operator
@@ -38,7 +25,7 @@ export class GetDashboardMetricsService {
       ...(filters.equipmentId && { workOrder: { equipmentId: filters.equipmentId } }),
     };
 
-    // 3. Busca registros no banco trazendo os relacionamentos necessários
+    // Busca registros no banco trazendo os relacionamentos necessários
     const sectorServices = await prismaClient.sectorService.findMany({
       where,
       include: {

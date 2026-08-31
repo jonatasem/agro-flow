@@ -1,20 +1,15 @@
 import React from "react";
 import { WorkOrderCard } from "../../components/workOrder/WorkOrderCard";
-import { type WorkOrder, type SectorService } from "../../services/workOrderService";
+import { type SectorService } from "../../services/workOrderService";
+import { useHistory } from "../../hooks/useHistory";
 
 interface HistoryPageProps {
-  refetch: () => void;
-  loading: boolean;
-  completedWorkOrders: WorkOrder[];
   onEditSector: (sector: SectorService, fleet: string) => void;
 }
 
-export const HistoryPage: React.FC<HistoryPageProps> = ({
-  refetch,
-  loading,
-  completedWorkOrders,
-  onEditSector,
-}) => {
+export const HistoryPage: React.FC<HistoryPageProps> = ({ onEditSector }) => {
+  const { completedWorkOrders, loading, error, refetch } = useHistory();
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -28,6 +23,12 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
           🔄 Atualizar
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3.5 rounded-xl font-medium">
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200/80 shadow-sm text-center">

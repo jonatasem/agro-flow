@@ -1,28 +1,29 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 
-interface UserProfileProps {
-  onClose?: () => void;
-}
-
-export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
+export const UserProfile: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const handleClose = () => {
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col items-center justify-center p-4">
-      <div className="relative bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-slate-200/50">
+      <div className="relative bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-slate-200/50 z-10">
         
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
-            title="Fechar"
-          >
-            ✕
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleClose}
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors cursor-pointer z-20"
+          title="Fechar"
+        >
+          ✕
+        </button>
 
         {/* Cabeçalho do Perfil */}
         <div className="text-center space-y-2 border-b border-slate-100 pb-5 pt-2">
@@ -72,6 +73,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
             </div>
 
             <button
+              type="button"
               onClick={() => setIsEditOpen(true)}
               className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
             >
