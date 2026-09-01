@@ -16,7 +16,7 @@
     "build": "npm run prisma:generate && tsc",
     "start": "node dist/server.js",
     "prettier": "npx prettier . --write",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

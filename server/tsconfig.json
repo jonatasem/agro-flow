@@ -9,6 +9,7 @@
     "moduleResolution": "NodeNext",
     "target": "es2023",
     "lib": ["ES2015", "ES2020", "DOM"],
+    "types": ["jest", "node"],
 
     // Other Outputs
     "sourceMap": true,
