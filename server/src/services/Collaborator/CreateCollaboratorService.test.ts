@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach } from "@jest/globals";
 
-// 1. Define os mocks antes de carregar os módulos
+// Define os mocks antes de carregar os módulos
 jest.unstable_mockModule("../../prisma/index.js", () => ({
   default: {
     collaborator: {
@@ -18,7 +18,7 @@ jest.unstable_mockModule("../../config/roles.js", () => ({
   isManagement: jest.fn(),
 }));
 
-// 2. Importa os módulos dinamicamente após o registro dos mocks
+// Importa os módulos dinamicamente após o registro dos mocks
 const { CreateCollaboratorService } = await import("./CreateCollaboratorService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 const { hash } = await import("bcryptjs");
