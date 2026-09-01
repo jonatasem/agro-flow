@@ -29,7 +29,6 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
   // Estados dos campos do formulário
   const [name, setName] = useState(user.name || "");
   const [city, setCity] = useState(user.city || "");
-  const [password, setPassword] = useState("");
 
   // Estados de carregamento e mensagem de erro
   const [loading, setLoading] = useState(false);
@@ -49,10 +48,6 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
         name,
         city,
       };
-
-      if (password.trim()) {
-        payload.password = password;
-      }
 
       const updatedData = await collaboratorService.update(user.id, payload);
 
@@ -134,20 +129,6 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              disabled={loading}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all disabled:opacity-50"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700">
-              Nova Senha (Opcional)
-            </label>
-            <input
-              type="password"
-              placeholder="Deixe em branco para manter a atual"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all disabled:opacity-50"
             />
