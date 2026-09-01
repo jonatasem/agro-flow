@@ -1,12 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import { workOrderService, type WorkOrder } from "../services/workOrderService";
+
+// Serviços e Tipos
+import {
+  workOrderService,
+  type WorkOrder,
+} from "../services/workOrderService";
+
+// Utilitários
 import { getErrorMessage } from "../utils/getErrorMessage";
 
+// Hook customizado para consulta e busca do histórico de Ordens de Serviço finalizadas
 export function useHistory() {
   const [completedWorkOrders, setCompletedWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Busca manual/recarregamento do histórico de OS finalizadas
   const fetchHistory = useCallback(async () => {
     try {
       setLoading(true);
@@ -14,12 +23,18 @@ export function useHistory() {
       const data = await workOrderService.getAll("FINALIZADA");
       setCompletedWorkOrders(data);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, "Erro ao carregar o histórico de Ordens de Serviço."));
+      setError(
+        getErrorMessage(
+          err,
+          "Erro ao carregar o histórico de Ordens de Serviço."
+        )
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Carregamento inicial com controle de desmontagem do componente
   useEffect(() => {
     let isMounted = true;
 
@@ -33,7 +48,12 @@ export function useHistory() {
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(getErrorMessage(err, "Erro ao carregar o histórico de Ordens de Serviço."));
+          setError(
+            getErrorMessage(
+              err,
+              "Erro ao carregar o histórico de Ordens de Serviço."
+            )
+          );
         }
       } finally {
         if (isMounted) {

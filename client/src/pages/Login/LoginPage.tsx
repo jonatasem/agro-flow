@@ -1,6 +1,9 @@
 import React from "react";
+
+// Hooks
 import { useLoginForm } from "../../hooks/useLoginForm";
 
+// Componente da tela de autenticação em duas etapas (Matrícula e Senha)
 export const LoginPage: React.FC = () => {
   const {
     step,
@@ -19,13 +22,14 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 text-slate-800 p-4">
       <div className="bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-emerald-950/5">
-        
-        {/* Marca AgroFlow / Zilor */}
+        {/* Cabeçalho e Marca */}
         <div className="text-center space-y-2">
           <div className="w-14 h-14 bg-emerald-600 text-white font-black text-2xl rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-emerald-600/20">
             Z
           </div>
-          <h1 className="text-2xl font-black text-slate-800 tracking-tight">AgroFlow</h1>
+          <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+            AgroFlow
+          </h1>
           <p className="text-xs font-semibold text-emerald-700 uppercase tracking-widest">
             Gestão Operacional
           </p>
@@ -38,11 +42,14 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        {/* Passo 1: Informar Matrícula */}
+        {/* Etapa 1: Identificação pela Matrícula */}
         {step === 1 ? (
           <form onSubmit={handleCheckRegistration} className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="registration" className="text-xs text-slate-700 font-bold">
+              <label
+                htmlFor="registration"
+                className="text-xs text-slate-700 font-bold"
+              >
                 Matrícula do Colaborador
               </label>
               <input
@@ -63,16 +70,20 @@ export const LoginPage: React.FC = () => {
               disabled={isSubmitting || !registration.trim()}
               className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              {isSubmitting ? "A verificar..." : "Avançar"}
+              {isSubmitting ? "Verificando..." : "Avançar"}
             </button>
           </form>
         ) : (
-          /* Passo 2: Informar Senha */
+          /* Etapa 2: Confirmação e Senha */
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="bg-emerald-50 p-3.5 rounded-xl border border-emerald-100 flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-bold text-emerald-800 uppercase">Colaborador Identificado:</p>
-                <p className="text-sm font-bold text-slate-800">{collaboratorName}</p>
+                <p className="text-[10px] font-bold text-emerald-800 uppercase">
+                  Colaborador Identificado:
+                </p>
+                <p className="text-sm font-bold text-slate-800">
+                  {collaboratorName}
+                </p>
               </div>
               <button
                 type="button"
@@ -84,7 +95,10 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="password" className="text-xs text-slate-700 font-bold">
+              <label
+                htmlFor="password"
+                className="text-xs text-slate-700 font-bold"
+              >
                 Senha de Acesso
               </label>
               <input
@@ -92,7 +106,7 @@ export const LoginPage: React.FC = () => {
                 type="password"
                 required
                 autoFocus
-                placeholder="Digite a sua senha"
+                placeholder="Digite sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
@@ -105,7 +119,7 @@ export const LoginPage: React.FC = () => {
               disabled={isSubmitting || !password.trim()}
               className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              {isSubmitting ? "A entrar..." : "Entrar no Sistema"}
+              {isSubmitting ? "Entrando..." : "Entrar no Sistema"}
             </button>
           </form>
         )}

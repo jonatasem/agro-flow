@@ -1,8 +1,18 @@
 import React, { useEffect, useState } from "react";
+
+// Hooks da aplicação
 import { useEquipments } from "../../hooks/useEquipment";
-import { workOrderService, type SectorService } from "../../services/workOrderService";
+
+// Serviços e Tipos
+import {
+  workOrderService,
+  type SectorService,
+} from "../../services/workOrderService";
+
+// Utilitários
 import { getErrorMessage } from "../../utils/getErrorMessage";
 
+// Interface com as propriedades recebidas pelo modal de criação/edição de Ordem de Serviço
 interface CreateWorkOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,6 +22,7 @@ interface CreateWorkOrderModalProps {
   operatorId?: string;
 }
 
+// Modal responsável pela criação de novas Ordens de Serviço ou edição de setores existentes
 export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   isOpen,
   onClose,
@@ -22,20 +33,24 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
 }) => {
   const { equipments, refetch: fetchEquipments } = useEquipments();
 
+  // Estados dos campos do formulário
   const [fleet, setFleet] = useState(initialFleet);
   const [setor, setSetor] = useState(initialSectorData?.setor || "");
-  const [qruDescricao, setQruDescricao] = useState(initialSectorData?.qruDescricao || "");
+  const [qruDescricao, setQruDescricao] = useState(
+    initialSectorData?.qruDescricao || ""
+  );
   const [qth, setQth] = useState(initialSectorData?.qth || "");
   const [city, setCity] = useState(initialSectorData?.city || "");
   const [selectedOperatorId, setSelectedOperatorId] = useState(operatorId);
 
+  // Controle de sincronização de estado com props
   const [prevSector, setPrevSector] = useState(initialSectorData);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
   if (isOpen !== prevIsOpen || initialSectorData !== prevSector) {
     setPrevIsOpen(isOpen);
     setPrevSector(initialSectorData);
-    
+
     setFleet(initialFleet || "");
     setSetor(initialSectorData?.setor || "");
     setQruDescricao(initialSectorData?.qruDescricao || "");
@@ -44,9 +59,11 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
     setSelectedOperatorId(operatorId);
   }
 
+  // Estados de carregamento e mensagem de erro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Busca lista de equipamentos ao abrir o modal
   useEffect(() => {
     if (isOpen) {
       fetchEquipments();
@@ -55,11 +72,14 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Submissão do formulário de criação ou edição
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Extrai o ID aceitando tanto 'id' quanto '_id' do MongoDB
-    const sectorId = initialSectorData?.id || (initialSectorData as unknown as { _id?: string })?._id;
+    const sectorId =
+      initialSectorData?.id ||
+      (initialSectorData as unknown as { _id?: string })?._id;
 
     if (!setor.trim() || !qruDescricao.trim() || !qth.trim() || !city.trim()) {
       return;
@@ -107,30 +127,39 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   return (
     <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white border border-neutral-200 p-6 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl">
-        
+        {/* Cabeçalho do Modal */}
         <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
           <h2 className="text-lg font-bold text-neutral-950">
-            {initialSectorData ? "Editar Setor da Ordem de Serviço" : "Nova Ordem de Serviço"}
+            {initialSectorData
+              ? "Editar Setor da Ordem de Serviço"
+              : "Nova Ordem de Serviço"}
           </h2>
           <button
-            onClick={onClose}
             type="button"
+            onClick={onClose}
             className="text-neutral-500 hover:text-neutral-800 font-bold cursor-pointer"
           >
             ✕
           </button>
         </div>
 
+        {/* Alerta de Erro */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs text-neutral-700">
+        {/* Formulário */}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 text-xs text-neutral-700"
+        >
           {!initialSectorData && (
             <div className="space-y-1">
-              <label className="font-semibold text-neutral-800">Frota / Equipamento *</label>
+              <label className="font-semibold text-neutral-800">
+                Frota / Equipamento *
+              </label>
               <select
                 required
                 value={fleet}
@@ -149,7 +178,9 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
           )}
 
           <div className="space-y-1">
-            <label className="font-semibold text-neutral-800">Setor Afetado *</label>
+            <label className="font-semibold text-neutral-800">
+              Setor Afetado *
+            </label>
             <input
               type="text"
               required
@@ -163,7 +194,9 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-semibold text-neutral-800">QTH (Local/Fazenda) *</label>
+              <label className="font-semibold text-neutral-800">
+                QTH (Local/Fazenda) *
+              </label>
               <input
                 type="text"
                 required
@@ -176,7 +209,9 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-neutral-800">Cidade *</label>
+              <label className="font-semibold text-neutral-800">
+                Cidade *
+              </label>
               <input
                 type="text"
                 required
@@ -191,7 +226,9 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
 
           {!initialSectorData && (
             <div className="space-y-1">
-              <label className="font-semibold text-neutral-800">ID / Matrícula do Operador *</label>
+              <label className="font-semibold text-neutral-800">
+                ID / Matrícula do Operador *
+              </label>
               <input
                 type="text"
                 required
@@ -205,7 +242,9 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
           )}
 
           <div className="space-y-1">
-            <label className="font-semibold text-neutral-800">Descrição do QRU (Problema) *</label>
+            <label className="font-semibold text-neutral-800">
+              Descrição do QRU (Problema) *
+            </label>
             <textarea
               required
               rows={3}
@@ -217,6 +256,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
             />
           </div>
 
+          {/* Botões de Ação */}
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
@@ -226,13 +266,17 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
             >
               Cancelar
             </button>
-            
+
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
             >
-              {loading ? "Salvando..." : initialSectorData ? "Salvar Alterações" : "Abrir Ordem de Serviço"}
+              {loading
+                ? "Salvando..."
+                : initialSectorData
+                ? "Salvar Alterações"
+                : "Abrir Ordem de Serviço"}
             </button>
           </div>
         </form>

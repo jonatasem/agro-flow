@@ -1,10 +1,12 @@
-import axios, { type InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 
+// Instância base do Axios apontando para a URL da API
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+// Interceptor de requisição: envia o token de acesso no cabeçalho em todas as chamadas
+api.interceptors.request.use((config) => {
   const token = localStorage.getItem("@agroflow:token");
 
   if (token && config.headers) {
@@ -14,15 +16,16 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// Trata erro 401 globalmente limpando o storage e redirecionando
+// Interceptor de resposta: trata sessões expiradas ou não autorizadas (erro 401)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Se o backend responder 401 (Não Autorizado), limpa o armazenamento do navegador
     if (error.response?.status === 401) {
       localStorage.removeItem("@agroflow:token");
       localStorage.removeItem("@agroflow:user");
 
-      // Evita o reload/redirecionamento forçado se o erro 401 for gerado na própria tela de login
+      // Redireciona para a tela de login apenas se o usuário já não estiver nela
       if (!window.location.pathname.startsWith("/login")) {
         window.location.href = "/login";
       }

@@ -1,30 +1,41 @@
 import React, { useState } from "react";
+
+// Hooks da aplicação
+import { useAuth } from "../../hooks/useAuth";
+
+// Serviços, Tipos e Utilitários
 import { collaboratorService } from "../../services/collaboratorService";
 import { getErrorMessage } from "../../utils/getErrorMessage";
-import { useAuth } from "../../hooks/useAuth";
 import type { User } from "../../contexts/AuthContext";
 
+// Interface das propriedades do Modal Principal de Edição de Perfil
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
+// Interface das propriedades do Formulário do Perfil
 interface FormProps {
   user: User;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
+// Subcomponente interno para controle do formulário e estados locais
 const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
   const { updateUser } = useAuth();
 
+  // Estados dos campos do formulário
   const [name, setName] = useState(user.name || "");
   const [city, setCity] = useState(user.city || "");
   const [password, setPassword] = useState("");
+
+  // Estados de carregamento e mensagem de erro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Submissão do formulário de atualização do perfil
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -61,28 +72,38 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white border border-slate-200 p-6 rounded-3xl w-full max-w-md space-y-5 shadow-2xl animate-slide-in">
+        {/* Cabeçalho do Modal */}
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
           <div>
-            <h2 className="text-lg font-black text-slate-800">Editar Meu Perfil</h2>
-            <p className="text-xs text-slate-400">Atualize suas informações pessoais</p>
+            <h2 className="text-lg font-black text-slate-800">
+              Editar Meu Perfil
+            </h2>
+            <p className="text-xs text-slate-400">
+              Atualize suas informações pessoais
+            </p>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            type="button"
+            onClick={onClose}
             className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-sm transition-colors cursor-pointer"
           >
             ✕
           </button>
         </div>
 
+        {/* Alerta de Erro */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3.5 rounded-xl font-medium">
             {error}
           </div>
         )}
 
+        {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700">Nome Completo *</label>
+            <label className="text-xs font-bold text-slate-700">
+              Nome Completo *
+            </label>
             <input
               type="text"
               required
@@ -94,7 +115,9 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400">Matrícula (Somente Leitura)</label>
+            <label className="text-xs font-bold text-slate-400">
+              Matrícula (Somente Leitura)
+            </label>
             <input
               type="text"
               disabled
@@ -104,7 +127,9 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700">Cidade / Base</label>
+            <label className="text-xs font-bold text-slate-700">
+              Cidade / Base
+            </label>
             <input
               type="text"
               value={city}
@@ -115,7 +140,9 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700">Nova Senha (Opcional)</label>
+            <label className="text-xs font-bold text-slate-700">
+              Nova Senha (Opcional)
+            </label>
             <input
               type="password"
               placeholder="Deixe em branco para manter a atual"
@@ -126,6 +153,7 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
             />
           </div>
 
+          {/* Botões de Ação */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
             <button
               type="button"
@@ -150,6 +178,7 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
   );
 };
 
+// Modal principal exportado que faz a validação de exibição e obtém dados do contexto
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,

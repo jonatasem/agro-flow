@@ -1,6 +1,9 @@
+/* Importação principal do Tailwind CSS */
 @import "tailwindcss";
 
+/* Animações e utilitários customizados */
 @layer utilities {
+  /* Animação para surgimento suave vindo da direita */
   @keyframes slideIn {
     from {
       transform: translateX(100%);
@@ -12,22 +15,30 @@
     }
   }
 
+  /* Classe utilitária para aplicar a animação slideIn */
   .animate-slide-in {
     animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }
 
+/* Customização global da barra de rolagem (Scrollbar) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
+/* Fundo do trilho da barra de rolagem */
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
+
+/* Indicador da barra de rolagem */
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
+
+/* Cor do indicador ao passar o mouse */
 ::-webkit-scrollbar-thumb:hover {
   background: #059669;
 }

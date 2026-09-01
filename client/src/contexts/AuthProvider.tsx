@@ -1,9 +1,16 @@
 import React, { useState } from "react";
-import { api } from "../services/api";
+
+// Contextos e Tipos
 import { AuthContext, type User } from "./AuthContext";
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Lazy state: lê do localStorage apenas no carregamento inicial da aplicação
+// Serviços
+import { api } from "../services/api";
+
+// Provedor do contexto de autenticação responsável pelo gerenciamento de sessão e persistência local
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  // Inicialização assíncrona do estado com verificação do localStorage
   const [user, setUser] = useState<User | null>(() => {
     const storedToken = localStorage.getItem("@agroflow:token");
     const storedUser = localStorage.getItem("@agroflow:user");
@@ -22,6 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [loading] = useState(false);
 
+  // Atualiza os dados do usuário autenticado no estado e na chave do localStorage
   const updateUser = (data: Partial<User>) => {
     setUser((prevUser) => {
       if (!prevUser) return null;
@@ -31,17 +39,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  // Desconecta o usuário e limpa o armazenamento local
   const signOut = () => {
     localStorage.removeItem("@agroflow:token");
     localStorage.removeItem("@agroflow:user");
     setUser(null);
   };
 
+  // Consulta se a matrícula informada existe no sistema
   const checkRegistration = async (registration: string) => {
-    const response = await api.post<{ name: string }>("/login/check-registration", { registration });
+    const response = await api.post<{ name: string }>(
+      "/login/check-registration",
+      { registration }
+    );
     return response.data;
   };
 
+  // Realiza o login, salva os dados de sessão e o token de acesso
   const signIn = async (registration: string, password: string) => {
     const response = await api.post("/login", { registration, password });
     const { token, id, name, role, city, sector } = response.data;

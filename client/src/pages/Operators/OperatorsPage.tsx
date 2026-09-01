@@ -1,42 +1,60 @@
 import React, { useState } from "react";
+
+// Hooks da aplicação
 import { useOperators } from "../../hooks/useOperator";
 import { useAuth } from "../../hooks/useAuth";
+
+// Utilitários de permissão e erros
 import { PERMISSIONS, hasPermission } from "../../utils/permission";
+import { getErrorMessage } from "../../utils/getErrorMessage";
+
+// Componentes e Tipos
 import { CreateOperatorModal } from "../../components/operator/CreateOperatorModal";
 import { type Operator } from "../../services/operatorService";
-import { getErrorMessage } from "../../utils/getErrorMessage";
 
 export const OperatorsPage: React.FC = () => {
   const { user } = useAuth();
-  const { operators, loading, error, refetch, deleteOperator } = useOperators();
+  const {
+    operators,
+    loading,
+    error,
+    refetch,
+    deleteOperator,
+  } = useOperators();
 
-  const canManage = hasPermission(user?.role, PERMISSIONS.OPERATOR_MANAGE);
-
+  // Estados locais
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOperator, setEditingOperator] = useState<Operator | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const filtered = Array.isArray(operators)
-    ? operators.filter((op) => {
+  // Permissão de gerenciamento do usuário atual
+  const canManage = hasPermission(user?.role, PERMISSIONS.OPERATOR_MANAGE);
+
+  // Filtro de operadores por nome, matrícula ou cidade
+  const filteredOperators = Array.isArray(operators)
+    ? operators.filter((operator) => {
         const term = search.toLowerCase().trim();
         if (!term) return true;
         return (
-          op.name?.toLowerCase().includes(term) ||
-          op.registration?.toLowerCase().includes(term) ||
-          op.city?.toLowerCase().includes(term)
+          operator.name?.toLowerCase().includes(term) ||
+          operator.registration?.toLowerCase().includes(term) ||
+          operator.city?.toLowerCase().includes(term)
         );
       })
     : [];
 
+  // Abertura do modal de edição
   const handleEdit = (operator: Operator) => {
     if (!canManage) return;
     setEditingOperator(operator);
     setIsModalOpen(true);
   };
 
+  // Exclusão de operador
   const handleDelete = async (id: string, name: string) => {
     if (!canManage) return;
+
     if (!window.confirm(`Tem certeza que deseja excluir o operador ${name}?`)) {
       return;
     }
@@ -51,6 +69,7 @@ export const OperatorsPage: React.FC = () => {
     }
   };
 
+  // Fechamento do modal de operador
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingOperator(null);
@@ -58,7 +77,7 @@ export const OperatorsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
+      {/* Cabeçalho e Ações */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">
@@ -100,34 +119,38 @@ export const OperatorsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Alerta de Erro */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3.5 rounded-xl font-medium">
           {typeof error === "string" ? error : "Erro ao carregar lista de operadores."}
         </div>
       )}
 
+      {/* Indicador de Carregamento */}
       {loading ? (
         <div className="text-center py-12 text-slate-400 text-xs animate-pulse">
-          A carregar operadores...
+          Carregando operadores...
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filteredOperators.length === 0 ? (
+        /* Estado Vazio */
         <div className="bg-white border border-slate-200 p-12 rounded-2xl text-center text-slate-500 text-sm shadow-sm">
           Nenhum operador localizado.
         </div>
       ) : (
+        /* Lista de Operadores */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((item) => (
+          {filteredOperators.map((operator) => (
             <div
-              key={item.id}
+              key={operator.id}
               className="bg-white border border-slate-200 p-5 rounded-2xl flex items-center justify-between hover:border-emerald-300 transition-all shadow-sm"
             >
               <div className="space-y-1.5">
                 <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-md font-extrabold uppercase">
-                  MATRÍCULA #{item.registration}
+                  MATRÍCULA #{operator.registration}
                 </span>
-                <h3 className="font-bold text-slate-800 text-sm">{item.name}</h3>
-                {item.city && (
-                  <p className="text-xs text-slate-400">📍 {item.city}</p>
+                <h3 className="font-bold text-slate-800 text-sm">{operator.name}</h3>
+                {operator.city && (
+                  <p className="text-xs text-slate-400">📍 {operator.city}</p>
                 )}
               </div>
 
@@ -135,19 +158,19 @@ export const OperatorsPage: React.FC = () => {
                 {canManage && (
                   <div className="flex items-center gap-1 mr-1">
                     <button
-                      onClick={() => handleEdit(item)}
+                      onClick={() => handleEdit(operator)}
                       className="p-1.5 text-slate-400 hover:text-emerald-600 text-xs transition-colors cursor-pointer"
                       title="Editar"
                     >
                       ✏️
                     </button>
                     <button
-                      onClick={() => handleDelete(item.id, item.name)}
-                      disabled={deletingId === item.id}
+                      onClick={() => handleDelete(operator.id, operator.name)}
+                      disabled={deletingId === operator.id}
                       className="p-1.5 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
                       title="Excluir"
                     >
-                      {deletingId === item.id ? "⏳" : "🗑️"}
+                      {deletingId === operator.id ? "⏳" : "🗑️"}
                     </button>
                   </div>
                 )}
@@ -160,6 +183,7 @@ export const OperatorsPage: React.FC = () => {
         </div>
       )}
 
+      {/* Modal de Criação / Edição */}
       {canManage && (
         <CreateOperatorModal
           key={editingOperator?.id || (isModalOpen ? "open" : "closed")}

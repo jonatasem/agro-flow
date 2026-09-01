@@ -1,19 +1,24 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+
+// Páginas da aplicação
 import { LoginPage } from "../pages/Login/LoginPage";
 import { DashboardPage } from "../pages/Dashboard/DashboardPage";
 import { UserProfile } from "../pages/Profile/UserProfile";
 import { CollaboratorsPage } from "../pages/Collaborators/CollaboratorsPage";
+
+// Componente de proteção de rotas e permissões
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PERMISSIONS } from "../utils/permission";
 
-export const AppRoutes = () => {
+// Módulo central de roteamento e navegação da aplicação
+export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rota pública */}
+        {/* Rota pública de login */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Rotas protegidas */}
+        {/* Rotas protegidas padrão */}
         <Route
           path="/dashboard"
           element={
@@ -31,7 +36,7 @@ export const AppRoutes = () => {
           }
         />
 
-        {/* Gestão de Acesso - Protegido por permissão explícita */}
+        {/* Rota protegida com validação de permissão específica */}
         <Route
           path="/collaborators"
           element={
@@ -41,9 +46,9 @@ export const AppRoutes = () => {
           }
         />
 
-        {/* Redirecionamento padrão para URLs inexistentes */}
+        {/* Redirecionamento de segurança para rotas inexistentes */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );
-};
+}

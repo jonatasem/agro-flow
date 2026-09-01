@@ -1,6 +1,16 @@
 import React, { useState } from "react";
+
+// Hooks da aplicação
 import { useAuth } from "../../hooks/useAuth";
-import { workOrderService, type WorkOrder, type SectorService } from "../../services/workOrderService";
+
+// Serviços e Tipos
+import {
+  workOrderService,
+  type WorkOrder,
+  type SectorService,
+} from "../../services/workOrderService";
+
+// Utilitários
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { formatRepairTime } from "../../utils/formatRepairTime";
 
@@ -10,7 +20,7 @@ interface WorkOrderCardProps {
   onRefresh: () => void;
 }
 
-// Subcomponente individual para renderização de cada setor da OS
+// Subcomponente para renderização individual de cada setor da OS
 const SectorItem: React.FC<{
   sector: SectorService;
   order: WorkOrder;
@@ -19,7 +29,11 @@ const SectorItem: React.FC<{
   onEditSector: (sector: SectorService, fleet: string) => void;
   onDeleteSector: (sectorId: string) => void;
   onStartRepair: (sectorId: string) => void;
-  onFinishRepair: (sectorId: string, solucao: string, causa?: string) => Promise<void>;
+  onFinishRepair: (
+    sectorId: string,
+    solucao: string,
+    causa?: string
+  ) => Promise<void>;
   onPauseRepair: (sectorId: string, motivo: string) => Promise<void>;
   onResumeRepair: (sectorId: string) => Promise<void>;
   getStatusBadge: (status: string) => string;
@@ -41,10 +55,11 @@ const SectorItem: React.FC<{
   const [motivoPausa, setMotivoPausa] = useState("");
   const [showPauseInput, setShowPauseInput] = useState(false);
 
-  const isFinished = sector.status === "FINALIZADO" || order.status === "FINALIZADA";
+  const isFinished =
+    sector.status === "FINALIZADO" || order.status === "FINALIZADA";
   const isLoading = loadingAction === sector.id;
 
-  // Formatação legível de data e hora
+  // Formatação de data e hora
   const formatDateTime = (dateString?: string | null) => {
     if (!dateString) return null;
     return new Date(dateString).toLocaleDateString("pt-BR", {
@@ -55,7 +70,7 @@ const SectorItem: React.FC<{
     });
   };
 
-  // Submissão do formulário de finalização
+  // Finalização do atendimento do setor
   const handleSubmitFinish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!solucao.trim()) return;
@@ -64,11 +79,11 @@ const SectorItem: React.FC<{
       setSolucao("");
       setCausa("");
     } catch {
-      // Erro gerenciado no componente pai
+      // Tratamento gerenciado no componente pai
     }
   };
 
-  // Submissão do motivo de pausa
+  // Registro e confirmação do motivo da pausa
   const handleConfirmPause = async () => {
     const trimmedMotivo = motivoPausa.trim();
     if (!trimmedMotivo) return;
@@ -77,7 +92,7 @@ const SectorItem: React.FC<{
       setMotivoPausa("");
       setShowPauseInput(false);
     } catch {
-      // Erro gerenciado no componente pai
+      // Tratamento gerenciado no componente pai
     }
   };
 
@@ -88,26 +103,33 @@ const SectorItem: React.FC<{
         <span className="font-extrabold text-emerald-800 flex items-center gap-1">
           Setor: {sector.setor}
         </span>
-        
+
         <div className="flex items-center gap-2">
-          {/* Badge formatando sublinhas de forma global */}
-          <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-md ${getStatusBadge(sector.status)}`}>
+          <span
+            className={`px-2 py-0.5 border text-[9px] font-bold rounded-md ${getStatusBadge(
+              sector.status
+            )}`}
+          >
             {sector.status.replace(/_/g, " ")}
           </span>
 
-          {/* Botões de Ação Administrativa (Editar e Excluir) */}
+          {/* Botões Administrativos */}
           {!isTecnico && !isFinished && (
             <div className="flex gap-1 border-l border-slate-200 pl-2">
               <button
-                onClick={() => onEditSector(sector, order.equipment?.fleet || "")}
-                className="p-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded text-xs transition-colors"
+                type="button"
+                onClick={() =>
+                  onEditSector(sector, order.equipment?.fleet || "")
+                }
+                className="p-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded text-xs transition-colors cursor-pointer"
                 title="Editar Setor"
               >
                 ✏️
               </button>
               <button
+                type="button"
                 onClick={() => onDeleteSector(sector.id)}
-                className="p-1 bg-white hover:bg-red-50 hover:border-red-200 border border-slate-200 text-slate-400 hover:text-red-600 rounded text-xs transition-colors"
+                className="p-1 bg-white hover:bg-red-50 hover:border-red-200 border border-slate-200 text-slate-400 hover:text-red-600 rounded text-xs transition-colors cursor-pointer"
                 title="Remover Setor"
               >
                 🗑️
@@ -117,70 +139,98 @@ const SectorItem: React.FC<{
         </div>
       </div>
 
-      {/* Dados do Chamado: Localização, Operador, Solicitante e Técnico */}
+      {/* Dados do Chamado */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10px] text-slate-600 bg-white/60 p-2 rounded-lg border border-slate-200/60">
-        <div>📍 <b>Local:</b> {sector.qth} - {sector.city}</div>
+        <div>
+          📍 <b>Local:</b> {sector.qth} - {sector.city}
+        </div>
         {sector.operator?.name && (
-          <div>👨‍🌾 <b>Operador:</b> {sector.operator.name} {sector.operator.registration ? `(#${sector.operator.registration})` : ''}</div>
+          <div>
+            👨‍🌾 <b>Operador:</b> {sector.operator.name}{" "}
+            {sector.operator.registration
+              ? `(#${sector.operator.registration})`
+              : ""}
+          </div>
         )}
         {sector.criador?.name && (
-          <div>📝 <b>Aberto por:</b> {sector.criador.name} {sector.criador.role ? `(${sector.criador.role})` : ''}</div>
+          <div>
+            📝 <b>Aberto por:</b> {sector.criador.name}{" "}
+            {sector.criador.role ? `(${sector.criador.role})` : ""}
+          </div>
         )}
         {sector.tecnicoResponsavel?.name && (
-          <div>👨‍🔧 <b>Técnico Resp:</b> {sector.tecnicoResponsavel.name}</div>
+          <div>
+            👨‍🔧 <b>Técnico Resp:</b> {sector.tecnicoResponsavel.name}
+          </div>
         )}
       </div>
 
-      {/* Relato da Falha / Descrição do QRU */}
+      {/* Descrição do QRU */}
       <div className="text-xs text-slate-700 leading-relaxed bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-        <span className="font-bold text-slate-400 block mb-0.5 text-[10px] uppercase tracking-wider">Relato do QRU / Falha:</span>
+        <span className="font-bold text-slate-400 block mb-0.5 text-[10px] uppercase tracking-wider">
+          Relato do QRU / Falha:
+        </span>
         {sector.qruDescricao}
       </div>
 
-      {/* Exibição do Motivo quando Pausado */}
+      {/* Motivo de Pausa */}
       {sector.status === "PAUSADO" && (
         <div className="text-xs text-amber-900 bg-amber-50 p-3 rounded-xl border border-amber-200">
-          <span className="font-bold text-amber-800 block text-[10px] uppercase tracking-wider">Motivo da Pausa:</span>
+          <span className="font-bold text-amber-800 block text-[10px] uppercase tracking-wider">
+            Motivo da Pausa:
+          </span>
           {sector.motivoPausa || "Aguardando peças/instruções"}
         </div>
       )}
 
-      {/* Solução Aplicada e Métricas de Tempo após Conclusão/Registro */}
+      {/* Solução Aplicada e Métricas */}
       {sector.solucaoTecnico && (
         <div className="text-xs text-emerald-900 bg-emerald-50 p-3 rounded-xl border border-emerald-200/80 space-y-1">
-          <span className="font-bold text-emerald-800 block text-[10px] uppercase tracking-wider">Solução Aplicada:</span>
+          <span className="font-bold text-emerald-800 block text-[10px] uppercase tracking-wider">
+            Solução Aplicada:
+          </span>
           <p>{sector.solucaoTecnico}</p>
-          
+
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-emerald-800 pt-1 border-t border-emerald-200/60 mt-1">
             {sector.tipoCausa && (
-              <span><b>Causa:</b> {sector.tipoCausa}</span>
+              <span>
+                <b>Causa:</b> {sector.tipoCausa}
+              </span>
             )}
-            {sector.tempoManutencao !== null && sector.tempoManutencao !== undefined && (
-              <span>⏱️ <b>Tempo de Reparo:</b> {formatRepairTime(sector.tempoManutencao)}</span>
-            )}
+            {sector.tempoManutencao !== null &&
+              sector.tempoManutencao !== undefined && (
+                <span>
+                  ⏱️ <b>Tempo de Reparo:</b>{" "}
+                  {formatRepairTime(sector.tempoManutencao)}
+                </span>
+              )}
             {sector.dataInicioManutencao && (
-              <span><b>Início:</b> {formatDateTime(sector.dataInicioManutencao)}</span>
+              <span>
+                <b>Início:</b> {formatDateTime(sector.dataInicioManutencao)}
+              </span>
             )}
             {sector.dataFimManutencao && (
-              <span><b>Fim:</b> {formatDateTime(sector.dataFimManutencao)}</span>
+              <span>
+                <b>Fim:</b> {formatDateTime(sector.dataFimManutencao)}
+              </span>
             )}
           </div>
         </div>
       )}
 
-      {/* Botão para Iniciar Manutenção */}
+      {/* Iniciar Manutenção */}
       {!isFinished && sector.status === "AGUARDANDO_MANUTENCAO" && (
         <button
           type="button"
           disabled={loadingAction !== null}
           onClick={() => onStartRepair(sector.id)}
-          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm shadow-emerald-600/15 disabled:opacity-50 mt-2"
+          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm shadow-emerald-600/15 disabled:opacity-50 mt-2 cursor-pointer"
         >
           {isLoading ? "Iniciando..." : "▶️ Iniciar Manutenção"}
         </button>
       )}
 
-      {/* Controles de Atendimento (Pausar ou Finalizar) */}
+      {/* Pausar ou Finalizar */}
       {!isFinished && sector.status === "EM_MANUTENCAO" && (
         <div className="space-y-2 pt-2 border-t border-slate-200 mt-2">
           {!showPauseInput ? (
@@ -188,7 +238,7 @@ const SectorItem: React.FC<{
               type="button"
               disabled={loadingAction !== null}
               onClick={() => setShowPauseInput(true)}
-              className="w-full py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs rounded-xl transition-all"
+              className="w-full py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
             >
               ⏸️ Pausar Atendimento
             </button>
@@ -205,7 +255,7 @@ const SectorItem: React.FC<{
                 <button
                   type="button"
                   onClick={() => setShowPauseInput(false)}
-                  className="w-1/2 py-1.5 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg"
+                  className="w-1/2 py-1.5 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -213,7 +263,7 @@ const SectorItem: React.FC<{
                   type="button"
                   disabled={loadingAction !== null || !motivoPausa.trim()}
                   onClick={handleConfirmPause}
-                  className="w-1/2 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-1/2 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Confirmar Pausa
                 </button>
@@ -244,7 +294,7 @@ const SectorItem: React.FC<{
             <button
               type="submit"
               disabled={loadingAction !== null || !solucao.trim()}
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm shadow-emerald-600/15 disabled:opacity-50"
+              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm shadow-emerald-600/15 disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? "Processando..." : "✅ Finalizar Atendimento"}
             </button>
@@ -252,13 +302,13 @@ const SectorItem: React.FC<{
         </div>
       )}
 
-      {/* Botão para Retomar Atendimento Pausado */}
+      {/* Retomar Atendimento Pausado */}
       {!isFinished && sector.status === "PAUSADO" && (
         <button
           type="button"
           disabled={loadingAction !== null}
           onClick={() => onResumeRepair(sector.id)}
-          className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm disabled:opacity-50 mt-2"
+          className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm disabled:opacity-50 mt-2 cursor-pointer"
         >
           {isLoading ? "Retomando..." : "▶️ Retomar Atendimento"}
         </button>
@@ -268,7 +318,11 @@ const SectorItem: React.FC<{
 };
 
 // Componente principal do Card de Ordem de Serviço
-export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSector, onRefresh }) => {
+export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({
+  order,
+  onEditSector,
+  onRefresh,
+}) => {
   const { user } = useAuth();
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
@@ -285,7 +339,8 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
   };
 
   const userRoleLower = user?.role?.toLowerCase().trim() || "";
-  const isTecnico = userRoleLower.includes("tecnico") || userRoleLower.includes("técnico");
+  const isTecnico =
+    userRoleLower.includes("tecnico") || userRoleLower.includes("técnico");
 
   // Estilização das badges de status
   const getStatusBadge = (status: string) => {
@@ -304,9 +359,14 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
-  // Handler para remover setor
+  // Remoção do setor
   const handleDeleteSector = async (sectorId: string) => {
-    if (!window.confirm("Deseja realmente remover este setor da Ordem de Serviço?")) return;
+    if (
+      !window.confirm(
+        "Deseja realmente remover este setor da Ordem de Serviço?"
+      )
+    )
+      return;
     try {
       await workOrderService.deleteSector(sectorId);
       onRefresh();
@@ -315,7 +375,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
-  // Handler para iniciar atendimento
+  // Início do atendimento do setor
   const handleStartRepair = async (sectorServiceId: string) => {
     try {
       setLoadingAction(sectorServiceId);
@@ -328,8 +388,11 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
-  // Handler para pausar atendimento
-  const handlePauseRepair = async (sectorServiceId: string, motivoPausa: string) => {
+  // Pausa do atendimento
+  const handlePauseRepair = async (
+    sectorServiceId: string,
+    motivoPausa: string
+  ) => {
     if (!motivoPausa?.trim()) {
       alert("O motivo da pausa é obrigatório.");
       return;
@@ -346,7 +409,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
-  // Handler para retomar atendimento
+  // Retomada do atendimento
   const handleResumeRepair = async (sectorServiceId: string) => {
     try {
       setLoadingAction(sectorServiceId);
@@ -359,8 +422,12 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
     }
   };
 
-  // Handler para finalizar atendimento
-  const handleFinishRepair = async (sectorServiceId: string, solucao: string, causa?: string) => {
+  // Finalização da manutenção do setor
+  const handleFinishRepair = async (
+    sectorServiceId: string,
+    solucao: string,
+    causa?: string
+  ) => {
     try {
       setLoadingAction(sectorServiceId);
       await workOrderService.finishSector(sectorServiceId, {
@@ -395,11 +462,18 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ order, onEditSecto
             {order.equipment?.name || "Equipamento Desconhecido"}
           </h3>
           <span className="text-xs text-slate-500 block mt-0.5">
-            🚜 Frota: <span className="text-emerald-800 font-mono font-bold">#{order.equipment?.fleet || "N/A"}</span>
+            🚜 Frota:{" "}
+            <span className="text-emerald-800 font-mono font-bold">
+              #{order.equipment?.fleet || "N/A"}
+            </span>
           </span>
         </div>
 
-        <span className={`px-2.5 py-1 border text-[10px] font-extrabold rounded-lg uppercase tracking-wider ${getStatusBadge(order.status)}`}>
+        <span
+          className={`px-2.5 py-1 border text-[10px] font-extrabold rounded-lg uppercase tracking-wider ${getStatusBadge(
+            order.status
+          )}`}
+        >
           {order.status.replace(/_/g, " ")}
         </span>
       </div>

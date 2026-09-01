@@ -1,19 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
+
+// Serviços e Tipos
 import {
   dashboardService,
   type DashboardFilters,
   type DashboardMetrics,
 } from "../services/dashboardService";
+
+// Utilitários
 import { getErrorMessage } from "../utils/getErrorMessage";
 
 export type { DashboardFilters, DashboardMetrics };
 
+// Hook customizado para consulta e filtragem de métricas e indicadores do dashboard
 export function useDashboardMetrics(initialFilters?: DashboardFilters) {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [filters, setFilters] = useState<DashboardFilters>(() => initialFilters || {});
+  const [filters, setFilters] = useState<DashboardFilters>(
+    () => initialFilters || {}
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Busca manual/recarregamento das métricas com os filtros atuais
   const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true);
@@ -27,6 +35,7 @@ export function useDashboardMetrics(initialFilters?: DashboardFilters) {
     }
   }, [filters]);
 
+  // Carregamento reativo sempre que os filtros forem alterados
   useEffect(() => {
     let isMounted = true;
 
@@ -40,7 +49,9 @@ export function useDashboardMetrics(initialFilters?: DashboardFilters) {
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(getErrorMessage(err, "Falha ao carregar dados do dashboard."));
+          setError(
+            getErrorMessage(err, "Falha ao carregar dados do dashboard.")
+          );
         }
       } finally {
         if (isMounted) {
@@ -56,10 +67,14 @@ export function useDashboardMetrics(initialFilters?: DashboardFilters) {
     };
   }, [filters]);
 
-  const updateFilters = useCallback((action: React.SetStateAction<DashboardFilters>) => {
-    setLoading(true);
-    setFilters(action);
-  }, []);
+  // Atualização dos filtros aplicados
+  const updateFilters = useCallback(
+    (action: React.SetStateAction<DashboardFilters>) => {
+      setLoading(true);
+      setFilters(action);
+    },
+    []
+  );
 
   return {
     metrics,

@@ -2,7 +2,7 @@ import { api } from "./api";
 import { type Collaborator } from "./collaboratorService";
 import { type Equipment } from "./equipmentService";
 
-// Interface para representação do operador associado ao setor
+// Informações do operador vinculado ao setor
 export interface SectorOperator {
   id: string;
   name: string;
@@ -10,7 +10,7 @@ export interface SectorOperator {
   city?: string;
 }
 
-// Interface detalhada do setor dentro de uma Ordem de Serviço
+// Estrutura detalhada de um setor dentro da Ordem de Serviço
 export interface SectorService {
   id: string;
   workOrderId: string;
@@ -27,14 +27,14 @@ export interface SectorService {
   dataCriacao: string;
   dataInicioManutencao?: string | null;
   dataFimManutencao?: string | null;
-  tempoManutencao?: number | null; // Duração em minutos
-  operator: SectorOperator; // Dados do operador vinculado ao setor
-  criador: Collaborator; // Usuário que abriu o chamado
-  tecnicoResponsavel?: Collaborator | null; // Técnico que atendeu o setor
-  pauses?: unknown[]; // Histórico de pausas do setor
+  tempoManutencao?: number | null;
+  operator: SectorOperator;
+  criador: Collaborator;
+  tecnicoResponsavel?: Collaborator | null;
+  pauses?: unknown[];
 }
 
-// Interface principal da Ordem de Serviço
+// Estrutura principal da Ordem de Serviço (OS)
 export interface WorkOrder {
   id: string;
   equipmentId: string;
@@ -47,7 +47,7 @@ export interface WorkOrder {
   setores: SectorService[];
 }
 
-// Interface para criação de nova OS
+// Dados necessários para criar uma nova Ordem de Serviço
 export interface CreateWorkOrderInput {
   fleet: string;
   operatorId: string;
@@ -57,7 +57,7 @@ export interface CreateWorkOrderInput {
   city: string;
 }
 
-// Tipo parcial para atualização de um setor
+// Campos permitidos na atualização de um setor
 export type UpdateSectorInput = Partial<{
   setor: string;
   qruDescricao: string;
@@ -68,10 +68,9 @@ export type UpdateSectorInput = Partial<{
   status: string;
 }>;
 
-// Métodos do serviço de Ordem de Serviço
+// Serviço responsável pelo gerenciamento de Ordens de Serviço e setores
 export const workOrderService = {
-  // CORREÇÃO: status agora é opcional (status?: string).
-  // Se não for fornecido, não envia o filtro para a API e retorna TODAS as OS (Abertas e Finalizadas).
+  // Busca todas as Ordens de Serviço (com filtro opcional por status)
   getAll: async (status?: string): Promise<WorkOrder[]> => {
     const response = await api.get<WorkOrder[]>("/work-order", {
       params: status ? { status } : undefined,
@@ -79,25 +78,25 @@ export const workOrderService = {
     return response.data;
   },
 
-  // Busca OS por ID específico
+  // Busca uma Ordem de Serviço pelo ID
   getById: async (id: string): Promise<WorkOrder> => {
     const response = await api.get<WorkOrder>(`/work-order/${id}`);
     return response.data;
   },
 
-  // Cria uma nova OS
+  // Cria uma nova Ordem de Serviço
   create: async (data: CreateWorkOrderInput): Promise<WorkOrder> => {
     const response = await api.post<WorkOrder>("/work-order", data);
     return response.data;
   },
 
-  // Atualiza os dados cadastrais de um setor
+  // Atualiza os dados de um setor
   updateSector: async (sectorId: string, data: UpdateSectorInput): Promise<SectorService> => {
     const response = await api.put<SectorService>(`/sector-service/${sectorId}`, data);
     return response.data;
   },
 
-  // Remove um setor de uma OS
+  // Remove um setor de uma Ordem de Serviço
   deleteSector: async (sectorId: string): Promise<void> => {
     await api.delete(`/sector-service/${sectorId}`);
   },
@@ -108,11 +107,8 @@ export const workOrderService = {
     return response.data;
   },
 
-  // Pausa o atendimento informando o motivo
-  pauseSector: async (
-    sectorServiceId: string,
-    motivoPausa: string
-  ): Promise<SectorService> => {
+  // Pausa o atendimento de um setor informando o motivo
+  pauseSector: async (sectorServiceId: string, motivoPausa: string): Promise<SectorService> => {
     const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/pause`, {
       reason: "OUTRO_MOTIVO",
       description: motivoPausa,
@@ -120,13 +116,13 @@ export const workOrderService = {
     return response.data;
   },
 
-  // Retoma um atendimento pausado
+  // Retoma o atendimento de um setor pausado
   resumeSector: async (sectorServiceId: string): Promise<SectorService> => {
     const response = await api.put<SectorService>(`/sector-service/${sectorServiceId}/resume`);
     return response.data;
   },
 
-  // Finaliza a manutenção de um setor registrando solução e causa
+  // Finaliza a manutenção de um setor com a solução aplicada
   finishSector: async (
     sectorServiceId: string,
     data: { solucaoTecnico: string; tipoCausa?: string }

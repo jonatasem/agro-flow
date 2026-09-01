@@ -1,48 +1,58 @@
 import React from "react";
+
+// Hooks da aplicação
+import { useHistory } from "../../hooks/useHistory";
+
+// Componentes e Tipos
 import { WorkOrderCard } from "../../components/workOrder/WorkOrderCard";
 import { type SectorService } from "../../services/workOrderService";
-import { useHistory } from "../../hooks/useHistory";
 
 interface HistoryPageProps {
   onEditSector: (sector: SectorService, fleet: string) => void;
 }
 
+// Componente para listagem e consulta do histórico de OS finalizadas
 export const HistoryPage: React.FC<HistoryPageProps> = ({ onEditSector }) => {
   const { completedWorkOrders, loading, error, refetch } = useHistory();
 
   return (
     <div className="space-y-4">
+      {/* Cabeçalho da Seção */}
       <div className="flex justify-between items-center">
         <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
           Histórico de Ordens Finalizadas
         </h2>
-        <button 
-          onClick={refetch} 
-          className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors"
+        <button
+          onClick={refetch}
+          className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors cursor-pointer"
         >
           🔄 Atualizar
         </button>
       </div>
 
+      {/* Alerta de Erro */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3.5 rounded-xl font-medium">
           {error}
         </div>
       )}
 
+      {/* Indicador de Carregamento */}
       {loading ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200/80 shadow-sm text-center">
-          <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
           <p className="text-xs font-bold text-slate-500">Carregando histórico...</p>
         </div>
       ) : completedWorkOrders.length === 0 ? (
+        /* Estado Vazio */
         <div className="bg-white border border-slate-200/80 p-12 rounded-2xl text-center text-slate-500 text-sm shadow-sm">
           Nenhuma Ordem de Serviço finalizada até o momento.
         </div>
       ) : (
+        /* Lista do Histórico */
         <div className="grid gap-4">
           {completedWorkOrders.map((order) => (
-            <WorkOrderCard 
+            <WorkOrderCard
               key={order.id}
               order={order}
               onEditSector={onEditSector}

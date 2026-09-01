@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach } from "@jest/globals";
 
-// 1. Mocks dos módulos externos e rotas
+// Mocks dos módulos externos e rotas
 const mockApp = {
   register: jest.fn().mockImplementation(() => Promise.resolve()),
   listen: jest.fn().mockImplementation(() => Promise.resolve()),

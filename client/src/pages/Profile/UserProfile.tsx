@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
+
+// Hooks da aplicação
 import { useAuth } from "../../hooks/useAuth";
+
+// Componentes
 import { EditProfileModal } from "../../components/profile/EditProfileModal";
 
+// Componente para visualização e edição do perfil do usuário logado
 export const UserProfile: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  // Retorna à página inicial
   const handleClose = () => {
     navigate("/");
   };
@@ -15,7 +21,7 @@ export const UserProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col items-center justify-center p-4">
       <div className="relative bg-white border border-slate-200 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-xl shadow-slate-200/50 z-10">
-        
+        {/* Botão para fechar/voltar */}
         <button
           type="button"
           onClick={handleClose}
@@ -38,7 +44,7 @@ export const UserProfile: React.FC = () => {
           </p>
         </div>
 
-        {/* Detalhes do Usuário */}
+        {/* Detalhes do Usuário Autenticado */}
         {user ? (
           <div className="space-y-4">
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
@@ -81,12 +87,14 @@ export const UserProfile: React.FC = () => {
             </button>
           </div>
         ) : (
+          /* Estado Vazio */
           <div className="text-center text-xs text-slate-400 py-4">
             Nenhum dado de usuário autenticado.
           </div>
         )}
       </div>
 
+      {/* Modal de Edição de Perfil */}
       <EditProfileModal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}

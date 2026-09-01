@@ -1,10 +1,16 @@
 import React, { useState } from "react";
+
+// Hooks da aplicação
 import { useCollaborator } from "../../hooks/useCollaborator";
 import { useAuth } from "../../hooks/useAuth";
+
+// Utilitários de permissão e erros
 import { PERMISSIONS, hasPermission } from "../../utils/permission";
+import { getErrorMessage } from "../../utils/getErrorMessage";
+
+// Componentes e Tipos
 import { CreateCollaboratorModal } from "../../components/collaborator/CreateCollaboratorModal";
 import { type Collaborator } from "../../services/collaboratorService";
-import { getErrorMessage } from "../../utils/getErrorMessage";
 
 export const CollaboratorsPage: React.FC = () => {
   const { user } = useAuth();
@@ -16,14 +22,16 @@ export const CollaboratorsPage: React.FC = () => {
     deleteCollaborator,
   } = useCollaborator();
 
-  // Proteção em nível de componente: verifica se a role do usuário permite gerenciamento
-  const canManage = hasPermission(user?.role, PERMISSIONS.COLLABORATOR_MANAGE);
-
+  // Estados locais
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Permissão de gerenciamento do usuário atual
+  const canManage = hasPermission(user?.role, PERMISSIONS.COLLABORATOR_MANAGE);
+
+  // Filtro simples de busca por nome, cargo ou matrícula
   const filteredCollaborators = Array.isArray(collaborators)
     ? collaborators.filter((collab) => {
         const term = search.toLowerCase().trim();
@@ -37,6 +45,7 @@ export const CollaboratorsPage: React.FC = () => {
       })
     : [];
 
+  // Exclusão de colaborador
   const handleDelete = async (id: string, name: string) => {
     if (!canManage) return;
 
@@ -54,12 +63,14 @@ export const CollaboratorsPage: React.FC = () => {
     }
   };
 
+  // Abertura do modal de edição
   const handleEdit = (collaborator: Collaborator) => {
     if (!canManage) return;
     setEditingCollaborator(collaborator);
     setIsModalOpen(true);
   };
 
+  // Fechamento do modal de colaborador
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingCollaborator(null);
@@ -67,11 +78,13 @@ export const CollaboratorsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
+      {/* Cabeçalho e Ações */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <h1 className="text-xl font-black text-slate-800">Colaboradores</h1>
-          <p className="text-xs font-semibold text-slate-400">Técnicos, líderes e equipe cadastrada</p>
+          <p className="text-xs font-semibold text-slate-400">
+            Técnicos, líderes e equipe cadastrada
+          </p>
         </div>
 
         <div className="flex gap-2 w-full md:w-auto">
@@ -82,6 +95,7 @@ export const CollaboratorsPage: React.FC = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="bg-white border border-slate-200/80 text-xs text-slate-800 font-medium placeholder-slate-400 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm w-full md:w-64"
           />
+
           <button
             onClick={refetch}
             className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200/80 text-xs text-slate-600 rounded-xl transition-colors shadow-sm cursor-pointer"
@@ -90,7 +104,6 @@ export const CollaboratorsPage: React.FC = () => {
             🔄
           </button>
 
-          {/* Oculta o botão de criar colaborador caso o usuário não possua permissão */}
           {canManage && (
             <button
               onClick={() => {
@@ -105,57 +118,65 @@ export const CollaboratorsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Alerta de Erro */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3 font-bold rounded-xl">
           {typeof error === "string" ? error : "Erro ao carregar colaboradores."}
         </div>
       )}
 
+      {/* Indicador de Carregamento */}
       {loading ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200/80 shadow-sm text-center">
           <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
           <p className="text-xs font-bold text-slate-500">Carregando colaboradores...</p>
         </div>
       ) : filteredCollaborators.length === 0 ? (
+        /* Estado Vazio */
         <div className="bg-white border border-slate-200/80 p-12 rounded-2xl text-center text-slate-500 text-sm shadow-sm">
           Nenhum colaborador encontrado.
         </div>
       ) : (
+        /* Lista de Colaboradores */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredCollaborators.map((c) => (
+          {filteredCollaborators.map((collaborator) => (
             <div
-              key={c.id}
+              key={collaborator.id}
               className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 hover:border-slate-300 transition-colors shadow-sm"
             >
               <div className="flex justify-between items-start gap-2">
                 <div>
-                  <h3 className="font-extrabold text-slate-800 text-sm">{c.name}</h3>
-                  <span className="text-xs text-emerald-700 font-bold block">{c.role}</span>
+                  <h3 className="font-extrabold text-slate-800 text-sm">
+                    {collaborator.name}
+                  </h3>
+                  <span className="text-xs text-emerald-700 font-bold block">
+                    {collaborator.role}
+                  </span>
                 </div>
+
                 <div className="flex items-center gap-2">
-                  {c.registration && (
+                  {collaborator.registration && (
                     <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200 font-bold">
-                      Matrícula: {c.registration}
+                      Matrícula: {collaborator.registration}
                     </span>
                   )}
 
-                  {/* Oculta os botões de edição e exclusão de cada card para perfis não autorizados */}
                   {canManage && (
                     <>
                       <button
-                        onClick={() => handleEdit(c)}
+                        onClick={() => handleEdit(collaborator)}
                         className="p-1 text-slate-400 hover:text-emerald-600 text-xs transition-colors cursor-pointer"
                         title="Editar"
                       >
                         ✏️
                       </button>
                       <button
-                        onClick={() => handleDelete(c.id, c.name)}
-                        disabled={deletingId === c.id}
+                        onClick={() => handleDelete(collaborator.id, collaborator.name)}
+                        disabled={deletingId === collaborator.id}
                         className="p-1 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
                         title="Excluir"
                       >
-                        {deletingId === c.id ? "⏳" : "🗑️"}
+                        {deletingId === collaborator.id ? "⏳" : "🗑️"}
                       </button>
                     </>
                   )}
@@ -163,15 +184,15 @@ export const CollaboratorsPage: React.FC = () => {
               </div>
 
               <div className="flex justify-between items-center text-[11px] font-semibold text-slate-500 pt-2 border-t border-slate-100">
-                <span>📍 {c.city || "Localidade não informada"}</span>
+                <span>📍 {collaborator.city || "Localidade não informada"}</span>
                 <span
                   className={`px-2 py-0.5 rounded-md text-[9px] font-black ${
-                    c.status !== false
+                    collaborator.status !== false
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : "bg-red-50 text-red-700 border border-red-200"
                   }`}
                 >
-                  {c.status !== false ? "ATIVO" : "INATIVO"}
+                  {collaborator.status !== false ? "ATIVO" : "INATIVO"}
                 </span>
               </div>
             </div>
@@ -179,7 +200,7 @@ export const CollaboratorsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Trava adicional de renderização do modal */}
+      {/* Modal de Criação / Edição */}
       {canManage && (
         <CreateCollaboratorModal
           key={editingCollaborator?.id || (isModalOpen ? "open" : "closed")}

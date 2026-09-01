@@ -1,57 +1,84 @@
 import React, { useState } from "react";
+
+// Hooks
 import { useAuth } from "../../hooks/useAuth";
 import { useWorkOrders } from "../../hooks/useWorkOrders";
 import { useHistory } from "../../hooks/useHistory";
 import { usePermission } from "../../hooks/usePermission";
+
+// Utilitários e Permissões
 import { PERMISSIONS } from "../../utils/permission";
 
+// Componentes Globais e Modais
+import { Header } from "../../components/Header";
 import { CreateWorkOrderModal } from "../../components/workOrder/CreateWorkOrderModal";
-import { EquipmentsPage } from "../Equipments/EquipmentsPage";
-import { CollaboratorsPage } from "../Collaborators/CollaboratorsPage";
-import { OperatorsPage } from "../Operators/OperatorsPage";
+
+// Subpáginas da Aba de Navegação
 import { ActiveWorkOrdersPage } from "../WorkOrders/ActiveWorkOrdersPage";
 import { HistoryPage } from "../History/HistoryPage";
+import { EquipmentsPage } from "../Equipments/EquipmentsPage";
+import { OperatorsPage } from "../Operators/OperatorsPage";
+import { CollaboratorsPage } from "../Collaborators/CollaboratorsPage";
 import { MetricsPage } from "../Metrics/MetricsPage";
-import { Header } from "../../components/Header";
+
+// Tipos
 import { type WorkOrder, type SectorService } from "../../services/workOrderService";
 
-type TabType = "work-orders" | "history" | "equipments" | "operators" | "collaborators" | "metrics";
+// Tipagem das abas de navegação
+type TabType =
+  | "work-orders"
+  | "history"
+  | "equipments"
+  | "operators"
+  | "collaborators"
+  | "metrics";
 
-const normalizeText = (text?: string) =>
-  text
-    ? text
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-    : "";
+// Normaliza texto para comparações sem acentos e minúsculo
+function normalizeText(text?: string): string {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
 
-const isOrderCompleted = (order: WorkOrder): boolean => {
+// Verifica se a ordem de serviço foi totalmente concluída
+function isOrderCompleted(order: WorkOrder): boolean {
   if (order.status === "FINALIZADA") return true;
+
   if (order.setores && order.setores.length > 0) {
     return order.setores.every((sector) => sector.status === "FINALIZADO");
   }
-  return false;
-};
 
+  return false;
+}
+
+// Página principal do Dashboard com navegação por abas
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const { workOrders, loading, error, refetch } = useWorkOrders();
   const { completedWorkOrders: historyWorkOrders } = useHistory();
   const { hasPermission, hasAnyPermission } = usePermission();
 
+  // Estados de navegação e controle de modais
   const [activeTab, setActiveTab] = useState<TabType>("work-orders");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSector, setSelectedSector] = useState<SectorService | null>(null);
   const [selectedFleet, setSelectedFleet] = useState<string>("");
 
+  // Permissões do usuário logado
   const canCreateWorkOrder = hasPermission(PERMISSIONS.WORK_ORDER_CREATE);
   const canManageCollaborators = hasPermission(PERMISSIONS.COLLABORATOR_MANAGE);
   const canViewMetrics = hasPermission(PERMISSIONS.METRICS_VIEW);
-  const canAccessAdminTabs = hasAnyPermission([PERMISSIONS.COLLABORATOR_MANAGE, PERMISSIONS.METRICS_VIEW]);
+  const canAccessAdminTabs = hasAnyPermission([
+    PERMISSIONS.COLLABORATOR_MANAGE,
+    PERMISSIONS.METRICS_VIEW,
+  ]);
 
   const userSector = user?.sector;
 
+  // Abertura do modal para criação de OS
   const handleCreateOpen = () => {
     if (!canCreateWorkOrder) return;
     setSelectedSector(null);
@@ -59,13 +86,14 @@ export const DashboardPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  // Abertura do modal para edição de setor
   const handleEditSectorOpen = (sector: SectorService, fleet: string) => {
     setSelectedSector(sector);
     setSelectedFleet(fleet);
     setIsModalOpen(true);
   };
 
-  // Filtragem das Ordens Ativas
+  // Filtragem de ordens de serviço ativas conforme permissão e setor
   const activeWorkOrders = (workOrders || []).filter((order) => {
     if (isOrderCompleted(order)) return false;
 
@@ -76,7 +104,8 @@ export const DashboardPage: React.FC = () => {
     if (order.setores && order.setores.length > 0) {
       return order.setores.some((sector) => {
         const isNotFinished = sector.status !== "FINALIZADO";
-        const matchesUserSector = normalizeText(sector.setor) === normalizeText(userSector);
+        const matchesUserSector =
+          normalizeText(sector.setor) === normalizeText(userSector);
         return isNotFinished && matchesUserSector;
       });
     }
@@ -86,6 +115,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 p-4 md:p-6 space-y-6">
+      {/* Cabeçalho principal */}
       <Header
         user={user}
         handleCreateOpen={handleCreateOpen}
@@ -93,6 +123,7 @@ export const DashboardPage: React.FC = () => {
         canCreate={canCreateWorkOrder}
       />
 
+      {/* Cards de resumo estatístico */}
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -102,6 +133,7 @@ export const DashboardPage: React.FC = () => {
             {activeWorkOrders.length}
           </span>
         </div>
+
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Ordens Concluídas
@@ -110,6 +142,7 @@ export const DashboardPage: React.FC = () => {
             {historyWorkOrders.length}
           </span>
         </div>
+
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Polo / Unidade
@@ -118,6 +151,7 @@ export const DashboardPage: React.FC = () => {
             📍 {user?.city || "Zilor Principal"}
           </span>
         </div>
+
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Status do Servidor
@@ -129,6 +163,7 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Barra de abas para navegação */}
       <nav className="max-w-6xl mx-auto flex gap-2 border-b border-slate-200 pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTab("work-orders")}
@@ -201,6 +236,7 @@ export const DashboardPage: React.FC = () => {
         )}
       </nav>
 
+      {/* Conteúdo dinâmico da aba selecionada */}
       <main className="max-w-6xl mx-auto space-y-4">
         {activeTab === "work-orders" && (
           <ActiveWorkOrdersPage
@@ -218,10 +254,13 @@ export const DashboardPage: React.FC = () => {
 
         {activeTab === "equipments" && <EquipmentsPage />}
         {activeTab === "operators" && <OperatorsPage />}
-        {activeTab === "collaborators" && canManageCollaborators && <CollaboratorsPage />}
+        {activeTab === "collaborators" && canManageCollaborators && (
+          <CollaboratorsPage />
+        )}
         {activeTab === "metrics" && canViewMetrics && <MetricsPage />}
       </main>
 
+      {/* Modal global de criação e edição de Ordens de Serviço */}
       <CreateWorkOrderModal
         isOpen={isModalOpen}
         onClose={() => {

@@ -1,13 +1,17 @@
 import axios from "axios";
 
-// função auxiliar que extrai mensagens de erro de forma segura, aceitando o erro como 'unknown'.
-export const getErrorMessage = (err: unknown, defaultMessage: string): string => {
-  // Verifica se o erro foi gerado especificamente pelo Axios (como uma falha na requisição HTTP).
-  if (axios.isAxiosError(err)) {
-    // Tenta capturar a mensagem customizada enviada pelo servidor ou usa a mensagem padrão caso não exista.
-    return err.response?.data?.error || defaultMessage;
+// Extrai a mensagem de erro de forma amigável para exibir na tela
+export function getErrorMessage(error: unknown, defaultMessage: string): string {
+  // Trata erros vindos de requisições HTTP (Axios)
+  if (axios.isAxiosError(error)) {
+    return error.response?.data?.error || defaultMessage;
   }
-  
-  // Se não for um erro do Axios, verifica se é uma instância padrão da classe Error do JavaScript/TypeScript.
-  return err instanceof Error ? err.message : defaultMessage;
-};
+
+  // Trata erros padrões do JavaScript (ex: throw new Error)
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  // Retorno de segurança caso o erro seja de um tipo inesperado
+  return defaultMessage;
+}

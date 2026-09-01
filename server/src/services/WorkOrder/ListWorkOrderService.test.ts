@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach } from "@jest/globals";
 
-// 1. Configuração dos mocks ESM
+// Configuração dos mocks ESM
 jest.unstable_mockModule("../../prisma/index.js", () => ({
   default: {
     workOrder: {
@@ -9,7 +9,7 @@ jest.unstable_mockModule("../../prisma/index.js", () => ({
   },
 }));
 
-// 2. Importações dinâmicas após o registro dos mocks
+// Importações dinâmicas após o registro dos mocks
 const { ListWorkOrderService } = await import("./ListWorkOrderService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 

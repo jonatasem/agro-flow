@@ -1,3 +1,4 @@
+// 1. Dicionário de Permissões do Sistema
 export const PERMISSIONS = {
   COLLABORATOR_MANAGE: 'collaborator:manage',
   OPERATOR_MANAGE: 'operator:manage',
@@ -8,24 +9,22 @@ export const PERMISSIONS = {
   METRICS_VIEW: 'metrics:view',
 } as const;
 
+// Tipo TypeScript derivado automaticamente dos valores de PERMISSIONS
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
-export function normalizeRole(role?: string): string {
-  if (!role) return '';
-  return role
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim();
-}
+// Lista com todas as permissões do sistema (usada para funções de gestão)
+const ALL_PERMISSIONS = Object.values(PERMISSIONS);
 
+// 2. Mapeamento de Permissões por Cargo (Role)
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
-  admin: Object.values(PERMISSIONS),
-  gerente: Object.values(PERMISSIONS),
-  supervisor: Object.values(PERMISSIONS),
-  lider: Object.values(PERMISSIONS),
-  coa: Object.values(PERMISSIONS),
+  // Cargos com acesso total ao sistema
+  admin: ALL_PERMISSIONS,
+  gerente: ALL_PERMISSIONS,
+  supervisor: ALL_PERMISSIONS,
+  lider: ALL_PERMISSIONS,
+  coa: ALL_PERMISSIONS,
 
+  // Cargos operacionais com acesso restrito
   tecnico: [
     PERMISSIONS.EQUIPMENT_VIEW,
     PERMISSIONS.WORK_ORDER_EXECUTE,
@@ -37,10 +36,29 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   ],
 };
 
-// HELPER ADICIONADO: Valida se uma determinada role possui a permissão requerida
+// 3. Funções Auxiliares
+
+/**
+ * Normaliza a string do cargo (remove acentos, espaços extras e converte para minúsculas)
+ */
+export function normalizeRole(role?: string): string {
+  if (!role) return '';
+
+  return role
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+/**
+ * Valida se um cargo possui uma permissão específica
+ */
 export function hasPermission(role?: string, permission?: Permission): boolean {
   if (!role || !permission) return false;
-  const normalized = normalizeRole(role);
-  const permissions = ROLE_PERMISSIONS[normalized] || [];
-  return permissions.includes(permission);
+
+  const normalizedRole = normalizeRole(role);
+  const userPermissions = ROLE_PERMISSIONS[normalizedRole] || [];
+
+  return userPermissions.includes(permission);
 }
