@@ -3,7 +3,7 @@ import { CreateWorkOrderService } from "../../services/WorkOrder/CreateWorkOrder
 
 interface CreateWorkServiceProps {
   fleet: string;
-  operatorId: string;
+  operatorId: string; // Matrícula informada no formulário
   setor: string;
   qruDescricao: string;
   qth: string;
@@ -18,24 +18,33 @@ export class CreateWorkOrderController {
     // Se o middleware falhar ou não injetar o papel, barra antes do Service
     if (!userRole) {
       return reply
-      .status(401)
-      .send({ error: "Sessão inválida ou usuário não autenticado." });
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const criadoPor = request.userId;
 
     if (!criadoPor) {
       return reply
-      .status(400)
-      .send({ error: "Sessão inválida ou usuário não autenticado." });
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
-   
-    const { fleet, operatorId, setor, qruDescricao, qth, city } = request.body as CreateWorkServiceProps;
 
-    if (!fleet || !operatorId || !setor || !qruDescricao || !qth || !city || !criadoPor) {
+    const { fleet, operatorId, setor, qruDescricao, qth, city } =
+      request.body as CreateWorkServiceProps;
+
+    if (
+      !fleet ||
+      !operatorId ||
+      !setor ||
+      !qruDescricao ||
+      !qth ||
+      !city ||
+      !criadoPor
+    ) {
       return reply
-      .status(400)
-      .send({ error: "Todos os campos são obrigatórios." });
+        .status(400)
+        .send({ error: "Todos os campos são obrigatórios." });
     }
 
     const workOrderService = new CreateWorkOrderService();
@@ -43,13 +52,13 @@ export class CreateWorkOrderController {
     try {
       const result = await workOrderService.execute({
         fleet,
-        operatorId,
+        operatorRegistration: operatorId,
         setor,
         qruDescricao,
         qth,
         city,
         criadoPor,
-        userRole
+        userRole,
       });
 
       return reply.status(201).send(result);

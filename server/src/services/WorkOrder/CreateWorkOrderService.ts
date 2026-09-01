@@ -3,7 +3,7 @@ import { isManagement } from "../../config/roles.js";
 
 interface CreateWorkOrderProps {
   fleet: string;
-  operatorId: string;
+  operatorRegistration: string;
   setor: string;
   qruDescricao: string;
   qth: string;
@@ -13,16 +13,24 @@ interface CreateWorkOrderProps {
 }
 
 export class CreateWorkOrderService {
-  async execute({ fleet, operatorId, setor, qruDescricao, qth, city, criadoPor, userRole }: CreateWorkOrderProps) {
-
+  async execute({
+    fleet,
+    operatorRegistration,
+    setor,
+    qruDescricao,
+    qth,
+    city,
+    criadoPor,
+    userRole,
+  }: CreateWorkOrderProps) {
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para abrir ordens de serviço.",
       );
     }
 
     const collaboratorExists = await prismaClient.collaborator.findUnique({
-      where: { id: criadoPor }
+      where: { id: criadoPor },
     });
 
     if (!collaboratorExists) {
@@ -37,12 +45,13 @@ export class CreateWorkOrderService {
       throw new Error("Equipamento não encontrado.");
     }
 
+    // Busca o operador pela matrícula
     const operatorExists = await prismaClient.operator.findUnique({
-      where: { id: operatorId }
-    })
+      where: { registration: operatorRegistration },
+    });
 
     if (!operatorExists) {
-      throw new Error("Operador não encontrado no banco de dados.");
+      throw new Error("Operador não encontrado com a matrícula informada.");
     }
 
     // Se existir O.S. aberta com a mesma frota do equipamento
@@ -53,7 +62,7 @@ export class CreateWorkOrderService {
       },
     });
 
-    // vincula o operador diretamente ao novo setor do mesmo equipamento
+    // Vincula o setor/operador diretamente à O.S. já aberta
     if (activeWorkOrder) {
       await prismaClient.sectorService.create({
         data: {
@@ -87,7 +96,7 @@ export class CreateWorkOrderService {
       });
     }
 
-    // Se não existir O.S. aberta, cria a O.S. sem operatorId e insere no setor
+    // Se não existir O.S. aberta, cria uma nova O.S. e insere o primeiro setor
     const newWorkOrder = await prismaClient.workOrder.create({
       data: {
         equipmentId: equipment.id,

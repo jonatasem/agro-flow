@@ -41,7 +41,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   // Submissão do formulário para criação ou atualização
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (
@@ -151,10 +151,10 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
                 disabled={loading}
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
               >
-                <option value="TECNICO">Técnico</option>
-                <option value="LIDER">Líder</option>
+                <option value="Técnico">Técnico</option>
+                <option value="líder">Líder</option>
                 <option value="COA">COA</option>
-                <option value="ADMIN">Administrador</option>
+                <option value="Admin">Admin</option>
               </select>
             </div>
           </div>
@@ -170,11 +170,11 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
             >
               <option value="">Selecione o Setor</option>
-              <option value="AGRICULTURA_PRECISAO">
+              <option value="Agricultura de Precisao">
                 Agricultura de Precisão
               </option>
-              <option value="MECANICA">Mecânica / Oficina</option>
-              <option value="GERAL">Geral</option>
+              <option value="Mecanica">Mecânica / Oficina</option>
+              <option value="Geral">Geral</option>
             </select>
           </div>
 
