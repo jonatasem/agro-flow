@@ -37,7 +37,7 @@ describe("CreateWorkOrderService", () => {
 
   const validPayload = {
     fleet: "EQ-001",
-    operatorId: "operator-123",
+    operatorRegistration: "500100",
     setor: "Mecanica",
     qruDescricao: "Vazamento de óleo no motor",
     qth: "Talhão 12",
@@ -59,6 +59,7 @@ describe("CreateWorkOrderService", () => {
 
   const mockOperator = {
     id: "operator-123",
+    registration: "500100",
     name: "Carlos Operador",
   };
 
@@ -73,7 +74,7 @@ describe("CreateWorkOrderService", () => {
     await expect(
       createWorkOrderService.execute({ ...validPayload, userRole: "OPERADOR" })
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para abrir ordens de serviço."
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -118,10 +119,10 @@ describe("CreateWorkOrderService", () => {
 
     await expect(
       createWorkOrderService.execute(validPayload)
-    ).rejects.toThrow("Operador não encontrado no banco de dados.");
+    ).rejects.toThrow("Operador não encontrado com a matrícula informada.");
 
     expect(prismaClient.operator.findUnique).toHaveBeenCalledWith({
-      where: { id: validPayload.operatorId },
+      where: { registration: validPayload.operatorRegistration },
     });
     expect(prismaClient.workOrder.findFirst).not.toHaveBeenCalled();
   });
