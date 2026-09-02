@@ -6,7 +6,6 @@ import { useAuth } from "../../hooks/useAuth";
 
 // Utilitários de permissão e erros
 import { PERMISSIONS, hasPermission } from "../../utils/permission";
-import { getErrorMessage } from "../../utils/getErrorMessage";
 
 // Componentes e Tipos
 import { CreateEquipmentModal } from "../../components/equipment/CreateEquipmentModal";
@@ -18,15 +17,13 @@ export const EquipmentsPage: React.FC = () => {
     equipments,
     loading,
     error,
-    refetch,
-    deleteEquipment,
+    refetch
   } = useEquipments();
 
   // Estados locais
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Permissão de gerenciamento do usuário atual
   const canManage = hasPermission(user?.role, PERMISSIONS.EQUIPMENT_CREATE);
@@ -50,24 +47,6 @@ export const EquipmentsPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Exclusão de equipamento
-  const handleDelete = async (id: string, fleet: string) => {
-    if (!canManage) return;
-
-    if (!window.confirm(`Tem certeza que deseja excluir o equipamento frota #${fleet}?`)) {
-      return;
-    }
-
-    try {
-      setDeletingId(id);
-      await deleteEquipment(id);
-    } catch (err: unknown) {
-      alert(getErrorMessage(err, "Erro ao excluir equipamento."));
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   // Fechamento do modal de equipamento
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -80,7 +59,7 @@ export const EquipmentsPage: React.FC = () => {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">
-            Equipamentos e Maquinários
+            Equipamentos
           </h1>
           <p className="text-xs text-slate-500">
             Frota agrícola cadastrada
@@ -159,14 +138,6 @@ export const EquipmentsPage: React.FC = () => {
                       title="Editar"
                     >
                       ✏️
-                    </button>
-                    <button
-                      onClick={() => handleDelete(equipment.id, equipment.fleet)}
-                      disabled={deletingId === equipment.id}
-                      className="p-1.5 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
-                      title="Excluir"
-                    >
-                      {deletingId === equipment.id ? "⏳" : "🗑️"}
                     </button>
                   </div>
                 )}

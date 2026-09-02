@@ -58,7 +58,11 @@ function isOrderCompleted(order: WorkOrder): boolean {
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const { workOrders, loading, error, refetch } = useWorkOrders();
-  const { completedWorkOrders: historyWorkOrders } = useHistory();
+  
+  // Extrai o histórico e a função de atualização (refetch)
+  const { completedWorkOrders: rawHistory, refetch: refetchHistory } = useHistory();
+  const historyWorkOrders = rawHistory || [];
+
   const { hasPermission, hasAnyPermission } = usePermission();
 
   // Estados de navegação e controle de modais
@@ -177,7 +181,10 @@ export const DashboardPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab("history")}
+          onClick={() => {
+            setActiveTab("history");
+            refetchHistory(); // Atualiza a lista ao alternar para a aba
+          }}
           className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
             activeTab === "history"
               ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
@@ -268,7 +275,10 @@ export const DashboardPage: React.FC = () => {
           setSelectedSector(null);
           setSelectedFleet("");
         }}
-        onSuccess={refetch}
+        onSuccess={() => {
+          refetch();         // Atualiza ordens ativas
+          refetchHistory();  // Atualiza histórico de concluídas
+        }}
         initialSectorData={selectedSector}
         initialFleet={selectedFleet}
       />

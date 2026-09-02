@@ -30,9 +30,9 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
     initialData?.registration || ""
   );
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState(initialData?.role || "TECNICO");
+  const [role, setRole] = useState(initialData?.role || "Técnico");
   const [sector, setSector] = useState(initialData?.sector || "");
-  const [city, setCity] = useState(initialData?.city || "");
+  const [city, setCity] = useState(initialData?.city || "Lucélia - SP");
 
   // Estados de carregamento e mensagem de erro
   const [loading, setLoading] = useState(false);
@@ -44,20 +44,27 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!sector) {
+      setError("Por favor, selecione um setor.");
+      return;
+    }
+
     if (
       !name.trim() ||
       !registration.trim() ||
       (!initialData && !password.trim())
-    )
+    ) {
+      setError("Por favor, preencha todos os campos obrigatórios.");
       return;
+    }
 
     try {
       setLoading(true);
       setError("");
 
       const payload = {
-        name,
-        registration,
+        name: name.trim(),
+        registration: registration.trim(),
         role,
         sector,
         city,
@@ -152,7 +159,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
               >
                 <option value="Técnico">Técnico</option>
-                <option value="líder">Líder</option>
+                <option value="Líder">Líder</option>
                 <option value="COA">COA</option>
                 <option value="Admin">Admin</option>
               </select>
@@ -173,7 +180,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
               <option value="Agricultura de Precisao">
                 Agricultura de Precisão
               </option>
-              <option value="Mecanica">Mecânica / Oficina</option>
+              <option value="Mecanica">Mecânica</option>
               <option value="Geral">Geral</option>
             </select>
           </div>
@@ -201,14 +208,17 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
             <label className="text-xs text-slate-700 font-semibold">
               Cidade / Filial
             </label>
-            <input
-              type="text"
-              placeholder="Ex: Sertãozinho - SP"
+            <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
               disabled={loading}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
-            />
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
+            >
+              <option value="Lucélia - SP">Lucélia - SP</option>
+              <option value="Adamantina - SP">Adamantina - SP</option>
+              <option value="Salmourão - SP">Salmourão - SP</option>
+              <option value="Dracena - SP">Dracena - SP</option>
+            </select>
           </div>
 
           {/* Botões de Ação */}

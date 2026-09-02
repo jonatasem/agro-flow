@@ -6,7 +6,6 @@ import { useAuth } from "../../hooks/useAuth";
 
 // Utilitários de permissão e erros
 import { PERMISSIONS, hasPermission } from "../../utils/permission";
-import { getErrorMessage } from "../../utils/getErrorMessage";
 
 // Componentes e Tipos
 import { CreateOperatorModal } from "../../components/operator/CreateOperatorModal";
@@ -18,15 +17,13 @@ export const OperatorsPage: React.FC = () => {
     operators,
     loading,
     error,
-    refetch,
-    deleteOperator,
+    refetch
   } = useOperators();
 
   // Estados locais
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOperator, setEditingOperator] = useState<Operator | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Permissão de gerenciamento do usuário atual
   const canManage = hasPermission(user?.role, PERMISSIONS.OPERATOR_MANAGE);
@@ -49,24 +46,6 @@ export const OperatorsPage: React.FC = () => {
     if (!canManage) return;
     setEditingOperator(operator);
     setIsModalOpen(true);
-  };
-
-  // Exclusão de operador
-  const handleDelete = async (id: string, name: string) => {
-    if (!canManage) return;
-
-    if (!window.confirm(`Tem certeza que deseja excluir o operador ${name}?`)) {
-      return;
-    }
-
-    try {
-      setDeletingId(id);
-      await deleteOperator(id);
-    } catch (err: unknown) {
-      alert(getErrorMessage(err, "Erro ao excluir operador."));
-    } finally {
-      setDeletingId(null);
-    }
   };
 
   // Fechamento do modal de operador
@@ -163,14 +142,6 @@ export const OperatorsPage: React.FC = () => {
                       title="Editar"
                     >
                       ✏️
-                    </button>
-                    <button
-                      onClick={() => handleDelete(operator.id, operator.name)}
-                      disabled={deletingId === operator.id}
-                      className="p-1.5 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
-                      title="Excluir"
-                    >
-                      {deletingId === operator.id ? "⏳" : "🗑️"}
                     </button>
                   </div>
                 )}

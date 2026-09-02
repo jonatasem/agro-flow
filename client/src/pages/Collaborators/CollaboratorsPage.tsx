@@ -6,7 +6,6 @@ import { useAuth } from "../../hooks/useAuth";
 
 // Utilitários de permissão e erros
 import { PERMISSIONS, hasPermission } from "../../utils/permission";
-import { getErrorMessage } from "../../utils/getErrorMessage";
 
 // Componentes e Tipos
 import { CreateCollaboratorModal } from "../../components/collaborator/CreateCollaboratorModal";
@@ -18,16 +17,13 @@ export const CollaboratorsPage: React.FC = () => {
     collaborators,
     loading,
     error,
-    refetch,
-    deleteCollaborator,
+    refetch
   } = useCollaborator();
 
   // Estados locais
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
   // Permissão de gerenciamento do usuário atual
   const canManage = hasPermission(user?.role, PERMISSIONS.COLLABORATOR_MANAGE);
 
@@ -44,24 +40,6 @@ export const CollaboratorsPage: React.FC = () => {
         return nameMatch || roleMatch || regMatch;
       })
     : [];
-
-  // Exclusão de colaborador
-  const handleDelete = async (id: string, name: string) => {
-    if (!canManage) return;
-
-    if (!window.confirm(`Tem certeza que deseja excluir o colaborador "${name}"?`)) {
-      return;
-    }
-
-    try {
-      setDeletingId(id);
-      await deleteCollaborator(id);
-    } catch (err: unknown) {
-      alert(getErrorMessage(err, "Erro ao excluir colaborador."));
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   // Abertura do modal de edição
   const handleEdit = (collaborator: Collaborator) => {
@@ -169,14 +147,6 @@ export const CollaboratorsPage: React.FC = () => {
                         title="Editar"
                       >
                         ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDelete(collaborator.id, collaborator.name)}
-                        disabled={deletingId === collaborator.id}
-                        className="p-1 text-slate-400 hover:text-red-600 text-xs transition-colors disabled:opacity-50 cursor-pointer"
-                        title="Excluir"
-                      >
-                        {deletingId === collaborator.id ? "⏳" : "🗑️"}
                       </button>
                     </>
                   )}
