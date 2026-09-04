@@ -87,6 +87,24 @@ export function useCollaborator() {
     }
   };
 
+  // Alternar o status (Ativo / Inativo) do colaborador
+  const toggleStatus = async (id: string, newStatus: boolean) => {
+    try {
+      const response = await collaboratorService.update(id, {
+        status: newStatus,
+      } as UpdateCollaboratorInput);
+
+      setCollaborators((prev) =>
+        prev.map((item) => (item.id === id ? response : item))
+      );
+      return response;
+    } catch (err: unknown) {
+      throw new Error(getErrorMessage(err, "Erro ao alterar status do colaborador."), {
+        cause: err,
+      });
+    }
+  };
+
   // Exclusão de colaborador
   const deleteCollaborator = async (id: string) => {
     try {
@@ -106,6 +124,7 @@ export function useCollaborator() {
     refetch,
     createCollaborator,
     updateCollaborator,
+    toggleStatus,
     deleteCollaborator,
   };
 }

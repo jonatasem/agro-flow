@@ -63,7 +63,7 @@ export const OperatorsPage: React.FC = () => {
             Operadores
           </h1>
           <p className="text-xs text-slate-500">
-            Operadores de máquinas e equipamentos cadastrados
+            Operadores de equipamentos cadastrados no sistema
           </p>
         </div>
 
@@ -145,9 +145,6 @@ export const OperatorsPage: React.FC = () => {
                     </button>
                   </div>
                 )}
-                <div className="w-8 h-8 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 text-sm">
-                  👨‍🌾
-                </div>
               </div>
             </div>
           ))}

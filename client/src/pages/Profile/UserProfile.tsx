@@ -71,7 +71,7 @@ export const UserProfile: React.FC = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                     Função / Cargo
                   </span>
-                  <span className="inline-block text-[11px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 rounded-md mt-0.5 uppercase">
+                  <span className="inline-block text-[11px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 rounded-md mt-0.5">
                     {user.role || "Colaborador"}
                   </span>
                 </div>

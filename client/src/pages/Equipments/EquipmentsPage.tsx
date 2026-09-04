@@ -62,7 +62,7 @@ export const EquipmentsPage: React.FC = () => {
             Equipamentos
           </h1>
           <p className="text-xs text-slate-500">
-            Frota agrícola cadastrada
+            Frota agrícola cadastrada no sistema
           </p>
         </div>
 
@@ -141,9 +141,6 @@ export const EquipmentsPage: React.FC = () => {
                     </button>
                   </div>
                 )}
-                <div className="w-8 h-8 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 text-sm">
-                  🚜
-                </div>
               </div>
             </div>
           ))}

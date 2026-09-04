@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useWorkOrders } from "../../hooks/useWorkOrders";
 import { useHistory } from "../../hooks/useHistory";
 import { usePermission } from "../../hooks/usePermission";
+import { useDashboardMetrics } from "../../hooks/useDashboardMetrics"; // <-- Adicionado
 
 // Utilitários e Permissões
 import { PERMISSIONS } from "../../utils/permission";
@@ -19,12 +20,11 @@ import { HistoryPage } from "../History/HistoryPage";
 import { EquipmentsPage } from "../Equipments/EquipmentsPage";
 import { OperatorsPage } from "../Operators/OperatorsPage";
 import { CollaboratorsPage } from "../Collaborators/CollaboratorsPage";
-import { MetricsPage } from "../Metrics/MetricsPage";
+import { MetricsDashboardApex } from "../Metrics/MetricsDashboardApex";
 
 // Tipos
 import { type WorkOrder, type SectorService } from "../../services/workOrderService";
 
-// Tipagem das abas de navegação
 type TabType =
   | "work-orders"
   | "history"
@@ -33,7 +33,6 @@ type TabType =
   | "collaborators"
   | "metrics";
 
-// Normaliza texto para comparações sem acentos e minúsculo
 function normalizeText(text?: string): string {
   if (!text) return "";
   return text
@@ -43,7 +42,6 @@ function normalizeText(text?: string): string {
     .trim();
 }
 
-// Verifica se a ordem de serviço foi totalmente concluída
 function isOrderCompleted(order: WorkOrder): boolean {
   if (order.status === "FINALIZADA") return true;
 
@@ -54,24 +52,27 @@ function isOrderCompleted(order: WorkOrder): boolean {
   return false;
 }
 
-// Página principal do Dashboard com navegação por abas
 export const DashboardPage: React.FC = () => {
   const { user, signOut } = useAuth();
   const { workOrders, loading, error, refetch } = useWorkOrders();
   
-  // Extrai o histórico e a função de atualização (refetch)
   const { completedWorkOrders: rawHistory, refetch: refetchHistory } = useHistory();
   const historyWorkOrders = rawHistory || [];
 
+  // Consome o hook de métricas do dashboard
+  const {
+    metrics,
+    loading: metricsLoading,
+    error: metricsError,
+  } = useDashboardMetrics();
+
   const { hasPermission, hasAnyPermission } = usePermission();
 
-  // Estados de navegação e controle de modais
   const [activeTab, setActiveTab] = useState<TabType>("work-orders");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSector, setSelectedSector] = useState<SectorService | null>(null);
   const [selectedFleet, setSelectedFleet] = useState<string>("");
 
-  // Permissões do usuário logado
   const canCreateWorkOrder = hasPermission(PERMISSIONS.WORK_ORDER_CREATE);
   const canManageCollaborators = hasPermission(PERMISSIONS.COLLABORATOR_MANAGE);
   const canViewMetrics = hasPermission(PERMISSIONS.METRICS_VIEW);
@@ -82,7 +83,6 @@ export const DashboardPage: React.FC = () => {
 
   const userSector = user?.sector;
 
-  // Abertura do modal para criação de OS
   const handleCreateOpen = () => {
     if (!canCreateWorkOrder) return;
     setSelectedSector(null);
@@ -90,14 +90,12 @@ export const DashboardPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Abertura do modal para edição de setor
   const handleEditSectorOpen = (sector: SectorService, fleet: string) => {
     setSelectedSector(sector);
     setSelectedFleet(fleet);
     setIsModalOpen(true);
   };
 
-  // Filtragem de ordens de serviço ativas conforme permissão e setor
   const activeWorkOrders = (workOrders || []).filter((order) => {
     if (isOrderCompleted(order)) return false;
 
@@ -119,7 +117,6 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 p-4 md:p-6 space-y-6">
-      {/* Cabeçalho principal */}
       <Header
         user={user}
         handleCreateOpen={handleCreateOpen}
@@ -127,7 +124,6 @@ export const DashboardPage: React.FC = () => {
         canCreate={canCreateWorkOrder}
       />
 
-      {/* Cards de resumo estatístico */}
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -167,7 +163,6 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Barra de abas para navegação */}
       <nav className="max-w-6xl mx-auto flex gap-2 border-b border-slate-200 pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTab("work-orders")}
@@ -183,7 +178,7 @@ export const DashboardPage: React.FC = () => {
         <button
           onClick={() => {
             setActiveTab("history");
-            refetchHistory(); // Atualiza a lista ao alternar para a aba
+            refetchHistory();
           }}
           className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
             activeTab === "history"
@@ -236,14 +231,13 @@ export const DashboardPage: React.FC = () => {
               activeTab === "metrics"
                 ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200"
-            }`}
-          >
-            📊 Métricas
-          </button>
+          }`}
+        >
+          📊 Métricas
+        </button>
         )}
       </nav>
 
-      {/* Conteúdo dinâmico da aba selecionada */}
       <main className="max-w-6xl mx-auto space-y-4">
         {activeTab === "work-orders" && (
           <ActiveWorkOrdersPage
@@ -264,10 +258,29 @@ export const DashboardPage: React.FC = () => {
         {activeTab === "collaborators" && canManageCollaborators && (
           <CollaboratorsPage />
         )}
-        {activeTab === "metrics" && canViewMetrics && <MetricsPage />}
+
+        {/* Renderização condicional com dados das métricas */}
+        {activeTab === "metrics" && canViewMetrics && (
+          <>
+            {metricsLoading && (
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 text-center text-slate-500 font-medium">
+                Carregando métricas do dashboard...
+              </div>
+            )}
+
+            {metricsError && (
+              <div className="bg-red-50 p-4 rounded-2xl border border-red-200 text-red-600 text-sm font-semibold">
+                {metricsError}
+              </div>
+            )}
+
+            {!metricsLoading && !metricsError && metrics && (
+              <MetricsDashboardApex metrics={metrics} />
+            )}
+          </>
+        )}
       </main>
 
-      {/* Modal global de criação e edição de Ordens de Serviço */}
       <CreateWorkOrderModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -276,8 +289,8 @@ export const DashboardPage: React.FC = () => {
           setSelectedFleet("");
         }}
         onSuccess={() => {
-          refetch();         // Atualiza ordens ativas
-          refetchHistory();  // Atualiza histórico de concluídas
+          refetch();
+          refetchHistory();
         }}
         initialSectorData={selectedSector}
         initialFleet={selectedFleet}

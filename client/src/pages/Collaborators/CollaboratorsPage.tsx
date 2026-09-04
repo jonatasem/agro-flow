@@ -17,13 +17,16 @@ export const CollaboratorsPage: React.FC = () => {
     collaborators,
     loading,
     error,
-    refetch
+    refetch,
+    // Assumindo que seu hook possua uma função para atualizar/alternar o status
+    toggleStatus 
   } = useCollaborator();
 
   // Estados locais
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  
   // Permissão de gerenciamento do usuário atual
   const canManage = hasPermission(user?.role, PERMISSIONS.COLLABORATOR_MANAGE);
 
@@ -52,6 +55,20 @@ export const CollaboratorsPage: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingCollaborator(null);
+  };
+
+  // Lógica para alternar o status (Ativo / Inativo)
+  const handleToggleStatus = async (collaborator: Collaborator) => {
+    if (!canManage) return;
+
+    try {
+      if (toggleStatus) {
+        await toggleStatus(collaborator.id, !collaborator.status);
+        refetch();
+      }
+    } catch (err) {
+      console.error("Erro ao alterar status do colaborador:", err);
+    }
   };
 
   return (
@@ -117,30 +134,32 @@ export const CollaboratorsPage: React.FC = () => {
       ) : (
         /* Lista de Colaboradores */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredCollaborators.map((collaborator) => (
-            <div
-              key={collaborator.id}
-              className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 hover:border-slate-300 transition-colors shadow-sm"
-            >
-              <div className="flex justify-between items-start gap-2">
-                <div>
-                  <h3 className="font-extrabold text-slate-800 text-sm">
-                    {collaborator.name}
-                  </h3>
-                  <span className="text-xs text-emerald-700 font-bold block">
-                    {collaborator.role}
-                  </span>
-                </div>
+          {filteredCollaborators.map((collaborator) => {
+            const isActive = collaborator.status !== false;
 
-                <div className="flex items-center gap-2">
-                  {collaborator.registration && (
-                    <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200 font-bold">
-                      Matrícula: {collaborator.registration}
+            return (
+              <div
+                key={collaborator.id}
+                className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 hover:border-slate-300 transition-colors shadow-sm"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <h3 className="font-extrabold text-slate-800 text-sm">
+                      {collaborator.name}
+                    </h3>
+                    <span className="text-xs text-emerald-700 font-bold block">
+                      {collaborator.role}
                     </span>
-                  )}
+                  </div>
 
-                  {canManage && (
-                    <>
+                  <div className="flex items-center gap-2">
+                    {collaborator.registration && (
+                      <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200 font-bold">
+                        Matrícula: {collaborator.registration}
+                      </span>
+                    )}
+
+                    {canManage && (
                       <button
                         onClick={() => handleEdit(collaborator)}
                         className="p-1 text-slate-400 hover:text-emerald-600 text-xs transition-colors cursor-pointer"
@@ -148,25 +167,32 @@ export const CollaboratorsPage: React.FC = () => {
                       >
                         ✏️
                       </button>
-                    </>
-                  )}
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-[11px] font-semibold text-slate-500 pt-2 border-t border-slate-100">
+                  <span>📍 {collaborator.city || "Localidade não informada"}</span>
+
+                  {/* Badge de Status Interativo */}
+                  <button
+                    onClick={() => handleToggleStatus(collaborator)}
+                    disabled={!canManage}
+                    title={canManage ? "Clique para alterar o status" : undefined}
+                    className={`px-2.5 py-0.5 rounded-md text-[9px] font-black tracking-wider transition-all shadow-xs ${
+                      canManage ? "cursor-pointer hover:opacity-80 active:scale-95" : "cursor-default"
+                    } ${
+                      isActive
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-red-50 text-red-700 border border-red-200"
+                    }`}
+                  >
+                    {isActive ? "ATIVO" : "INATIVO"}
+                  </button>
                 </div>
               </div>
-
-              <div className="flex justify-between items-center text-[11px] font-semibold text-slate-500 pt-2 border-t border-slate-100">
-                <span>📍 {collaborator.city || "Localidade não informada"}</span>
-                <span
-                  className={`px-2 py-0.5 rounded-md text-[9px] font-black ${
-                    collaborator.status !== false
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : "bg-red-50 text-red-700 border border-red-200"
-                  }`}
-                >
-                  {collaborator.status !== false ? "ATIVO" : "INATIVO"}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
