@@ -125,13 +125,17 @@ const EditProfileForm: React.FC<FormProps> = ({ user, onClose, onSuccess }) => {
             <label className="text-xs font-bold text-slate-700">
               Cidade / Base
             </label>
-            <input
-              type="text"
+            <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
               disabled={loading}
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all disabled:opacity-50"
-            />
+            >
+              <option value="Lucélia - SP">Lucélia - SP</option>
+              <option value="Adamantina - SP">Adamantina - SP</option>
+              <option value="Salmourão - SP">Salmourão - SP</option>
+              <option value="Dracena - SP">Dracena - SP</option>
+            </select>
           </div>
 
           {/* Botões de Ação */}

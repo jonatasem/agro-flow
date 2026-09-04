@@ -93,7 +93,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-md space-y-4 shadow-xl text-slate-800">
+      <div className="bg-white border border-neutral-200 p-6 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl animate-slide-in">
         {/* Cabeçalho do Modal */}
         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
           <h2 className="text-lg font-bold text-slate-800">

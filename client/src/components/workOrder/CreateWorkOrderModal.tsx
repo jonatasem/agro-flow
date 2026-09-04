@@ -126,7 +126,7 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white border border-neutral-200 p-6 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl">
+      <div className="bg-white border border-neutral-200 p-6 rounded-3xl w-full max-w-lg space-y-4 shadow-2xl animate-slide-in">
         {/* Cabeçalho do Modal */}
         <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
           <h2 className="text-lg font-bold text-neutral-950">

@@ -121,7 +121,7 @@ describe("GetDashboardMetricsService", () => {
       totalWorkOrders: 3,
       totalDowntimeMinutes: 270,
       totalDowntimeHours: 4.5,
-      averageRepairTimeMinutes: 90, // 270 / 3
+      averageRepairTimeMinutes: 90,
     });
 
     expect(result.causesDistribution).toEqual({
@@ -172,5 +172,31 @@ describe("GetDashboardMetricsService", () => {
     expect(result.causesDistribution).toEqual({
       NÃO_INFORMADO: 1,
     });
+  });
+
+  it("deve tratar corretamente campos com valores nulos, strings numéricas ou espaços em branco", async () => {
+    const mockServices = [
+      {
+        id: "service-1",
+        tempoManutencao: "45",
+        tipoCausa: "   ",
+        dataCriacao: "2026-08-20T10:00:00Z",
+        operator: null,
+        workOrder: null,
+      },
+    ];
+
+    jest.mocked(prismaClient.sectorService.findMany).mockResolvedValue(mockServices as any);
+
+    const result = await getDashboardMetricsService.execute({});
+
+    expect(result.overview.totalDowntimeMinutes).toBe(45);
+    expect(result.overview.averageRepairTimeMinutes).toBe(45);
+    expect(result.causesDistribution).toEqual({
+      NÃO_INFORMADO: 1,
+    });
+    expect(result.timeline).toEqual([
+      { date: "2026-08-20", count: 1 },
+    ]);
   });
 });

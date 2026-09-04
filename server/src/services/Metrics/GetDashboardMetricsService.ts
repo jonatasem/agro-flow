@@ -15,7 +15,7 @@ export class GetDashboardMetricsService {
     // Sanitiza e calcula o intervalo de datas válido (padrão: últimos 30 dias)
     const { start, end } = this.parseDateRange(filters.startDate, filters.endDate);
 
-    // 2. Constrói dinamicamente a cláusula WHERE do Prisma via spread operator
+    // Constrói dinamicamente a cláusula WHERE do Prisma
     const where = {
       dataCriacao: { gte: start, lte: end },
       ...(filters.setor && { setor: filters.setor }),
@@ -35,7 +35,7 @@ export class GetDashboardMetricsService {
       orderBy: { dataCriacao: "asc" },
     });
 
-    // 4. Executa o agrupamento e a ordenação em memória das métricas obtidas
+    // Executa o agrupamento e a ordenação em memória das métricas obtidas
     return this.aggregateMetrics(sectorServices);
   }
 
@@ -43,17 +43,14 @@ export class GetDashboardMetricsService {
    * Converte strings de data em instâncias de Date válidas e ajusta horários limites.
    */
   private parseDateRange(startDate?: string, endDate?: string) {
-    // Define a data inicial (caso inválida ou ausente, assume 30 dias atrás)
-    const start = startDate && !isNaN(Date.parse(startDate))
-      ? new Date(startDate)
-      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const start =
+      startDate && !isNaN(Date.parse(startDate))
+        ? new Date(startDate)
+        : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    // Define a data final (caso inválida ou ausente, assume o momento atual)
-    const end = endDate && !isNaN(Date.parse(endDate))
-      ? new Date(endDate)
-      : new Date();
+    const end =
+      endDate && !isNaN(Date.parse(endDate)) ? new Date(endDate) : new Date();
 
-    // Ajusta strings no formato "YYYY-MM-DD" para incluir todo o dia até 23:59:59.999
     if (endDate && !endDate.includes("T")) {
       end.setHours(23, 59, 59, 999);
     }
@@ -62,68 +59,103 @@ export class GetDashboardMetricsService {
   }
 
   /**
-   * Processa a lista de serviços em uma única iteração ($O(N)$) para gerar as agregações.
+   * Processa a lista de serviços em uma única iteração (O(N)) para gerar as agregações.
    */
   private aggregateMetrics(services: any[]) {
     let totalDowntimeMinutes = 0;
     let finishedOrdersCount = 0;
 
-    // Estruturas do tipo Hash Map para acúmulo performático com acesso $O(1)$
     const causesDistribution: Record<string, number> = {};
     const equipmentMap: Record<string, any> = {};
     const operatorMap: Record<string, any> = {};
     const timelineMap: Record<string, number> = {};
 
     for (const service of services) {
-      // Computa tempo total de parada e total de ordens finalizadas
-      if (service.tempoManutencao > 0) {
-        totalDowntimeMinutes += service.tempoManutencao;
+      /* =========================================================================
+       * Usamos `Number(service.tempoManutencao) || 0` para garantir que o valor
+       * seja estritamente numérico e evite operações com `NaN` ou falhas na checagem.
+       * ========================================================================= */
+      const maintenanceTime = Number(service.tempoManutencao) || 0;
+
+      // Soma minutos de parada e incrementa contador de OSs com reparo concluído
+      if (maintenanceTime > 0) {
+        totalDowntimeMinutes += maintenanceTime;
         finishedOrdersCount++;
       }
 
-      // Incrementa a contagem de tipos de causa
-      const cause = service.tipoCausa || "NÃO_INFORMADO";
+      /* =========================================================================
+       * Verificamos com `.trim()` o tamanho real da string.
+       * ========================================================================= */
+      const rawCause = service.tipoCausa?.trim();
+      const cause = rawCause && rawCause.length > 0 ? rawCause : "NÃO_INFORMADO";
       causesDistribution[cause] = (causesDistribution[cause] || 0) + 1;
 
-      // Agrupa ocorrências e minutos parados por equipamento
+      /* =========================================================================
+       * CORREÇÃO 3: Agrupamento por Equipamento usando tempo corrigido
+       * ========================================================================= */
       const eq = service.workOrder?.equipment;
       if (eq) {
-        equipmentMap[eq.id] = equipmentMap[eq.id] || { fleet: eq.fleet, name: eq.name, count: 0, totalMinutes: 0 };
+        equipmentMap[eq.id] = equipmentMap[eq.id] || {
+          fleet: eq.fleet,
+          name: eq.name,
+          count: 0,
+          totalMinutes: 0,
+        };
         equipmentMap[eq.id].count++;
-        equipmentMap[eq.id].totalMinutes += service.tempoManutencao || 0;
+        equipmentMap[eq.id].totalMinutes += maintenanceTime;
       }
 
-      // Agrupa total de OSs e tipos de causas por operador
+      /* =========================================================================
+       * Agrupamento por Operador
+       * ========================================================================= */
       const op = service.operator;
       if (op) {
         const opId = op.id || op.registration;
         const opName = op.name || op.nome || op.registration || "Operador";
 
-        operatorMap[opId] = operatorMap[opId] || { name: opName, totalOS: 0, causes: {} };
+        operatorMap[opId] = operatorMap[opId] || {
+          name: opName,
+          totalOS: 0,
+          causes: {},
+        };
         operatorMap[opId].totalOS++;
         operatorMap[opId].causes[cause] = (operatorMap[opId].causes[cause] || 0) + 1;
       }
 
-      // Agrupa o volume de chamados por data no formato YYYY-MM-DD
-      const dateKey = service.dataCriacao.toISOString().slice(0, 10);
-      timelineMap[dateKey] = (timelineMap[dateKey] || 0) + 1;
+      /* =========================================================================
+       * Garante conversão segura para Date antes de extrair YYYY-MM-DD para evitar
+       * crash caso `dataCriacao` venha como string do banco.
+       * ========================================================================= */
+      if (service.dataCriacao) {
+        const dateKey = new Date(service.dataCriacao).toISOString().slice(0, 10);
+        timelineMap[dateKey] = (timelineMap[dateKey] || 0) + 1;
+      }
     }
 
+    /* =========================================================================
+     * Cálculo dos KPIs Consolidados (MTTR e Totais)
+     * ========================================================================= */
     return {
-      // Indicadores Consolidados (KPIs)
       overview: {
         totalWorkOrders: services.length,
         totalDowntimeMinutes,
         totalDowntimeHours: Number((totalDowntimeMinutes / 60).toFixed(2)),
-        averageRepairTimeMinutes: finishedOrdersCount > 0 ? Math.round(totalDowntimeMinutes / finishedOrdersCount) : 0,
+        // MTTR: Divide o tempo total pelo número de ordens com reparo efetuado
+        averageRepairTimeMinutes:
+          finishedOrdersCount > 0
+            ? Math.round(totalDowntimeMinutes / finishedOrdersCount)
+            : 0,
       },
       causesDistribution,
-      // Ordena e extrai o TOP 10 equipamentos com mais ocorrências
-      topProblematicEquipments: Object.values(equipmentMap).sort((a, b) => b.count - a.count).slice(0, 10),
-      // Ordena e extrai o TOP 10 operadores que mais abriram OSs
-      topRequestingOperators: Object.values(operatorMap).sort((a, b) => b.totalOS - a.totalOS).slice(0, 10),
-      // Ordena cronologicamente os pontos da linha do tempo
-      timeline: Object.entries(timelineMap).sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ date, count })),
+      topProblematicEquipments: Object.values(equipmentMap)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10),
+      topRequestingOperators: Object.values(operatorMap)
+        .sort((a, b) => b.totalOS - a.totalOS)
+        .slice(0, 10),
+      timeline: Object.entries(timelineMap)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, count]) => ({ date, count })),
     };
   }
 }
