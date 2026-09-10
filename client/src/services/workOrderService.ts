@@ -6,8 +6,8 @@ import { type Equipment } from "./equipmentService";
 export interface SectorOperator {
   id: string;
   name: string;
-  registration?: string;
-  city?: string;
+  registration: string;
+  city: string;
 }
 
 // Estrutura detalhada de um setor dentro da Ordem de Serviço

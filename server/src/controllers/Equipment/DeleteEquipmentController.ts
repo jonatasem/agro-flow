@@ -8,16 +8,16 @@ export class DeleteEquipmentController {
 
     if (!userRole) {
       return reply
-      .status(401)
-      .send({ error: "Sessão inválida ou usuário não autenticado." });
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
-    const { id } = request.params as { id:string }
+    const { id } = request.params as { id: string };
 
     if (!id) {
       return reply
-      .status(400)
-      .send({ error: "Id do equipamento não encontrado." });
+        .status(400)
+        .send({ error: "Id do equipamento não encontrado." });
     }
 
     const equipmentService = new DeleteEquipmentService();
@@ -25,7 +25,7 @@ export class DeleteEquipmentController {
     try {
       const result = await equipmentService.execute({ id, userRole });
       reply.status(200).send(result);
-    } catch(error: any){
+    } catch (error: any) {
       const isPermissionError = error.message?.includes("Acesso negado");
       const statusCode = isPermissionError ? 403 : 400;
 

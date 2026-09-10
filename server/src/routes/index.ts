@@ -32,9 +32,9 @@ import { DeleteOperatorController } from "../controllers/Operator/DeleteOperator
 
 // --- CONTROLLERS: Ordem de Serviço (WorkOrder) ---
 import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
-import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js"; 
-import { DeleteWorkOrderController } from "../controllers/WorkOrder/DeleteWorkOrderController.js";
-import { UpdateWorkOrderController } from "../controllers/WorkOrder/UpdateWorkOrderController.js";
+import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js";
+
+import { UpdateSectorController } from "../controllers/SectorService/UpdateSectorController.js";
 import { GetWorkOrderByIdController } from "../controllers/WorkOrder/GetWorkOrderByIdController.js";
 
 // --- CONTROLLERS: Atendimento de Setor (SectorService) ---
@@ -45,6 +45,7 @@ import { FinishSectorServiceController } from "../controllers/SectorService/Fini
 
 // --- CONTROLLERS: Dashboard & Métricas ---
 import { GetDashboardMetricsController } from "../controllers/Metrics/GetDashboardMetricsController.js";
+import { DeleteSectorController } from "../controllers/SectorService/DeleteSectorController.js";
 
 export async function routes(
   fastify: FastifyInstance,
@@ -67,7 +68,7 @@ export async function routes(
     "/login/check-registration",
     async (request: FastifyRequest, reply: FastifyReply) => {
       return new CheckRegistrationController().handle(request, reply);
-    }
+    },
   );
 
   // =========================================================================
@@ -84,7 +85,7 @@ export async function routes(
       "/metrics",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new GetDashboardMetricsController().handle(request, reply);
-      }
+      },
     );
 
     // -----------------------------------------------------------------------
@@ -111,29 +112,31 @@ export async function routes(
       },
     );
 
-    subFastify.put(
-      "/work-order/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new UpdateWorkOrderController().handle(request, reply);
-      }
-    );
-
-    subFastify.delete(
-      "/work-order/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new DeleteWorkOrderController().handle(request, reply);
-      }
-    );
-
     // -----------------------------------------------------------------------
     // FLUXO DE MANUTENÇÃO DO SETOR (SECTOR SERVICE)
     // -----------------------------------------------------------------------
+    // Deletar atendimento
+    subFastify.delete(
+      "/sector-service/:id",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new DeleteSectorController().handle(request, reply);
+      },
+    );
+
+    // Editar atendimento
+    subFastify.put(
+      "/sector-service/:id",
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        return new UpdateSectorController().handle(request, reply);
+      },
+    );
+
     // Iniciar atendimento
     subFastify.put(
       "/sector-service/:id/start",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new StartSectorServiceController().handle(request, reply);
-      }
+      },
     );
 
     // Pausar atendimento (aguardando peça ou outro setor)
@@ -141,7 +144,7 @@ export async function routes(
       "/sector-service/:id/pause",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new PauseSectorController().handle(request, reply);
-      }
+      },
     );
 
     // Retomar atendimento pausado
@@ -149,7 +152,7 @@ export async function routes(
       "/sector-service/:id/resume",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new ResumeSectorController().handle(request, reply);
-      }
+      },
     );
 
     // Finalizar atendimento e calcular tempo líquido
@@ -157,7 +160,7 @@ export async function routes(
       "/sector-service/:id/finish",
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new FinishSectorServiceController().handle(request, reply);
-      }
+      },
     );
 
     // -----------------------------------------------------------------------
@@ -169,7 +172,7 @@ export async function routes(
         return new ListCollaboratorController().handle(request, reply);
       },
     );
-    
+
     subFastify.put(
       "/collaborator/:id",
       async (request: FastifyRequest, reply: FastifyReply) => {
@@ -191,9 +194,9 @@ export async function routes(
         return new CreateCollaboratorController().handle(request, reply);
       },
     );
-       
+
     // -----------------------------------------------------------------------
-    // EQUIPAMENTOS 
+    // EQUIPAMENTOS
     // -----------------------------------------------------------------------
     subFastify.get(
       "/equipment",
@@ -257,4 +260,3 @@ export async function routes(
 }
 
 export default routes;
-

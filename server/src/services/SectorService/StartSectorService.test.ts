@@ -11,7 +11,8 @@ jest.unstable_mockModule("../../prisma/index.js", () => ({
 }));
 
 // Importações dinâmicas após o registro dos mocks
-const { StartSectorServiceService } = await import("./StartSectorServiceService.js");
+const { StartSectorServiceService } =
+  await import("./StartSectorServiceService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 
 describe("StartSectorServiceService", () => {
@@ -33,10 +34,12 @@ describe("StartSectorServiceService", () => {
   });
 
   it("não deve permitir iniciar se o serviço não for encontrado", async () => {
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(null as never);
 
     await expect(
-      startSectorServiceService.execute(validPayload)
+      startSectorServiceService.execute(validPayload),
     ).rejects.toThrow("Serviço não encontrado");
 
     expect(prismaClient.sectorService.findUnique).toHaveBeenCalledWith({
@@ -52,9 +55,9 @@ describe("StartSectorServiceService", () => {
     } as any);
 
     await expect(
-      startSectorServiceService.execute(validPayload)
+      startSectorServiceService.execute(validPayload),
     ).rejects.toThrow(
-      "Este serviço não pode ser iniciado pois seu status atual é: EM_MANUTENCAO"
+      "Este serviço não pode ser iniciado pois seu status atual é: EM_MANUTENCAO",
     );
 
     expect(prismaClient.sectorService.findUnique).toHaveBeenCalledWith({
@@ -73,8 +76,12 @@ describe("StartSectorServiceService", () => {
       tecnicoResponsavel: { name: "João Técnico", role: "TECNICO" },
     };
 
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(mockSectorService as any);
-    jest.mocked(prismaClient.sectorService.update).mockResolvedValue(mockUpdatedService as any);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(mockSectorService as any);
+    jest
+      .mocked(prismaClient.sectorService.update)
+      .mockResolvedValue(mockUpdatedService as any);
 
     const result = await startSectorServiceService.execute(validPayload);
 

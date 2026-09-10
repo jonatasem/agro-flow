@@ -12,8 +12,8 @@ export class LoginCollaboratorController {
 
     if (!registration || !password) {
       return reply
-      .status(400)
-      .send({ error: "Matrícula e senha são obrigatórias." });
+        .status(400)
+        .send({ error: "Matrícula e senha são obrigatórias." });
     }
 
     const loginService = new LoginCollaboratorService();

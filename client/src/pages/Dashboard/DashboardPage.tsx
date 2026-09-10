@@ -5,7 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useWorkOrders } from "../../hooks/useWorkOrders";
 import { useHistory } from "../../hooks/useHistory";
 import { usePermission } from "../../hooks/usePermission";
-import { useDashboardMetrics } from "../../hooks/useDashboardMetrics"; // <-- Adicionado
+import { useDashboardMetrics } from "../../hooks/useDashboardMetrics";
 
 // Utilitários e Permissões
 import { PERMISSIONS } from "../../utils/permission";
@@ -13,6 +13,7 @@ import { PERMISSIONS } from "../../utils/permission";
 // Componentes Globais e Modais
 import { Header } from "../../components/Header";
 import { CreateWorkOrderModal } from "../../components/workOrder/CreateWorkOrderModal";
+import { MetricsDashboard } from "../../components/metrics/MetricsDashboard";
 
 // Subpáginas da Aba de Navegação
 import { ActiveWorkOrdersPage } from "../WorkOrders/ActiveWorkOrdersPage";
@@ -20,7 +21,6 @@ import { HistoryPage } from "../History/HistoryPage";
 import { EquipmentsPage } from "../Equipments/EquipmentsPage";
 import { OperatorsPage } from "../Operators/OperatorsPage";
 import { CollaboratorsPage } from "../Collaborators/CollaboratorsPage";
-import { MetricsDashboardApex } from "../Metrics/MetricsDashboardApex";
 
 // Tipos
 import { type WorkOrder, type SectorService } from "../../services/workOrderService";
@@ -59,12 +59,7 @@ export const DashboardPage: React.FC = () => {
   const { completedWorkOrders: rawHistory, refetch: refetchHistory } = useHistory();
   const historyWorkOrders = rawHistory || [];
 
-  // Consome o hook de métricas do dashboard
-  const {
-    metrics,
-    loading: metricsLoading,
-    error: metricsError,
-  } = useDashboardMetrics();
+  const { data: metrics, loading: metricsLoading, error: metricsError } = useDashboardMetrics();
 
   const { hasPermission, hasAnyPermission } = usePermission();
 
@@ -231,10 +226,10 @@ export const DashboardPage: React.FC = () => {
               activeTab === "metrics"
                 ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                 : "bg-white text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200"
-          }`}
-        >
-          📊 Métricas
-        </button>
+            }`}
+          >
+            📊 Métricas
+          </button>
         )}
       </nav>
 
@@ -259,7 +254,6 @@ export const DashboardPage: React.FC = () => {
           <CollaboratorsPage />
         )}
 
-        {/* Renderização condicional com dados das métricas */}
         {activeTab === "metrics" && canViewMetrics && (
           <>
             {metricsLoading && (
@@ -275,7 +269,7 @@ export const DashboardPage: React.FC = () => {
             )}
 
             {!metricsLoading && !metricsError && metrics && (
-              <MetricsDashboardApex metrics={metrics} />
+              <MetricsDashboard data={metrics} />
             )}
           </>
         )}

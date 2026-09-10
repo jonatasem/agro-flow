@@ -14,7 +14,8 @@ jest.unstable_mockModule("../../config/roles.js", () => ({
 }));
 
 // Importações dinâmicas após o registro dos mocks
-const { GetWorkOrderByIdService } = await import("./GetWorkOrderByIdService.js");
+const { GetWorkOrderByIdService } =
+  await import("./GetWorkOrderByIdService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 const { isManagement } = await import("../../config/roles.js");
 
@@ -35,9 +36,12 @@ describe("GetWorkOrderByIdService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      getWorkOrderByIdService.execute({ ...validPayload, userRole: "OPERADOR" })
+      getWorkOrderByIdService.execute({
+        ...validPayload,
+        userRole: "OPERADOR",
+      }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -48,7 +52,7 @@ describe("GetWorkOrderByIdService", () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
 
     await expect(
-      getWorkOrderByIdService.execute({ workOrderId: "", userRole: "GESTAO" })
+      getWorkOrderByIdService.execute({ workOrderId: "", userRole: "GESTAO" }),
     ).rejects.toThrow("ID da Ordem de Serviço é obrigatório.");
 
     expect(prismaClient.workOrder.findUnique).not.toHaveBeenCalled();
@@ -56,11 +60,13 @@ describe("GetWorkOrderByIdService", () => {
 
   it("não deve permitir buscar uma ordem de serviço inexistente", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.workOrder.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.workOrder.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      getWorkOrderByIdService.execute(validPayload)
-    ).rejects.toThrow("Ordem de Serviço não encontrada.");
+    await expect(getWorkOrderByIdService.execute(validPayload)).rejects.toThrow(
+      "Ordem de Serviço não encontrada.",
+    );
 
     expect(prismaClient.workOrder.findUnique).toHaveBeenCalledWith({
       where: { id: validPayload.workOrderId },
@@ -70,7 +76,9 @@ describe("GetWorkOrderByIdService", () => {
           include: {
             operator: true,
             criador: { select: { id: true, name: true, role: true } },
-            tecnicoResponsavel: { select: { id: true, name: true, role: true } },
+            tecnicoResponsavel: {
+              select: { id: true, name: true, role: true },
+            },
             pauses: true,
           },
         },
@@ -83,21 +91,31 @@ describe("GetWorkOrderByIdService", () => {
       id: validPayload.workOrderId,
       equipmentId: "equipment-123",
       status: "ABERTA",
-      equipment: { id: "equipment-123", name: "Trator John Deere", fleet: "EQ-001" },
+      equipment: {
+        id: "equipment-123",
+        name: "Trator John Deere",
+        fleet: "EQ-001",
+      },
       setores: [
         {
           id: "sector-1",
           setor: "Mecanica",
           operator: { id: "op-1", name: "Carlos Operador" },
           criador: { id: "user-1", name: "Gestor Silva", role: "GESTAO" },
-          tecnicoResponsavel: { id: "tec-1", name: "João Técnico", role: "TECNICO" },
+          tecnicoResponsavel: {
+            id: "tec-1",
+            name: "João Técnico",
+            role: "TECNICO",
+          },
           pauses: [],
         },
       ],
     };
 
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.workOrder.findUnique).mockResolvedValue(mockWorkOrder as any);
+    jest
+      .mocked(prismaClient.workOrder.findUnique)
+      .mockResolvedValue(mockWorkOrder as any);
 
     const result = await getWorkOrderByIdService.execute(validPayload);
 
@@ -109,7 +127,9 @@ describe("GetWorkOrderByIdService", () => {
           include: {
             operator: true,
             criador: { select: { id: true, name: true, role: true } },
-            tecnicoResponsavel: { select: { id: true, name: true, role: true } },
+            tecnicoResponsavel: {
+              select: { id: true, name: true, role: true },
+            },
             pauses: true,
           },
         },

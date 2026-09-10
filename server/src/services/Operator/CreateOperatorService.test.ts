@@ -38,9 +38,9 @@ describe("CreateOperatorService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      createOperatorService.execute({ ...validPayload, userRole: "OPERADOR" })
+      createOperatorService.execute({ ...validPayload, userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -56,9 +56,9 @@ describe("CreateOperatorService", () => {
       registration: "78910",
     } as any);
 
-    await expect(
-      createOperatorService.execute(validPayload)
-    ).rejects.toThrow("Já existe um funcionário cadastrado com essa matrícula");
+    await expect(createOperatorService.execute(validPayload)).rejects.toThrow(
+      "Já existe um funcionário cadastrado com essa matrícula",
+    );
 
     expect(prismaClient.operator.findUnique).toHaveBeenCalledWith({
       where: { registration: validPayload.registration },
@@ -77,8 +77,12 @@ describe("CreateOperatorService", () => {
     };
 
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.operator.findUnique).mockResolvedValue(null as never);
-    jest.mocked(prismaClient.operator.create).mockResolvedValue(mockCreatedOperator as any);
+    jest
+      .mocked(prismaClient.operator.findUnique)
+      .mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.operator.create)
+      .mockResolvedValue(mockCreatedOperator as any);
 
     const result = await createOperatorService.execute(validPayload);
 

@@ -46,9 +46,9 @@ describe("UpdateEquipmentService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      updateEquipmentService.execute({ ...validPayload, userRole: "OPERADOR" })
+      updateEquipmentService.execute({ ...validPayload, userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -58,11 +58,13 @@ describe("UpdateEquipmentService", () => {
 
   it("não deve permitir atualizar um equipamento inexistente", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.equipment.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.equipment.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      updateEquipmentService.execute(validPayload)
-    ).rejects.toThrow("Equipamento não encontrado.");
+    await expect(updateEquipmentService.execute(validPayload)).rejects.toThrow(
+      "Equipamento não encontrado.",
+    );
 
     expect(prismaClient.equipment.findUnique).toHaveBeenCalledWith({
       where: { id: validPayload.id },
@@ -74,13 +76,14 @@ describe("UpdateEquipmentService", () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
 
     // 1ª busca (por ID) encontra o equipamento; 2ª busca (por frota) encontra outro cadastro
-    jest.mocked(prismaClient.equipment.findUnique)
+    jest
+      .mocked(prismaClient.equipment.findUnique)
       .mockResolvedValueOnce(existingEquipment as any)
       .mockResolvedValueOnce({ id: "equipment-456", fleet: "EQ-002" } as any);
 
-    await expect(
-      updateEquipmentService.execute(validPayload)
-    ).rejects.toThrow("Esta frota já está em uso por outro equipamento.");
+    await expect(updateEquipmentService.execute(validPayload)).rejects.toThrow(
+      "Esta frota já está em uso por outro equipamento.",
+    );
 
     expect(prismaClient.equipment.findUnique).toHaveBeenNthCalledWith(1, {
       where: { id: validPayload.id },
@@ -102,11 +105,14 @@ describe("UpdateEquipmentService", () => {
 
     jest.mocked(isManagement).mockReturnValue(true as never);
     // 1ª busca encontra o equipamento; 2ª confirma que a nova frota está livre
-    jest.mocked(prismaClient.equipment.findUnique)
+    jest
+      .mocked(prismaClient.equipment.findUnique)
       .mockResolvedValueOnce(existingEquipment as any)
       .mockResolvedValueOnce(null as never);
 
-    jest.mocked(prismaClient.equipment.update).mockResolvedValue(updatedResult as any);
+    jest
+      .mocked(prismaClient.equipment.update)
+      .mockResolvedValue(updatedResult as any);
 
     const result = await updateEquipmentService.execute(validPayload);
 

@@ -39,7 +39,9 @@ describe("ListEquipmentService", () => {
       },
     ];
 
-    jest.mocked(prismaClient.equipment.findMany).mockResolvedValue(mockEquipments as any);
+    jest
+      .mocked(prismaClient.equipment.findMany)
+      .mockResolvedValue(mockEquipments as any);
 
     const result = await listEquipmentService.execute();
 

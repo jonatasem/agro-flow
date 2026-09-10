@@ -19,7 +19,8 @@ jest.unstable_mockModule("../../config/roles.js", () => ({
 }));
 
 // Importa os módulos dinamicamente após o registro dos mocks
-const { CreateCollaboratorService } = await import("./CreateCollaboratorService.js");
+const { CreateCollaboratorService } =
+  await import("./CreateCollaboratorService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 const { hash } = await import("bcryptjs");
 const { isManagement } = await import("../../config/roles.js");
@@ -46,9 +47,9 @@ describe("CreateCollaboratorService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      createCollaboratorService.execute(validPayload)
+      createCollaboratorService.execute(validPayload),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith(validPayload.userRole);
@@ -64,7 +65,7 @@ describe("CreateCollaboratorService", () => {
     } as any);
 
     await expect(
-      createCollaboratorService.execute(validPayload)
+      createCollaboratorService.execute(validPayload),
     ).rejects.toThrow("Esta matrícula já está cadastrada no sistema.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({
@@ -77,7 +78,9 @@ describe("CreateCollaboratorService", () => {
     const hashedPassword = "hashed_password_123";
 
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(null as never);
     jest.mocked(hash).mockResolvedValue(hashedPassword as never);
 
     const mockCreatedCollaborator = {
@@ -93,7 +96,9 @@ describe("CreateCollaboratorService", () => {
       updatedAt: new Date(),
     };
 
-    jest.mocked(prismaClient.collaborator.create).mockResolvedValue(mockCreatedCollaborator as any);
+    jest
+      .mocked(prismaClient.collaborator.create)
+      .mockResolvedValue(mockCreatedCollaborator as any);
 
     const result = await createCollaboratorService.execute(validPayload);
 

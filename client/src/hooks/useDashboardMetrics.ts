@@ -1,62 +1,29 @@
-import { useState, useEffect, useCallback } from "react";
-import { dashboardService } from "../services/dashboardMetrics";
-import { getErrorMessage } from "../utils/getErrorMessage";
-import type { DashboardFilters, DashboardMetrics } from "../types/dashboard";
+import { useState, useEffect } from "react";
+import { api } from "../services/api";
+import type { DashboardData } from "../types/metrics";
 
-export function useDashboardMetrics(initialFilters?: DashboardFilters) {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [filters, setFilters] = useState<DashboardFilters>(() => initialFilters || {});
+export function useDashboardMetrics() {
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMetrics = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await dashboardService.getMetrics(filters);
-      setMetrics(data);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, "Falha ao carregar dados do dashboard."));
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
-
   useEffect(() => {
-    let active = true;
-
-    async function loadData() {
+    async function fetchMetrics() {
       try {
         setLoading(true);
         setError(null);
-        const data = await dashboardService.getMetrics(filters);
-        if (active) {
-          setMetrics(data);
-        }
-      } catch (err: unknown) {
-        if (active) {
-          setError(getErrorMessage(err, "Falha ao carregar dados do dashboard."));
-        }
+        const response = await api.get<DashboardData>("/metrics");
+        setData(response.data);
+      } catch (err) {
+        console.error(err);
+        setError("Não foi possível carregar as métricas do servidor.");
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     }
 
-    loadData();
+    fetchMetrics();
+  }, []);
 
-    return () => {
-      active = false;
-    };
-  }, [filters]);
-
-  return {
-    metrics,
-    loading,
-    error,
-    filters,
-    setFilters,
-    refetch: fetchMetrics,
-  };
+  return { data, loading, error };
 }

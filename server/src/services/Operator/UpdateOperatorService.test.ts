@@ -50,9 +50,9 @@ describe("UpdateOperatorService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      updateOperatorService.execute({ ...validPayload, userRole: "OPERADOR" })
+      updateOperatorService.execute({ ...validPayload, userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -62,11 +62,13 @@ describe("UpdateOperatorService", () => {
 
   it("não deve permitir atualizar um operador inexistente", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.operator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.operator.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      updateOperatorService.execute(validPayload)
-    ).rejects.toThrow("Funcionário não encontrado.");
+    await expect(updateOperatorService.execute(validPayload)).rejects.toThrow(
+      "Funcionário não encontrado.",
+    );
 
     expect(prismaClient.operator.findUnique).toHaveBeenCalledWith({
       where: { id: validPayload.id },
@@ -78,13 +80,17 @@ describe("UpdateOperatorService", () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
 
     // 1ª busca (por ID) encontra o operador; 2ª busca (por matrícula) encontra outro cadastro
-    jest.mocked(prismaClient.operator.findUnique)
+    jest
+      .mocked(prismaClient.operator.findUnique)
       .mockResolvedValueOnce(existingOperator as any)
-      .mockResolvedValueOnce({ id: "operator-456", registration: "78910" } as any);
+      .mockResolvedValueOnce({
+        id: "operator-456",
+        registration: "78910",
+      } as any);
 
-    await expect(
-      updateOperatorService.execute(validPayload)
-    ).rejects.toThrow("Esta matricula já está em uso por outro funcionário.");
+    await expect(updateOperatorService.execute(validPayload)).rejects.toThrow(
+      "Esta matricula já está em uso por outro funcionário.",
+    );
 
     expect(prismaClient.operator.findUnique).toHaveBeenNthCalledWith(1, {
       where: { id: validPayload.id },
@@ -108,11 +114,14 @@ describe("UpdateOperatorService", () => {
 
     jest.mocked(isManagement).mockReturnValue(true as never);
     // 1ª busca encontra o operador; 2ª confirma que a nova matrícula está livre
-    jest.mocked(prismaClient.operator.findUnique)
+    jest
+      .mocked(prismaClient.operator.findUnique)
       .mockResolvedValueOnce(existingOperator as any)
       .mockResolvedValueOnce(null as never);
 
-    jest.mocked(prismaClient.operator.update).mockResolvedValue(updatedResult as any);
+    jest
+      .mocked(prismaClient.operator.update)
+      .mockResolvedValue(updatedResult as any);
 
     const result = await updateOperatorService.execute(validPayload);
 

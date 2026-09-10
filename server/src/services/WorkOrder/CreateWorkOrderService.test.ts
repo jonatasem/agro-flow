@@ -72,9 +72,9 @@ describe("CreateWorkOrderService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      createWorkOrderService.execute({ ...validPayload, userRole: "OPERADOR" })
+      createWorkOrderService.execute({ ...validPayload, userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para abrir ordens de serviço."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para abrir ordens de serviço.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -84,11 +84,13 @@ describe("CreateWorkOrderService", () => {
 
   it("não deve permitir criar O.S. se o colaborador criador não for encontrado", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      createWorkOrderService.execute(validPayload)
-    ).rejects.toThrow("Usuário criador não encontrado.");
+    await expect(createWorkOrderService.execute(validPayload)).rejects.toThrow(
+      "Usuário criador não encontrado.",
+    );
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({
       where: { id: validPayload.criadoPor },
@@ -98,12 +100,16 @@ describe("CreateWorkOrderService", () => {
 
   it("não deve permitir criar O.S. se o equipamento não for encontrado", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
-    jest.mocked(prismaClient.equipment.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.equipment.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      createWorkOrderService.execute(validPayload)
-    ).rejects.toThrow("Equipamento não encontrado.");
+    await expect(createWorkOrderService.execute(validPayload)).rejects.toThrow(
+      "Equipamento não encontrado.",
+    );
 
     expect(prismaClient.equipment.findUnique).toHaveBeenCalledWith({
       where: { fleet: validPayload.fleet },
@@ -113,13 +119,19 @@ describe("CreateWorkOrderService", () => {
 
   it("não deve permitir criar O.S. se o operador não for encontrado", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
-    jest.mocked(prismaClient.equipment.findUnique).mockResolvedValue(mockEquipment as any);
-    jest.mocked(prismaClient.operator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.equipment.findUnique)
+      .mockResolvedValue(mockEquipment as any);
+    jest
+      .mocked(prismaClient.operator.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      createWorkOrderService.execute(validPayload)
-    ).rejects.toThrow("Operador não encontrado com a matrícula informada.");
+    await expect(createWorkOrderService.execute(validPayload)).rejects.toThrow(
+      "Operador não encontrado com a matrícula informada.",
+    );
 
     expect(prismaClient.operator.findUnique).toHaveBeenCalledWith({
       where: { registration: validPayload.operatorRegistration },
@@ -147,11 +159,21 @@ describe("CreateWorkOrderService", () => {
     };
 
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
-    jest.mocked(prismaClient.equipment.findUnique).mockResolvedValue(mockEquipment as any);
-    jest.mocked(prismaClient.operator.findUnique).mockResolvedValue(mockOperator as any);
-    jest.mocked(prismaClient.workOrder.findFirst).mockResolvedValue(activeWorkOrder as any);
-    jest.mocked(prismaClient.workOrder.findUnique).mockResolvedValue(mockUpdatedWorkOrder as any);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.equipment.findUnique)
+      .mockResolvedValue(mockEquipment as any);
+    jest
+      .mocked(prismaClient.operator.findUnique)
+      .mockResolvedValue(mockOperator as any);
+    jest
+      .mocked(prismaClient.workOrder.findFirst)
+      .mockResolvedValue(activeWorkOrder as any);
+    jest
+      .mocked(prismaClient.workOrder.findUnique)
+      .mockResolvedValue(mockUpdatedWorkOrder as any);
 
     const result = await createWorkOrderService.execute(validPayload);
 
@@ -206,11 +228,21 @@ describe("CreateWorkOrderService", () => {
     };
 
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
-    jest.mocked(prismaClient.equipment.findUnique).mockResolvedValue(mockEquipment as any);
-    jest.mocked(prismaClient.operator.findUnique).mockResolvedValue(mockOperator as any);
-    jest.mocked(prismaClient.workOrder.findFirst).mockResolvedValue(null as never);
-    jest.mocked(prismaClient.workOrder.create).mockResolvedValue(mockCreatedWorkOrder as any);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.equipment.findUnique)
+      .mockResolvedValue(mockEquipment as any);
+    jest
+      .mocked(prismaClient.operator.findUnique)
+      .mockResolvedValue(mockOperator as any);
+    jest
+      .mocked(prismaClient.workOrder.findFirst)
+      .mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.workOrder.create)
+      .mockResolvedValue(mockCreatedWorkOrder as any);
 
     const result = await createWorkOrderService.execute(validPayload);
 

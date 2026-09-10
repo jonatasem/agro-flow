@@ -26,7 +26,9 @@ export async function isAuthenticated(
 
   // Valida se o cabeçalho segue o padrão 'Bearer <token>'
   if (!authHeader.startsWith("Bearer ")) {
-    return reply.status(401).send({ error: "Formato do token inválido. Utilize o padrão Bearer." });
+    return reply
+      .status(401)
+      .send({ error: "Formato do token inválido. Utilize o padrão Bearer." });
   }
 
   // Separa o prefixo 'Bearer' e obtém apenas a hash do token

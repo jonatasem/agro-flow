@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { PauseSectorService } from "../../services/SectorService/PauseSectorService.js";
 
-interface PauseSectorControllerProps { 
+interface PauseSectorControllerProps {
   reason: "FALTA_DE_PECA" | "AGUARDANDO_OUTRO_SETOR" | "OUTRO_MOTIVO";
   description: string;
 }
@@ -20,15 +20,15 @@ export class PauseSectorController {
     }
 
     if (!sectorServiceId) {
+      return reply.status(400).send({ error: "ID do serviço é obrigatório." });
+    }
+
+    if (!reason || !description) {
       return reply
         .status(400)
-        .send({ error: "ID do serviço é obrigatório." });
-    }
-    
-    if(!reason || !description){
-      return reply
-      .status(400)
-      .send({ error: "O motivo e a descrição são obrigatórios para pausar uma O.S." });
+        .send({
+          error: "O motivo e a descrição são obrigatórios para pausar uma O.S.",
+        });
     }
 
     const pauseService = new PauseSectorService();
@@ -38,7 +38,7 @@ export class PauseSectorController {
         sectorServiceId,
         pauseReason: reason,
         observation: description,
-        tecnicoId
+        tecnicoId,
       });
 
       return reply.status(200).send(result);

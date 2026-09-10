@@ -14,7 +14,9 @@ export class ResumeSectorService {
     }
 
     if (sectorService.status !== "PAUSADO") {
-      throw new Error(`Este serviço não está pausado. Status atual: ${sectorService.status}`);
+      throw new Error(
+        `Este serviço não está pausado. Status atual: ${sectorService.status}`,
+      );
     }
 
     // Busca a última pausa registrada para este serviço

@@ -40,11 +40,13 @@ describe("PauseSectorService", () => {
   });
 
   it("não deve permitir pausar se o atendimento do setor não for encontrado", async () => {
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      pauseSectorService.execute(validPayload)
-    ).rejects.toThrow("Atendimento do setor não encontrado.");
+    await expect(pauseSectorService.execute(validPayload)).rejects.toThrow(
+      "Atendimento do setor não encontrado.",
+    );
 
     expect(prismaClient.sectorService.findUnique).toHaveBeenCalledWith({
       where: { id: validPayload.sectorServiceId },
@@ -58,9 +60,9 @@ describe("PauseSectorService", () => {
       tecnicoResponsavelId: "tec-outro",
     } as any);
 
-    await expect(
-      pauseSectorService.execute(validPayload)
-    ).rejects.toThrow("Apenas o técnico que iniciou a manutenção pode pausa-la.");
+    await expect(pauseSectorService.execute(validPayload)).rejects.toThrow(
+      "Apenas o técnico que iniciou a manutenção pode pausa-la.",
+    );
 
     expect(prismaClient.$transaction).not.toHaveBeenCalled();
   });
@@ -71,9 +73,9 @@ describe("PauseSectorService", () => {
       status: "FINALIZADO",
     } as any);
 
-    await expect(
-      pauseSectorService.execute(validPayload)
-    ).rejects.toThrow("Apenas atendimentos em manutenção podem ser pausados.");
+    await expect(pauseSectorService.execute(validPayload)).rejects.toThrow(
+      "Apenas atendimentos em manutenção podem ser pausados.",
+    );
 
     expect(prismaClient.$transaction).not.toHaveBeenCalled();
   });
@@ -93,11 +95,12 @@ describe("PauseSectorService", () => {
       pausedAt: new Date(),
     };
 
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(mockSectorService as any);
-    jest.mocked(prismaClient.$transaction).mockResolvedValue([
-      mockUpdatedService,
-      mockServicePause,
-    ] as any);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(mockSectorService as any);
+    jest
+      .mocked(prismaClient.$transaction)
+      .mockResolvedValue([mockUpdatedService, mockServicePause] as any);
 
     const result = await pauseSectorService.execute(validPayload);
 
