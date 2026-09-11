@@ -2,9 +2,9 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { CreateOperatorService } from "../../services/Operator/CreateOperatorService.js";
 
 interface CreateOperatorProps {
-    name: string;
-    registration: string;
-    city: string;
+  name: string;
+  registration: string;
+  city: string;
 }
 
 export class CreateOperatorController {
@@ -15,16 +15,16 @@ export class CreateOperatorController {
     // Se o middleware falhar ou não injetar o papel, barra antes do Service
     if (!userRole) {
       return reply
-      .status(401)
-      .send({ error: "Sessão inválida ou usuário não autenticado." });
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { name, registration, city } = request.body as CreateOperatorProps;
 
     if (!name || !registration || !city) {
       return reply
-      .status(401)
-      .send({ error: "Todos os campos são obrigatórios" });
+        .status(401)
+        .send({ error: "Todos os campos são obrigatórios" });
     }
 
     const operatorService = new CreateOperatorService();
@@ -34,10 +34,10 @@ export class CreateOperatorController {
         name,
         registration,
         city,
-        userRole
+        userRole,
       });
 
-      return reply.status(201).send(result);    
+      return reply.status(201).send(result);
     } catch (error: any) {
       return reply.status(400).send({ error: error.message });
     }

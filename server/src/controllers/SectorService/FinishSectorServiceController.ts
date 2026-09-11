@@ -1,4 +1,3 @@
-
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { FinishSectorServiceService } from "../../services/SectorService/FinishSectorServiceService.js";
 
@@ -17,12 +16,16 @@ export class FinishSectorServiceController {
         .send({ error: "O ID do serviço é obrigatório." });
     }
 
-    const { solucaoTecnico, tipoCausa } = request.body as FinishSectorServiceBody;
+    const { solucaoTecnico, tipoCausa } =
+      request.body as FinishSectorServiceBody;
 
     if (!solucaoTecnico || !tipoCausa) {
       return reply
-      .status(400)
-      .send({ error: "A solução do técnico e o tipo de causa são necessários para finalizar o serviço."});
+        .status(400)
+        .send({
+          error:
+            "A solução do técnico e o tipo de causa são necessários para finalizar o serviço.",
+        });
     }
 
     const tecnicoId = request.userId;

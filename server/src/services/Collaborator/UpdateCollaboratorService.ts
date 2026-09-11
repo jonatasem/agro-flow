@@ -11,11 +11,18 @@ export interface UpdateCollaboratorProps {
 }
 
 export class UpdateCollaboratorService {
-  async execute({ id, userRole, name, registration, city, status }: UpdateCollaboratorProps) {
+  async execute({
+    id,
+    userRole,
+    name,
+    registration,
+    city,
+    status,
+  }: UpdateCollaboratorProps) {
     // Validação do RBAC
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar colaboradores."
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar colaboradores.",
       );
     }
 

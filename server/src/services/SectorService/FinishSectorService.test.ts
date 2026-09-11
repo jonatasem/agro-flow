@@ -15,11 +15,14 @@ jest.unstable_mockModule("../../prisma/index.js", () => ({
 }));
 
 // Importações dinâmicas após o registro dos mocks
-const { FinishSectorServiceService } = await import("./FinishSectorServiceService.js");
+const { FinishSectorServiceService } =
+  await import("./FinishSectorServiceService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 
 describe("FinishSectorServiceService", () => {
-  let finishSectorServiceService: InstanceType<typeof FinishSectorServiceService>;
+  let finishSectorServiceService: InstanceType<
+    typeof FinishSectorServiceService
+  >;
 
   const validPayload = {
     sectorServiceId: "service-123",
@@ -48,10 +51,12 @@ describe("FinishSectorServiceService", () => {
   });
 
   it("não deve permitir finalizar se o serviço não for encontrado", async () => {
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(null as never);
 
     await expect(
-      finishSectorServiceService.execute(validPayload)
+      finishSectorServiceService.execute(validPayload),
     ).rejects.toThrow("Serviço não encontrado.");
 
     expect(prismaClient.sectorService.findUnique).toHaveBeenCalledWith({
@@ -68,7 +73,7 @@ describe("FinishSectorServiceService", () => {
     } as any);
 
     await expect(
-      finishSectorServiceService.execute(validPayload)
+      finishSectorServiceService.execute(validPayload),
     ).rejects.toThrow("Este serviço não está em manutenção.");
 
     expect(prismaClient.sectorService.update).not.toHaveBeenCalled();
@@ -81,8 +86,10 @@ describe("FinishSectorServiceService", () => {
     } as any);
 
     await expect(
-      finishSectorServiceService.execute(validPayload)
-    ).rejects.toThrow("Apenas o técnico que iniciou a manutenção pode finalizá-la.");
+      finishSectorServiceService.execute(validPayload),
+    ).rejects.toThrow(
+      "Apenas o técnico que iniciou a manutenção pode finalizá-la.",
+    );
 
     expect(prismaClient.sectorService.update).not.toHaveBeenCalled();
   });
@@ -94,7 +101,7 @@ describe("FinishSectorServiceService", () => {
     } as any);
 
     await expect(
-      finishSectorServiceService.execute(validPayload)
+      finishSectorServiceService.execute(validPayload),
     ).rejects.toThrow("Dados do início da manutenção ausente.");
 
     expect(prismaClient.sectorService.update).not.toHaveBeenCalled();
@@ -109,12 +116,17 @@ describe("FinishSectorServiceService", () => {
       tempoManutencao: 40,
     };
 
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(mockSectorService as any);
-    jest.mocked(prismaClient.sectorService.update).mockResolvedValue(mockUpdatedService as any);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(mockSectorService as any);
+    jest
+      .mocked(prismaClient.sectorService.update)
+      .mockResolvedValue(mockUpdatedService as any);
 
     // 1ª contagem: total de serviços = 2
     // 2ª contagem: serviços finalizados = 1 (ainda resta 1 pendente)
-    jest.mocked(prismaClient.sectorService.count)
+    jest
+      .mocked(prismaClient.sectorService.count)
       .mockResolvedValueOnce(2 as never)
       .mockResolvedValueOnce(1 as never);
 
@@ -145,12 +157,17 @@ describe("FinishSectorServiceService", () => {
       tempoManutencao: 40,
     };
 
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(mockSectorService as any);
-    jest.mocked(prismaClient.sectorService.update).mockResolvedValue(mockUpdatedService as any);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(mockSectorService as any);
+    jest
+      .mocked(prismaClient.sectorService.update)
+      .mockResolvedValue(mockUpdatedService as any);
 
     // 1ª contagem: total de serviços = 2
     // 2ª contagem: serviços finalizados = 2 (todos finalizados)
-    jest.mocked(prismaClient.sectorService.count)
+    jest
+      .mocked(prismaClient.sectorService.count)
       .mockResolvedValueOnce(2 as never)
       .mockResolvedValueOnce(2 as never);
 

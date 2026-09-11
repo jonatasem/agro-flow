@@ -20,15 +20,15 @@ export class CreateOperatorService {
       where: { registration },
     });
 
-    if(registrationExists){
-      throw new Error("Já existe um funcionário cadastrado com essa matrícula")
+    if (registrationExists) {
+      throw new Error("Já existe um funcionário cadastrado com essa matrícula");
     }
-  
+
     const operator = await prismaClient.operator.create({
       data: {
         name,
         registration,
-        city
+        city,
       },
     });
 

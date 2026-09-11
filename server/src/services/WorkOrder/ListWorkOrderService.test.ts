@@ -28,7 +28,11 @@ describe("ListWorkOrderService", () => {
           setor: "Mecanica",
           operator: { id: "op-1", name: "Carlos Operador" },
           criador: { id: "user-1", name: "Gestor Silva", role: "GESTAO" },
-          tecnicoResponsavel: { id: "tec-1", name: "João Técnico", role: "TECNICO" },
+          tecnicoResponsavel: {
+            id: "tec-1",
+            name: "João Técnico",
+            role: "TECNICO",
+          },
         },
       ],
     },
@@ -47,7 +51,9 @@ describe("ListWorkOrderService", () => {
   });
 
   it("deve listar todas as ordens de serviço quando nenhum status for informado", async () => {
-    jest.mocked(prismaClient.workOrder.findMany).mockResolvedValue(mockWorkOrders as any);
+    jest
+      .mocked(prismaClient.workOrder.findMany)
+      .mockResolvedValue(mockWorkOrders as any);
 
     const result = await listWorkOrderService.execute({});
 
@@ -84,7 +90,9 @@ describe("ListWorkOrderService", () => {
 
   it("deve listar ordens de serviço filtradas por status convertido para maiúsculas", async () => {
     const filteredOrders = [mockWorkOrders[0]];
-    jest.mocked(prismaClient.workOrder.findMany).mockResolvedValue(filteredOrders as any);
+    jest
+      .mocked(prismaClient.workOrder.findMany)
+      .mockResolvedValue(filteredOrders as any);
 
     const result = await listWorkOrderService.execute({ status: "aberta" });
 

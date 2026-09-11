@@ -1,7 +1,7 @@
 import prismaClient from "../../prisma/index.js";
 import { isManagement } from "../../config/roles.js";
 
-interface UpdateWorkOrderProps {
+interface UpdateSectorProps {
   id: string;
   setor?: string | undefined;
   qruDescricao?: string | undefined;
@@ -14,11 +14,11 @@ interface UpdateWorkOrderProps {
   operatorId?: string | undefined;
 }
 
-export class UpdateWorkOrderService {
-  async execute(data: UpdateWorkOrderProps, userRole: string) {
+export class UpdateSectorService {
+  async execute(data: UpdateSectorProps, userRole: string) {
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar ordens de serviço."
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar ordens de serviço.",
       );
     }
 

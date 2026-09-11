@@ -37,9 +37,9 @@ describe("CreateEquipmentService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      createEquipmentService.execute({ ...validPayload, userRole: "OPERADOR" })
+      createEquipmentService.execute({ ...validPayload, userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -55,9 +55,9 @@ describe("CreateEquipmentService", () => {
       fleet: "EQ-001",
     } as any);
 
-    await expect(
-      createEquipmentService.execute(validPayload)
-    ).rejects.toThrow("Já existe um equipamento cadastrado com essa frota.");
+    await expect(createEquipmentService.execute(validPayload)).rejects.toThrow(
+      "Já existe um equipamento cadastrado com essa frota.",
+    );
 
     expect(prismaClient.equipment.findUnique).toHaveBeenCalledWith({
       where: { fleet: validPayload.fleet },
@@ -75,8 +75,12 @@ describe("CreateEquipmentService", () => {
     };
 
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.equipment.findUnique).mockResolvedValue(null as never);
-    jest.mocked(prismaClient.equipment.create).mockResolvedValue(mockCreatedEquipment as any);
+    jest
+      .mocked(prismaClient.equipment.findUnique)
+      .mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.equipment.create)
+      .mockResolvedValue(mockCreatedEquipment as any);
 
     const result = await createEquipmentService.execute(validPayload);
 

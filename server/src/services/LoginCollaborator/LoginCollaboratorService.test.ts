@@ -1,4 +1,11 @@
-import { jest, describe, it, expect, beforeEach, afterEach } from "@jest/globals";
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
 
 // Configuração dos mocks ESM
 jest.unstable_mockModule("../../prisma/index.js", () => ({
@@ -22,7 +29,8 @@ jest.unstable_mockModule("jsonwebtoken", () => ({
 }));
 
 // Importações dinâmicas após o registro dos mocks
-const { LoginCollaboratorService } = await import("./LoginCollaboratorService.js");
+const { LoginCollaboratorService } =
+  await import("./LoginCollaboratorService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 const { default: bcrypt } = await import("bcryptjs");
 const { default: jwt } = await import("jsonwebtoken");
@@ -58,10 +66,12 @@ describe("LoginCollaboratorService", () => {
   });
 
   it("não deve permitir login de uma matrícula não cadastrada", async () => {
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(null as never);
 
     await expect(
-      loginCollaboratorService.execute(validPayload)
+      loginCollaboratorService.execute(validPayload),
     ).rejects.toThrow("Matrícula não autorizada.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({
@@ -76,7 +86,7 @@ describe("LoginCollaboratorService", () => {
     } as any);
 
     await expect(
-      loginCollaboratorService.execute(validPayload)
+      loginCollaboratorService.execute(validPayload),
     ).rejects.toThrow("Este colaborador está desativado no sistema.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({
@@ -87,16 +97,18 @@ describe("LoginCollaboratorService", () => {
   });
 
   it("não deve permitir login com senha incorreta", async () => {
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
     jest.mocked(bcrypt.compare).mockResolvedValue(false as never);
 
     await expect(
-      loginCollaboratorService.execute(validPayload)
+      loginCollaboratorService.execute(validPayload),
     ).rejects.toThrow("Senha incorreta.");
 
     expect(bcrypt.compare).toHaveBeenCalledWith(
       validPayload.password,
-      mockCollaborator.password
+      mockCollaborator.password,
     );
 
     expect(jwt.sign).not.toHaveBeenCalled();
@@ -105,11 +117,13 @@ describe("LoginCollaboratorService", () => {
   it("não deve permitir login se a variável JWT_SECRET não estiver definida", async () => {
     delete process.env.JWT_SECRET;
 
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
     jest.mocked(bcrypt.compare).mockResolvedValue(true as never);
 
     await expect(
-      loginCollaboratorService.execute(validPayload)
+      loginCollaboratorService.execute(validPayload),
     ).rejects.toThrow("A variável de ambiente JWT_SECRET não foi definida.");
 
     expect(jwt.sign).not.toHaveBeenCalled();
@@ -118,7 +132,9 @@ describe("LoginCollaboratorService", () => {
   it("deve realizar login com sucesso e retornar o token com os dados do colaborador", async () => {
     const mockToken = "generated_jwt_token";
 
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
     jest.mocked(bcrypt.compare).mockResolvedValue(true as never);
     jest.mocked(jwt.sign).mockReturnValue(mockToken as never);
 
@@ -126,7 +142,7 @@ describe("LoginCollaboratorService", () => {
 
     expect(bcrypt.compare).toHaveBeenCalledWith(
       validPayload.password,
-      mockCollaborator.password
+      mockCollaborator.password,
     );
 
     expect(jwt.sign).toHaveBeenCalledWith(
@@ -139,7 +155,7 @@ describe("LoginCollaboratorService", () => {
       {
         subject: mockCollaborator.id,
         expiresIn: "8h",
-      }
+      },
     );
 
     expect(result).toEqual({

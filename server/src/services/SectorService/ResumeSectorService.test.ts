@@ -43,11 +43,13 @@ describe("ResumeSectorService", () => {
   });
 
   it("não deve permitir retomar se o serviço não for encontrado", async () => {
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      resumeSectorService.execute(validPayload)
-    ).rejects.toThrow("Serviço não encontrado.");
+    await expect(resumeSectorService.execute(validPayload)).rejects.toThrow(
+      "Serviço não encontrado.",
+    );
 
     expect(prismaClient.sectorService.findUnique).toHaveBeenCalledWith({
       where: { id: validPayload.sectorServiceId },
@@ -62,9 +64,9 @@ describe("ResumeSectorService", () => {
       status: "EM_MANUTENCAO",
     } as any);
 
-    await expect(
-      resumeSectorService.execute(validPayload)
-    ).rejects.toThrow("Este serviço não está pausado. Status atual: EM_MANUTENCAO");
+    await expect(resumeSectorService.execute(validPayload)).rejects.toThrow(
+      "Este serviço não está pausado. Status atual: EM_MANUTENCAO",
+    );
 
     expect(prismaClient.servicePause.findFirst).not.toHaveBeenCalled();
     expect(prismaClient.sectorService.update).not.toHaveBeenCalled();
@@ -76,9 +78,15 @@ describe("ResumeSectorService", () => {
       status: "EM_MANUTENCAO",
     };
 
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(mockSectorService as any);
-    jest.mocked(prismaClient.servicePause.findFirst).mockResolvedValue(mockPause as any);
-    jest.mocked(prismaClient.sectorService.update).mockResolvedValue(mockUpdatedService as any);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(mockSectorService as any);
+    jest
+      .mocked(prismaClient.servicePause.findFirst)
+      .mockResolvedValue(mockPause as any);
+    jest
+      .mocked(prismaClient.sectorService.update)
+      .mockResolvedValue(mockUpdatedService as any);
 
     const result = await resumeSectorService.execute(validPayload);
 
@@ -106,12 +114,16 @@ describe("ResumeSectorService", () => {
       status: "EM_MANUTENCAO",
     };
 
-    jest.mocked(prismaClient.sectorService.findUnique).mockResolvedValue(mockSectorService as any);
+    jest
+      .mocked(prismaClient.sectorService.findUnique)
+      .mockResolvedValue(mockSectorService as any);
     jest.mocked(prismaClient.servicePause.findFirst).mockResolvedValue({
       ...mockPause,
       resumedAt: new Date("2026-08-01T11:00:00Z"),
     } as any);
-    jest.mocked(prismaClient.sectorService.update).mockResolvedValue(mockUpdatedService as any);
+    jest
+      .mocked(prismaClient.sectorService.update)
+      .mockResolvedValue(mockUpdatedService as any);
 
     const result = await resumeSectorService.execute(validPayload);
 

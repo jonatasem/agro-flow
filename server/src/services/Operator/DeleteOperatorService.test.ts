@@ -36,9 +36,9 @@ describe("DeleteOperatorService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      deleteOperatorService.execute({ ...validPayload, userRole: "OPERADOR" })
+      deleteOperatorService.execute({ ...validPayload, userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -50,7 +50,7 @@ describe("DeleteOperatorService", () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
 
     await expect(
-      deleteOperatorService.execute({ id: "", userRole: "GESTAO" })
+      deleteOperatorService.execute({ id: "", userRole: "GESTAO" }),
     ).rejects.toThrow("Id do funcionario não encontrado.");
 
     expect(prismaClient.operator.findFirst).not.toHaveBeenCalled();
@@ -59,11 +59,13 @@ describe("DeleteOperatorService", () => {
 
   it("não deve permitir deletar um operador inexistente", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.operator.findFirst).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.operator.findFirst)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      deleteOperatorService.execute(validPayload)
-    ).rejects.toThrow("Funcionário não encontrado");
+    await expect(deleteOperatorService.execute(validPayload)).rejects.toThrow(
+      "Funcionário não encontrado",
+    );
 
     expect(prismaClient.operator.findFirst).toHaveBeenCalledWith({
       where: { id: validPayload.id },

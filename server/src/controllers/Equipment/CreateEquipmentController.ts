@@ -1,5 +1,8 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { CreateEquipmentService, type CreateEquipmentProps } from "../../services/Equipment/CreateEquipmentService.js";
+import {
+  CreateEquipmentService,
+  type CreateEquipmentProps,
+} from "../../services/Equipment/CreateEquipmentService.js";
 
 export class CreateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
@@ -9,16 +12,16 @@ export class CreateEquipmentController {
     // Se o middleware falhar ou não injetar o papel, barra antes do Service
     if (!userRole) {
       return reply
-      .status(401)
-      .send({ error: "Sessão inválida ou usuário não autenticado." });
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { name, fleet } = request.body as CreateEquipmentProps;
-        
+
     if (!name || !fleet) {
-       return reply
-      .status(400)
-      .send({ error: "Todos os campos são obrigatórios." });
+      return reply
+        .status(400)
+        .send({ error: "Todos os campos são obrigatórios." });
     }
 
     const equipmentService = new CreateEquipmentService();
@@ -31,7 +34,7 @@ export class CreateEquipmentController {
       });
 
       return reply.status(201).send(result);
-    } catch(error: any){
+    } catch (error: any) {
       const isPermissionError = error.message?.includes("Acesso negado");
       const statusCode = isPermissionError ? 403 : 400;
 

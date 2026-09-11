@@ -6,10 +6,10 @@ const app = fastify({
   logger: false,
 });
 
-const urlDevelop = process.env.URL_DEVELOP;
+const urlProd = process.env.URL_PROD;
 const port = process.env.PORT;
 
-if (!urlDevelop) {
+if (!urlProd) {
   throw new Error("Informe a url do frontend.");
 }
 
@@ -19,7 +19,7 @@ if (!port) {
 
 const start = async () => {
   await app.register(cors, {
-    origin: urlDevelop,
+    origin: urlProd,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
