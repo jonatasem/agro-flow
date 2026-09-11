@@ -22,12 +22,13 @@ export class CreateCollaboratorService {
     city,
     userRole,
   }: CreateCollaboratorProps) {
+  
     if (!isManagement(userRole)) {
       throw new Error(
         "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
       );
     }
-
+  
     const collaboratorExists = await prismaClient.collaborator.findUnique({
       where: { registration },
     });

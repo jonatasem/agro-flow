@@ -8,6 +8,7 @@ import {
 
 // Utilitários
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { CITIES } from "../../utils/cities";
 
 // Interface das propriedades do Modal de Criação e Edição de Operadores
 interface ModalProps {
@@ -41,7 +42,10 @@ export const CreateOperatorModal: React.FC<ModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !registration.trim()) return;
+    if (!name.trim() || !registration.trim() || !city.trim()) {
+      setError("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -134,17 +138,23 @@ export const CreateOperatorModal: React.FC<ModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700">
-                Cidade / Polo
+              <label className="text-xs text-slate-700 font-semibold">
+                Cidade / Filial *
               </label>
-              <input
-                type="text"
-                placeholder="Ex: Lençóis Paulista"
+              <select
+                required
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 disabled={loading}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all disabled:opacity-50"
-              />
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
+              >
+                <option value="">Selecione uma cidade...</option>
+                {CITIES.map((cityName) => (
+                  <option key={cityName} value={cityName}>
+                    {cityName}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

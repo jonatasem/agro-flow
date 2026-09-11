@@ -106,7 +106,7 @@ export const LoginPage: React.FC = () => {
                 type="password"
                 required
                 autoFocus
-                placeholder="Digite sua senha"
+                placeholder="Ex: 102030"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
