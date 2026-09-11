@@ -1,8 +1,8 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { UpdateWorkOrderService } from "../../services/WorkOrder/UpdateWorkOrderService.js";
+import { UpdateSectorService } from "../../services/SectorService/UpdateSectorService.js";
 
-interface UpdateWorkOrderBody {
-  setor?: string
+interface UpdateSectorProps {
+  setor?: string;
   qruDescricao?: string;
   qth?: string;
   city?: string;
@@ -10,9 +10,10 @@ interface UpdateWorkOrderBody {
   tipoCausa?: string;
   status?: string;
   tecnicoResponsavelId?: string;
+  operatorId?: string;
 }
 
-export class UpdateWorkOrderController {
+export class UpdateSectorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     // Extrai o cargo autenticado
     const userRole = request.userRole;
@@ -20,16 +21,16 @@ export class UpdateWorkOrderController {
     // Se o middleware falhar ou não injetar o papel, barra antes do Service
     if (!userRole) {
       return reply
-      .status(401)
-      .send({ error: "Sessão inválida ou usuário não autenticado." });
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
-    
+
     const { id } = request.params as { id: string };
 
-    if(!id){
+    if (!id) {
       return reply
-      .status(400)
-      .send({ error: "O ID do setor da ordem de serviço é obrigatório." });
+        .status(400)
+        .send({ error: "O ID do setor da ordem de serviço é obrigatório." });
     }
 
     const {
@@ -41,23 +42,26 @@ export class UpdateWorkOrderController {
       tipoCausa,
       status,
       tecnicoResponsavelId,
-    } = request.body as UpdateWorkOrderBody;
+      operatorId,
+    } = request.body as UpdateSectorProps;
 
-    const updateWorkOrderService = new UpdateWorkOrderService();
+    const updateSectorService = new UpdateSectorService();
 
     try {
-      const updatedSector = await updateWorkOrderService.execute({
-        id,
-        setor,
-        qruDescricao,
-        qth,
-        city,
-        solucaoTecnico,
-        tipoCausa,
-        status,
-        tecnicoResponsavelId
-      },
-        userRole
+      const updatedSector = await updateSectorService.execute(
+        {
+          id,
+          setor,
+          qruDescricao,
+          qth,
+          city,
+          solucaoTecnico,
+          tipoCausa,
+          status,
+          tecnicoResponsavelId,
+          operatorId,
+        },
+        userRole,
       );
 
       return reply.status(200).send(updatedSector);

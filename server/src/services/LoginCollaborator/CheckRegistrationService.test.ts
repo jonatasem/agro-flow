@@ -10,7 +10,8 @@ jest.unstable_mockModule("../../prisma/index.js", () => ({
 }));
 
 // Importações dinâmicas após o registro do mock
-const { CheckRegistrationService } = await import("./CheckRegistrationService.js");
+const { CheckRegistrationService } =
+  await import("./CheckRegistrationService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 
 describe("CheckRegistrationService", () => {
@@ -26,10 +27,12 @@ describe("CheckRegistrationService", () => {
   });
 
   it("não deve permitir verificação se a matrícula não for encontrada", async () => {
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(null as never);
 
     await expect(
-      checkRegistrationService.execute(validPayload)
+      checkRegistrationService.execute(validPayload),
     ).rejects.toThrow("Matrícula não encontrada.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({
@@ -48,7 +51,7 @@ describe("CheckRegistrationService", () => {
     } as any);
 
     await expect(
-      checkRegistrationService.execute(validPayload)
+      checkRegistrationService.execute(validPayload),
     ).rejects.toThrow("Este cadastro está inativo. Contate o administrador.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({
@@ -66,7 +69,9 @@ describe("CheckRegistrationService", () => {
       status: true,
     };
 
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(mockCollaborator as any);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(mockCollaborator as any);
 
     const result = await checkRegistrationService.execute(validPayload);
 

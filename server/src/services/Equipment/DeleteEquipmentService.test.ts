@@ -36,9 +36,9 @@ describe("DeleteEquipmentService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      deleteEquipmentService.execute({ ...validPayload, userRole: "OPERADOR" })
+      deleteEquipmentService.execute({ ...validPayload, userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -48,11 +48,13 @@ describe("DeleteEquipmentService", () => {
 
   it("não deve permitir deletar um equipamento inexistente", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.equipment.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.equipment.findUnique)
+      .mockResolvedValue(null as never);
 
-    await expect(
-      deleteEquipmentService.execute(validPayload)
-    ).rejects.toThrow("Equipamento não encontrado");
+    await expect(deleteEquipmentService.execute(validPayload)).rejects.toThrow(
+      "Equipamento não encontrado",
+    );
 
     expect(prismaClient.equipment.findUnique).toHaveBeenCalledWith({
       where: { id: validPayload.id },

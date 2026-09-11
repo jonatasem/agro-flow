@@ -37,13 +37,13 @@ export class LoginCollaboratorService {
     const token = jwt.sign(
       {
         name: collaborator.name,
-        role: collaborator.role,    
+        role: collaborator.role,
         sector: collaborator.sector,
       },
       secret,
       {
-        subject: collaborator.id,  
-        expiresIn: "8h",             // Tempo de expiração da sessão do JWT
+        subject: collaborator.id,
+        expiresIn: "8h", // Tempo de expiração da sessão do JWT
       },
     );
 

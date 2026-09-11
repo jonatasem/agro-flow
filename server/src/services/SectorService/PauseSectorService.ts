@@ -8,7 +8,12 @@ interface PauseSectorProps {
 }
 
 export class PauseSectorService {
-  async execute({ sectorServiceId, pauseReason, observation, tecnicoId }: PauseSectorProps) {
+  async execute({
+    sectorServiceId,
+    pauseReason,
+    observation,
+    tecnicoId,
+  }: PauseSectorProps) {
     const sectorService = await prismaClient.sectorService.findUnique({
       where: { id: sectorServiceId },
     });
@@ -18,7 +23,9 @@ export class PauseSectorService {
     }
 
     if (sectorService.tecnicoResponsavelId !== tecnicoId) {
-        throw new Error("Apenas o técnico que iniciou a manutenção pode pausa-la.");
+      throw new Error(
+        "Apenas o técnico que iniciou a manutenção pode pausa-la.",
+      );
     }
 
     if (sectorService.status !== "EM_MANUTENCAO") {
@@ -28,7 +35,7 @@ export class PauseSectorService {
     const [updatedService] = await prismaClient.$transaction([
       prismaClient.sectorService.update({
         where: { id: sectorServiceId },
-        data: { 
+        data: {
           status: "PAUSADO",
           motivoPausa: observation,
         },

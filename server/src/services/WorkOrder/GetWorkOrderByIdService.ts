@@ -25,7 +25,9 @@ export class GetWorkOrderByIdService {
           include: {
             operator: true,
             criador: { select: { id: true, name: true, role: true } },
-            tecnicoResponsavel: { select: { id: true, name: true, role: true } },
+            tecnicoResponsavel: {
+              select: { id: true, name: true, role: true },
+            },
             pauses: true,
           },
         },

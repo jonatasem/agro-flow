@@ -17,11 +17,11 @@ export class CreateEquipmentService {
     }
 
     const fleetExists = await prismaClient.equipment.findUnique({
-      where: { fleet }
+      where: { fleet },
     });
-    
-    if(fleetExists){
-      throw new Error("Já existe um equipamento cadastrado com essa frota.")
+
+    if (fleetExists) {
+      throw new Error("Já existe um equipamento cadastrado com essa frota.");
     }
 
     const equipment = await prismaClient.equipment.create({

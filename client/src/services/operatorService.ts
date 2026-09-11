@@ -4,11 +4,11 @@ import { api } from "./api";
 export interface Operator {
   id: string;
   name: string;
-  role?: string;
+  role: string;
   registration: string;
-  city?: string;
+  city: string;
   status?: boolean;
-  createdAt?: string;
+  createdAt: string;
   updatedAt?: string;
 }
 

@@ -26,11 +26,11 @@ model Collaborator {
 }
 
 model Equipment {
-  id        String      @id @map("_id") @default(auto()) @db.ObjectId
-  name      String
-  fleet     String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id            String      @id @map("_id") @default(auto()) @db.ObjectId
+  name          String
+  fleet         String      @unique
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   workOrder WorkOrder[]
 
@@ -72,8 +72,8 @@ model SectorService {
   status               String        @default("AGUARDANDO_MANUTENCAO") 
   qruDescricao         String    
   solucaoTecnico       String        @default("") 
-  tipoCausa            String?   
-  motivoPausa          String?       // <--- CAMPO ADICIONADO
+  tipoCausa            String?       
+  motivoPausa          String?       
   qth                  String
   city                 String 
 
@@ -97,9 +97,9 @@ model SectorService {
 model ServicePause {
   id              String        @id @map("_id") @default(auto()) @db.ObjectId
   sectorServiceId String        @db.ObjectId
-  sectorService   SectorService? @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
+  sectorService   SectorService @relation(fields: [sectorServiceId], references: [id], onDelete: Cascade)
   reason          String        
-  description     String?       
+  description     String?
   pausedAt        DateTime      @default(now())
   resumedAt       DateTime?     
 

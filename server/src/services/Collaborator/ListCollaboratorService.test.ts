@@ -14,7 +14,8 @@ jest.unstable_mockModule("../../config/roles.js", () => ({
 }));
 
 // Importações dinâmicas após o registro dos mocks
-const { ListCollaboratorService } = await import("./ListCollaboratorService.js");
+const { ListCollaboratorService } =
+  await import("./ListCollaboratorService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 const { isManagement } = await import("../../config/roles.js");
 
@@ -34,9 +35,9 @@ describe("ListCollaboratorService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      listCollaboratorService.execute({ userRole: "OPERADOR" })
+      listCollaboratorService.execute({ userRole: "OPERADOR" }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para listar os colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para listar os colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -68,7 +69,9 @@ describe("ListCollaboratorService", () => {
     ];
 
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findMany).mockResolvedValue(mockCollaborators as any);
+    jest
+      .mocked(prismaClient.collaborator.findMany)
+      .mockResolvedValue(mockCollaborators as any);
 
     const result = await listCollaboratorService.execute(validPayload);
 

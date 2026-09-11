@@ -15,7 +15,8 @@ jest.unstable_mockModule("../../config/roles.js", () => ({
 }));
 
 // Importações dinâmicas após o registro dos mocks
-const { DeleteCollaboratorService } = await import("./DeleteCollaboratorService.js");
+const { DeleteCollaboratorService } =
+  await import("./DeleteCollaboratorService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 const { isManagement } = await import("../../config/roles.js");
 
@@ -36,9 +37,9 @@ describe("DeleteCollaboratorService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      deleteCollaboratorService.execute(validPayload)
+      deleteCollaboratorService.execute(validPayload),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para deletar colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para deletar colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith(validPayload.userRole);
@@ -48,10 +49,12 @@ describe("DeleteCollaboratorService", () => {
 
   it("não deve permitir deletar um colaborador inexistente", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(null as never);
 
     await expect(
-      deleteCollaboratorService.execute(validPayload)
+      deleteCollaboratorService.execute(validPayload),
     ).rejects.toThrow("Funcionário não encontrado.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({

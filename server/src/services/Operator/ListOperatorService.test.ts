@@ -41,7 +41,9 @@ describe("ListOperatorService", () => {
       },
     ];
 
-    jest.mocked(prismaClient.operator.findMany).mockResolvedValue(mockOperators as any);
+    jest
+      .mocked(prismaClient.operator.findMany)
+      .mockResolvedValue(mockOperators as any);
 
     const result = await listOperatorService.execute();
 

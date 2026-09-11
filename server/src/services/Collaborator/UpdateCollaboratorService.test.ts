@@ -15,7 +15,8 @@ jest.unstable_mockModule("../../config/roles.js", () => ({
 }));
 
 // Importações dinâmicas após o registro dos mocks
-const { UpdateCollaboratorService } = await import("./UpdateCollaboratorService.js");
+const { UpdateCollaboratorService } =
+  await import("./UpdateCollaboratorService.js");
 const { default: prismaClient } = await import("../../prisma/index.js");
 const { isManagement } = await import("../../config/roles.js");
 
@@ -51,9 +52,12 @@ describe("UpdateCollaboratorService", () => {
     jest.mocked(isManagement).mockReturnValue(false as never);
 
     await expect(
-      updateCollaboratorService.execute({ ...validPayload, userRole: "OPERADOR" })
+      updateCollaboratorService.execute({
+        ...validPayload,
+        userRole: "OPERADOR",
+      }),
     ).rejects.toThrow(
-      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar colaboradores."
+      "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar colaboradores.",
     );
 
     expect(isManagement).toHaveBeenCalledWith("OPERADOR");
@@ -63,10 +67,12 @@ describe("UpdateCollaboratorService", () => {
 
   it("não deve permitir atualizar um colaborador inexistente", async () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
-    jest.mocked(prismaClient.collaborator.findUnique).mockResolvedValue(null as never);
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
+      .mockResolvedValue(null as never);
 
     await expect(
-      updateCollaboratorService.execute(validPayload)
+      updateCollaboratorService.execute(validPayload),
     ).rejects.toThrow("Funcionário não encontrado.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenCalledWith({
@@ -79,12 +85,16 @@ describe("UpdateCollaboratorService", () => {
     jest.mocked(isManagement).mockReturnValue(true as never);
 
     // Primeira busca (por ID) encontra o colaborador; a segunda (por matrícula) encontra outro cadastro
-    jest.mocked(prismaClient.collaborator.findUnique)
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
       .mockResolvedValueOnce(existingCollaborator as any)
-      .mockResolvedValueOnce({ id: "collaborator-456", registration: "654321" } as any);
+      .mockResolvedValueOnce({
+        id: "collaborator-456",
+        registration: "654321",
+      } as any);
 
     await expect(
-      updateCollaboratorService.execute(validPayload)
+      updateCollaboratorService.execute(validPayload),
     ).rejects.toThrow("Esta matrícula já está em uso por outro colaborador.");
 
     expect(prismaClient.collaborator.findUnique).toHaveBeenNthCalledWith(1, {
@@ -110,11 +120,14 @@ describe("UpdateCollaboratorService", () => {
 
     jest.mocked(isManagement).mockReturnValue(true as never);
     // Primeira busca encontra o colaborador; a segunda confirma que a nova matrícula está livre
-    jest.mocked(prismaClient.collaborator.findUnique)
+    jest
+      .mocked(prismaClient.collaborator.findUnique)
       .mockResolvedValueOnce(existingCollaborator as any)
       .mockResolvedValueOnce(null as never);
 
-    jest.mocked(prismaClient.collaborator.update).mockResolvedValue(updatedResult as any);
+    jest
+      .mocked(prismaClient.collaborator.update)
+      .mockResolvedValue(updatedResult as any);
 
     const result = await updateCollaboratorService.execute(validPayload);
 

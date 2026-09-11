@@ -6,10 +6,10 @@ export interface Collaborator {
   name: string;
   role: string;
   registration: string;
-  city?: string;
-  sector?: string;
+  city: string;
+  sector: string;
   status?: boolean;
-  createdAt?: string;
+  createdAt: string;
   updatedAt?: string;
 }
 

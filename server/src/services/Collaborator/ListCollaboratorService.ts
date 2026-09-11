@@ -10,7 +10,7 @@ export class ListCollaboratorService {
     // Validação do RBAC
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para listar os colaboradores."
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para listar os colaboradores.",
       );
     }
 

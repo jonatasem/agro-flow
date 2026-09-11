@@ -9,32 +9,35 @@ export interface UpdateOperatorProps {
 }
 
 export class UpdateOperatorController {
-  async handle(request:FastifyRequest, reply:FastifyReply) {
-
+  async handle(request: FastifyRequest, reply: FastifyReply) {
     // Extrai o cargo autenticado
     const userRole = request.userRole;
 
     if (!userRole) {
       return reply
-      .status(401)
-      .send({ error: "Sessão inválida ou usuário não autenticado." });
+        .status(401)
+        .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
     const { id } = request.params as { id: string };
 
-    if(!id){
+    if (!id) {
       return reply
-      .status(401)
-      .send({ error: "O id do operador é necessario!" });
+        .status(401)
+        .send({ error: "O id do operador é necessario!" });
     }
 
     const { name, registration, city } = request.body as UpdateOperatorProps;
 
     // Valida se ao menos um campo foi enviado
-    if (name === undefined && registration === undefined && city === undefined) {
+    if (
+      name === undefined &&
+      registration === undefined &&
+      city === undefined
+    ) {
       return reply
-      .status(400)
-      .send({ error: "Informe ao menos um campo para atualização." });
+        .status(400)
+        .send({ error: "Informe ao menos um campo para atualização." });
     }
 
     const updateCollaboratorService = new UpdateOperatorService();
@@ -45,7 +48,7 @@ export class UpdateOperatorController {
         name,
         registration,
         city,
-        userRole
+        userRole,
       });
 
       return reply.status(200).send(result);
@@ -55,6 +58,5 @@ export class UpdateOperatorController {
 
       return reply.status(statusCode).send({ error: error.message });
     }
-
   }
 }

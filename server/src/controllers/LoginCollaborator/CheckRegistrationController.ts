@@ -7,11 +7,9 @@ import {
 export class CheckRegistrationController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
     const { registration } = request.body as CheckProps;
-    
+
     if (!registration) {
-      return reply
-      .status(400)
-      .send({ error: "A matrícula é obrigatória." });
+      return reply.status(400).send({ error: "A matrícula é obrigatória." });
     }
 
     const checkService = new CheckRegistrationService();

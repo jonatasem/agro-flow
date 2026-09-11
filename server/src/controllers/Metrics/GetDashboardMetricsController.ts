@@ -1,18 +1,14 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { GetDashboardMetricsService, type DashboardFiltersProps } from "../../services/Metrics/GetDashboardMetricsService.js";
+import { GetDashboardMetricsService } from "../../services/Metrics/GetDashboardMetricsService.js";
 
 export class GetDashboardMetricsController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const filters = request.query as DashboardFiltersProps;
-
     const getDashboardMetricsService = new GetDashboardMetricsService();
 
-    try {
-      const metrics = await getDashboardMetricsService.execute(filters);
+    // Executa a lógica de cálculo
+    const metrics = await getDashboardMetricsService.execute();
 
-      return reply.status(200).send(metrics);
-    } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
-    }
+    // Retorna a resposta HTTP com status 200 (OK)
+    return reply.status(200).send(metrics);
   }
 }

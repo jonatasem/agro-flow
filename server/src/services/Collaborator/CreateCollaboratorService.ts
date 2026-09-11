@@ -13,17 +13,15 @@ export interface CreateCollaboratorProps {
 }
 
 export class CreateCollaboratorService {
-  async execute(
-    { 
-      name, 
-      role, 
-      sector, 
-      registration, 
-      password, 
-      city, 
-      userRole 
-    }: CreateCollaboratorProps) {
-
+  async execute({
+    name,
+    role,
+    sector,
+    registration,
+    password,
+    city,
+    userRole,
+  }: CreateCollaboratorProps) {
     if (!isManagement(userRole)) {
       throw new Error(
         "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
