@@ -1,4 +1,3 @@
-# 🚀 Jonatas Moreira | Full Stack Developer & Geotecnologia
 
 > **Transformando a complexidade do campo em soluções digitais de alta performance.**
 
@@ -56,3 +55,5 @@ Sistema Full Stack completo para digitalização de Ordens de Serviço (OS), con
 <p align="center">
   <i>"O código é uma ferramenta; a solução é o que gera valor para a operação."</i>
 </p>
+
+---
