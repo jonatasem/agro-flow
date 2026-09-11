@@ -8,6 +8,8 @@ import {
 
 // Utilitários
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { CITIES } from "../../utils/cities";
+import { SETORES } from "../../utils/setores";
 
 // Interface das propriedades do Modal de Criação e Edição de Colaboradores
 interface ModalProps {
@@ -32,7 +34,7 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   const [password, setPassword] = useState("");
   const [role, setRole] = useState(initialData?.role || "Técnico");
   const [sector, setSector] = useState(initialData?.sector || "");
-  const [city, setCity] = useState(initialData?.city || "Lucélia - SP");
+  const [city, setCity] = useState(initialData?.city || "");
 
   // Estados de carregamento e mensagem de erro
   const [loading, setLoading] = useState(false);
@@ -41,11 +43,16 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   // Submissão do formulário para criação ou atualização
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!sector) {
       setError("Por favor, selecione um setor.");
+      return;
+    }
+
+    if (!city) {
+      setError("Por favor, selecione uma cidade.");
       return;
     }
 
@@ -62,19 +69,21 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
       setLoading(true);
       setError("");
 
-      const payload = {
+      const basePayload = {
         name: name.trim(),
         registration: registration.trim(),
         role,
         sector,
         city,
-        ...(password.trim() ? { password } : {}),
       };
 
       if (initialData?.id) {
-        await collaboratorService.update(initialData.id, payload);
+        await collaboratorService.update(initialData.id, basePayload);
       } else {
-        await collaboratorService.create(payload);
+        await collaboratorService.create({
+          ...basePayload,
+          password: password.trim(),
+        });
       }
 
       onSuccess();
@@ -171,53 +180,56 @@ export const CreateCollaboratorModal: React.FC<ModalProps> = ({
               Setor
             </label>
             <select
+              required
               value={sector}
               onChange={(e) => setSector(e.target.value)}
               disabled={loading}
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
             >
               <option value="">Selecione o Setor</option>
-              <option value="Agricultura de Precisao">
-                Agricultura de Precisão
-              </option>
-              <option value="Mecanica">Mecânica</option>
-              <option value="Geral">Geral</option>
+              {SETORES.map((setorItem) => (
+                <option key={setorItem} value={setorItem}>
+                  {setorItem}
+                </option>
+              ))}
             </select>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs text-slate-700 font-semibold">
-              {initialData ? "Nova Senha (Opcional)" : "Senha de Acesso"}
-            </label>
-            <input
-              type="password"
-              required={!initialData}
-              placeholder={
-                initialData
-                  ? "Deixe em branco para manter"
-                  : "Mínimo 6 caracteres"
-              }
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
-            />
-          </div>
+          {/* O campo de senha só é exibido na criação de novo usuário */}
+          {!initialData && (
+            <div className="space-y-1">
+              <label className="text-xs text-slate-700 font-semibold">
+                Senha de Acesso
+              </label>
+              <input
+                type="password"
+                required
+                placeholder="Mínimo 6 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
+              />
+            </div>
+          )}
 
           <div className="space-y-1">
             <label className="text-xs text-slate-700 font-semibold">
               Cidade / Filial
             </label>
             <select
+              required
               value={city}
               onChange={(e) => setCity(e.target.value)}
               disabled={loading}
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-500 focus:bg-white"
             >
-              <option value="Lucélia - SP">Lucélia - SP</option>
-              <option value="Adamantina - SP">Adamantina - SP</option>
-              <option value="Salmourão - SP">Salmourão - SP</option>
-              <option value="Dracena - SP">Dracena - SP</option>
+              <option value="">Selecione uma cidade...</option>
+              {CITIES.map((cityName) => (
+                <option key={cityName} value={cityName}>
+                  {cityName}
+                </option>
+              ))}
             </select>
           </div>
 

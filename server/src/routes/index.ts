@@ -193,7 +193,7 @@ export async function routes(
       async (request: FastifyRequest, reply: FastifyReply) => {
         return new CreateCollaboratorController().handle(request, reply);
       },
-    );
+    );  
 
     // -----------------------------------------------------------------------
     // EQUIPAMENTOS

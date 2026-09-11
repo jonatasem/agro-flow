@@ -8,9 +8,15 @@ import {
   workOrderService,
   type SectorService,
 } from "../../services/workOrderService";
+import {
+  operatorService,
+  type Operator,
+} from "../../services/operatorService";
 
 // Utilitários
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { CITIES } from "../../utils/cities";
+import { SETORES } from "../../utils/setores";
 
 // Interface com as propriedades recebidas pelo modal de criação/edição de Ordem de Serviço
 interface CreateWorkOrderModalProps {
@@ -32,6 +38,9 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   operatorId = "",
 }) => {
   const { equipments, refetch: fetchEquipments } = useEquipments();
+
+  // Estado para armazenar a lista de operadores
+  const [operators, setOperators] = useState<Operator[]>([]);
 
   // Estados dos campos do formulário
   const [fleet, setFleet] = useState(initialFleet);
@@ -63,10 +72,15 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Busca lista de equipamentos ao abrir o modal
+  // Busca a lista de equipamentos e operadores ao abrir o modal
   useEffect(() => {
     if (isOpen) {
       fetchEquipments();
+
+      operatorService
+        .getAll()
+        .then((data) => setOperators(data))
+        .catch((err) => console.error("Erro ao carregar operadores:", err));
     }
   }, [isOpen, fetchEquipments]);
 
@@ -181,15 +195,20 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
             <label className="font-semibold text-neutral-800">
               Setor Afetado *
             </label>
-            <input
-              type="text"
+            <select
               required
-              placeholder="Ex: Mecânica, Elétrica, Hidráulica"
               value={setor}
               onChange={(e) => setSetor(e.target.value)}
               disabled={loading}
               className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
-            />
+            >
+              <option value="">Selecione o setor...</option>
+              {SETORES.map((setorItem) => (
+                <option key={setorItem} value={setorItem}>
+                  {setorItem}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -212,32 +231,42 @@ export const CreateWorkOrderModal: React.FC<CreateWorkOrderModalProps> = ({
               <label className="font-semibold text-neutral-800">
                 Cidade *
               </label>
-              <input
-                type="text"
+              <select
                 required
-                placeholder="Ex: Lucélia"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 disabled={loading}
                 className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
-              />
+              >
+                <option value="">Selecione uma cidade...</option>
+                {CITIES.map((cityName) => (
+                  <option key={cityName} value={cityName}>
+                    {cityName}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           {!initialSectorData && (
             <div className="space-y-1">
               <label className="font-semibold text-neutral-800">
-                ID / Matrícula do Operador *
+                Operador *
               </label>
-              <input
-                type="text"
+              <select
                 required
-                placeholder="Ex: 23805"
                 value={selectedOperatorId}
                 onChange={(e) => setSelectedOperatorId(e.target.value)}
                 disabled={loading}
                 className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
-              />
+              >
+                <option value="">Selecione o operador...</option>
+                {operators.map((op) => (
+                  <option key={op.id} value={op.registration || op.id}>
+                    {op.name} {op.registration ? (`${op.registration}`) : ""}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 

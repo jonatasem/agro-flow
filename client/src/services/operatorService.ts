@@ -4,7 +4,6 @@ import { api } from "./api";
 export interface Operator {
   id: string;
   name: string;
-  role: string;
   registration: string;
   city: string;
   status?: boolean;
