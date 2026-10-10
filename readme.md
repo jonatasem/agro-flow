@@ -1,59 +1,49 @@
+# 🌾 AgroFlow - Sistema de Gestão Operacional Agrícola (CMMS)
 
-## Transformando a complexidade do campo em soluções digitais de alta performance.
+> Sistema corporativo desenvolvido para otimizar a gestão de ordens de serviço, controle de frotas e manutenção de maquinário agrícola, unindo processos do agronegócio à engenharia de software moderna.
 
-Desenvolvedor Full Stack graduando 3° ano em **Engenharia de Computação** e com bagagem técnica como **Técnico Agrícola**. Atuo no setor de **Geotecnologia e Automação Agroindustrial**, unindo a vivência operacional do campo com a precisão da engenharia de software moderna.
+## 🚀 Tecnologias Utilizadas
 
----
-
-### Tech Stack & Ferramentas
-
-* **Frontend:** React.js, TypeScript, Tailwind CSS, SCSS, HTML5/CSS3
-* **Backend:** Node.js, TypeScript, Fastify, Express, JWT, Bcrypt, Zod, Axios
-* **Banco de Dados & ORM:** MongoDB, Prisma ORM
-* **Qualidade & Testes:** Jest (Testes Unitários com padrão AAA e Mocks/Spies)
-* **Geotecnologia & Campo:** Sistemas GIS, Telemetria, Piloto Automático, Sistemas de Abastecimento
+Este projeto foi construído utilizando a seguinte stack:
+- *Backend:* Node.js, Fastify, TypeScript
+- *Banco de Dados & ORM:* MongoDB, Prisma ORM
+- *Validação & Segurança:* Zod, JWT (Authentication stateless)
+- *Testes:* Jest (Testes unitários com padrão AAA e Mocks)
+- *Frontend:* React.js, Next.js (App Router), Tailwind CSS
 
 ---
 
-### O Diferencial: Agro + Tech
-
-Minha atuação é respaldada pelo entendimento prático das dores do setor primário e da indústria de base:
-* **Domínio do Agronegócio:** Compreensão profunda da cadeia produtiva, gestão de frotas e fluxos operacionais de campo.
-* **Métricas de Performance Operacional:** Aplicação de conceitos como MTTR (*Mean Time to Repair*), SLAs e gestão de *downtime* em sistemas de manutenção industrial.
-* **Arquitetura & Segurança:** Construção de aplicações desacopladas, com validações rigorosas de dados (Schema Validation) e controle granular de acesso (RBAC).
+## ⚙️ Arquitetura e Decisões de Projeto
+- *Padrão Controller-Service:* Separação estrita entre as rotas HTTP e as regras de negócio, facilitando a manutenibilidade e a testabilidade.
+- *Validação Defensiva:* Uso do Zod em todas as entradas de dados para garantir integridade em runtime.
+- *Cobertura de Testes:* Suíte robusta de testes unitários cobrindo as regras críticas de negócio dos serviços.
 
 ---
 
-### Projeto em Destaque
+## 🛠️ Como Executar o Projeto Localmente
 
-#### [AgroFlow – Plataforma de Gestão Agroindustrial & CMMS](https://github.com/jonatasem/agro-flow)
-Sistema Full Stack completo para digitalização de Ordens de Serviço (OS), controle de ativos agrícolas e monitoramento de indicadores em tempo real.
+Clone o repositório e acesse a pasta raiz:
+```bash
+git clone https://github.com/jonatasem/agroflow.git
+cd agroflow
 
-* **Principais Recursos & Arquitetura:**
-  * **Controle de Acesso Granular (RBAC):** Autenticação *stateless* por matrícula e permissões dinâmicas para Administradores, Gestores e Técnicos de campo.
-  * **Cálculo de SLAs & MTTR:** Mapeamento de pausas e retomadas operacionais (`ServicePause`) para auditoria exata do tempo inoperante de frotas.
-  * **Backend Seguro & Robustez:** Validação de entradas com Zod, ORM Prisma integrado ao MongoDB e tratamento centralizado de exceções.
-  * **Backend Testado:** Suíte de testes unitários desenvolvida em Jest cobrindo regras de negócio críticas.
-* **Techs:** React, TypeScript, Node.js, Prisma ORM, MongoDB, Tailwind CSS, Jest.
-* **Acesse:** [Repositório no GitHub](https://github.com/jonatasem/agro-flow) | [Aplicação no Ar](https://agro-flow-phi.vercel.app)
+Configurando e Executando o Backend (/server)
+cd server
+npm install
 
----
+Crie um arquivo .env na raiz da pasta server com base no .env.example.
+Execute os testes automatizados:
+npm test
 
-### 🎮 Engenharia de Baixo Nível & Lógica
-* **Otimização & Arquitetura:** Projetos pessoais de análise de memória e otimização de scripts para ROMs de GBA, exercitando conceitos de baixo nível, estruturas de dados e eficiência lógica.
+Inicie o servidor de desenvolvimento:
+npm run dev
 
----
+Configurando e Executando o Frontend (/client)
+Abra um novo terminal na raiz do projeto (/agroflow) e execute:
+cd client
+npm install
 
-### 📫 Vamos conversar?
-
-* **LinkedIn:** [Jonatas Elieser Moreira](https://www.linkedin.com/in/jonatasem)
-* **GitHub:** [@jonatasem](https://github.com/jonatasem)
-* **E-mail:** jonatas.em25@gmail.com
-
----
-
-<p align="center">
-  <i>"O código é uma ferramenta; a solução é o que gera valor para a operação."</i>
-</p>
-
----
+Crie um arquivo .env na raiz da pasta client com base no .env.example.
+Inicie o ambiente de desenvolvimento do frontend:
+npm run dev
+```
