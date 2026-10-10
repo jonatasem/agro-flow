@@ -9,7 +9,7 @@ Este projeto foi construído utilizando a seguinte stack:
 - *Banco de Dados & ORM:* MongoDB, Prisma ORM
 - *Validação & Segurança:* Zod, JWT (Authentication stateless)
 - *Testes:* Jest (Testes unitários com padrão AAA e Mocks)
-- *Frontend:* React.js, Next.js (App Router), Tailwind CSS
+- *Frontend:* React.js, Tailwind CSS
 
 ---
 
