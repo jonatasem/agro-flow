@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  workOrderService,
-  type WorkOrder,
-  type SectorService,
+  workOrderService
 } from "@/services/workOrderService";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 import { formatRepairTime } from "@/utils/formatRepairTime";
+import type { WorkOrder } from "@/types/sectorService";
+import type { SectorService } from "@/types/sectorService";
 
 interface WorkOrderCardProps {
   order: WorkOrder;

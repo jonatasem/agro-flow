@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkOrders } from "@/hooks/useWorkOrders";
 import { Header } from "@/components/Header";
 import { WorkOrderCard } from "@/components/WorkOrderCard";
-import type { SectorService } from "@/services/workOrderService";
+import type { SectorService } from "@/types/sectorService";
 
 // Página do Dashboard Principal - Gestão de Ordens de Serviço (AgroFlow).
 export default function DashboardPage() {
