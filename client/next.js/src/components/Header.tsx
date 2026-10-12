@@ -5,10 +5,10 @@ import Link from "next/link";
 
 interface HeaderProps {
   user: {
-    name: string;
-    role: string;
-    city: string;
-  };
+    name?: string;
+    role?: string;
+    city?: string;
+  } | null;
   handleCreateOpen: () => void;
   signOut: () => void;
   canCreate?: boolean;
@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>{" "}
             •{" "}
             <span className="text-emerald-700 font-extrabold">
-              {mounted ? user?.role : "A carregar..."}
+              {mounted ? user?.role : "..."}
             </span>
           </p>
         </div>
