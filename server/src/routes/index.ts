@@ -42,9 +42,6 @@ import { StartSectorServiceController } from "../controllers/SectorService/Start
 import { PauseSectorController } from "../controllers/SectorService/PauseSectorController.js";
 import { ResumeSectorController } from "../controllers/SectorService/ResumeSectorController.js";
 import { FinishSectorServiceController } from "../controllers/SectorService/FinishSectorServiceController.js";
-
-// --- CONTROLLERS: Dashboard & Métricas ---
-import { GetDashboardMetricsController } from "../controllers/Metrics/GetDashboardMetricsController.js";
 import { DeleteSectorController } from "../controllers/SectorService/DeleteSectorController.js";
 
 export async function routes(
@@ -77,16 +74,6 @@ export async function routes(
   fastify.register(async function protectedRoutes(subFastify) {
     // Hook executado antes de qualquer manipulador dentro deste bloco
     subFastify.addHook("preHandler", isAuthenticated);
-
-    // -----------------------------------------------------------------------
-    // DASHBOARD & MÉTRICAS
-    // -----------------------------------------------------------------------
-    subFastify.get(
-      "/metrics",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new GetDashboardMetricsController().handle(request, reply);
-      },
-    );
 
     // -----------------------------------------------------------------------
     // ORDENS DE SERVIÇO (WORK ORDER)
