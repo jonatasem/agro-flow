@@ -2,6 +2,14 @@
 
 Sistema web full-stack desenvolvido para gestão de ordens de serviço, atendimento por setor e manutenção de frotas e equipamentos agrícolas. Construído com foco em responsividade (Mobile-First), tipagem estrita e controle de acesso por perfil.
 
+---
+
+## 📷 Demonstração
+
+![Preview do Projeto](./github/agro-flow.png)
+
+---
+
 ## Stack
 
 - **Frontend:** Next.js (App Router), React, TypeScript e Tailwind CSS
