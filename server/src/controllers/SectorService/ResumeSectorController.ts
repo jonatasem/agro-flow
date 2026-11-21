@@ -1,23 +1,29 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { ResumeSectorService } from "../../services/SectorService/ResumeSectorService.js";
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class ResumeSectorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { id: sectorServiceId } = request.params as { id: string };
-
-    if (!sectorServiceId) {
+    if (!request.userId) {
       return reply
         .status(401)
+        .send({ error: "Não autorizado. Técnico não identificado." });
+    }
+
+    const { id: sectorServiceId } = (request.params ?? {}) as { id?: string };
+    if (!sectorServiceId) {
+      return reply
+        .status(400)
         .send({ error: "O ID do serviço é obrigatório." });
     }
 
-    const resumeService = new ResumeSectorService();
-
     try {
-      const result = await resumeService.execute({ sectorServiceId });
+      const result = await new ResumeSectorService().execute({
+        sectorServiceId,
+      });
       return reply.status(200).send(result);
-    } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao retomar atendimento.");
     }
   }
 }

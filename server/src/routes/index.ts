@@ -1,43 +1,35 @@
-import {
-  type FastifyInstance,
-  type FastifyPluginOptions,
-  type FastifyRequest,
-  type FastifyReply,
+// src/routes/index.ts
+import type {
+  FastifyInstance,
+  FastifyPluginOptions,
+  FastifyRequest,
+  FastifyReply,
 } from "fastify";
-
-// Middleware de Autenticação JWT
 import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 
-// --- CONTROLLERS: Autenticação & Registro ---
 import { LoginCollaboratorController } from "../controllers/LoginCollaborator/LoginCollaboratorController.js";
 import { CheckRegistrationController } from "../controllers/LoginCollaborator/CheckRegistrationController.js";
 
-// --- CONTROLLERS: Colaborador ---
 import { CreateCollaboratorController } from "../controllers/Collaborator/CreateCollaboratorController.js";
 import { ListCollaboratorController } from "../controllers/Collaborator/ListCollaboratorController.js";
-import { DeleteCollaboratorController } from "../controllers/Collaborator/DeleteCollaboratorController.js";
 import { UpdateCollaboratorController } from "../controllers/Collaborator/UpdateCollaboratorController.js";
+import { DeleteCollaboratorController } from "../controllers/Collaborator/DeleteCollaboratorController.js";
 
-// --- CONTROLLERS: Equipamento ---
 import { CreateEquipmentController } from "../controllers/Equipment/CreateEquipmentController.js";
 import { ListEquipmentController } from "../controllers/Equipment/ListEquipmentController.js";
 import { UpdateEquipmentController } from "../controllers/Equipment/UpdateEquipmentController.js";
 import { DeleteEquipmentController } from "../controllers/Equipment/DeleteEquipmentController.js";
 
-// --- CONTROLLERS: Operador ---
 import { CreateOperatorController } from "../controllers/Operator/CreateOperatorController.js";
 import { ListOperatorController } from "../controllers/Operator/ListOperatorController.js";
 import { UpdateOperatorController } from "../controllers/Operator/UpdateOperatorController.js";
 import { DeleteOperatorController } from "../controllers/Operator/DeleteOperatorController.js";
 
-// --- CONTROLLERS: Ordem de Serviço (WorkOrder) ---
 import { CreateWorkOrderController } from "../controllers/WorkOrder/CreateWorkOrderController.js";
-import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrdernController.js";
-
-import { UpdateSectorController } from "../controllers/SectorService/UpdateSectorController.js";
+import { ListWorkOrderController } from "../controllers/WorkOrder/ListWorkOrderController.js";
 import { GetWorkOrderByIdController } from "../controllers/WorkOrder/GetWorkOrderByIdController.js";
 
-// --- CONTROLLERS: Atendimento de Setor (SectorService) ---
+import { UpdateSectorController } from "../controllers/SectorService/UpdateSectorController.js";
 import { StartSectorServiceController } from "../controllers/SectorService/StartSectorServiceController.js";
 import { PauseSectorController } from "../controllers/SectorService/PauseSectorController.js";
 import { ResumeSectorController } from "../controllers/SectorService/ResumeSectorController.js";
@@ -46,202 +38,124 @@ import { DeleteSectorController } from "../controllers/SectorService/DeleteSecto
 
 export async function routes(
   fastify: FastifyInstance,
-  options: FastifyPluginOptions,
+  _options: FastifyPluginOptions,
 ) {
-  // =========================================================================
-  // ROTAS PÚBLICAS (Nenhum token JWT é exigido)
-  // =========================================================================
-
-  // Autenticação de colaborador
-  fastify.post(
-    "/login",
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      return new LoginCollaboratorController().handle(request, reply);
-    },
+  // Rotas públicas
+  fastify.post("/login", (req: FastifyRequest, reply: FastifyReply) =>
+    new LoginCollaboratorController().handle(req, reply),
   );
 
-  // Validação de matrícula existente
   fastify.post(
     "/login/check-registration",
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      return new CheckRegistrationController().handle(request, reply);
-    },
+    (req: FastifyRequest, reply: FastifyReply) =>
+      new CheckRegistrationController().handle(req, reply),
   );
 
-  // =========================================================================
-  // ROTAS PROTEGIDAS (Exigem Header "Authorization: Bearer <token>")
-  // =========================================================================
+  // Rotas protegidas
   fastify.register(async function protectedRoutes(subFastify) {
-    // Hook executado antes de qualquer manipulador dentro deste bloco
     subFastify.addHook("preHandler", isAuthenticated);
 
-    // -----------------------------------------------------------------------
-    // ORDENS DE SERVIÇO (WORK ORDER)
-    // -----------------------------------------------------------------------
-    subFastify.post(
-      "/work-order",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreateWorkOrderController().handle(request, reply);
-      },
+    // Ordens de Serviço
+    subFastify.post("/work-order", (req: FastifyRequest, reply: FastifyReply) =>
+      new CreateWorkOrderController().handle(req, reply),
     );
-
-    subFastify.get(
-      "/work-order",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListWorkOrderController().handle(request, reply);
-      },
+    subFastify.get("/work-order", (req: FastifyRequest, reply: FastifyReply) =>
+      new ListWorkOrderController().handle(req, reply),
     );
-
     subFastify.get(
       "/work-order/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new GetWorkOrderByIdController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new GetWorkOrderByIdController().handle(req, reply),
     );
 
-    // -----------------------------------------------------------------------
-    // FLUXO DE MANUTENÇÃO DO SETOR (SECTOR SERVICE)
-    // -----------------------------------------------------------------------
-    // Deletar atendimento
+    // Atendimento por Setor
     subFastify.delete(
       "/sector-service/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new DeleteSectorController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new DeleteSectorController().handle(req, reply),
     );
-
-    // Editar atendimento
     subFastify.put(
       "/sector-service/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new UpdateSectorController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new UpdateSectorController().handle(req, reply),
     );
-
-    // Iniciar atendimento
     subFastify.put(
       "/sector-service/:id/start",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new StartSectorServiceController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new StartSectorServiceController().handle(req, reply),
     );
-
-    // Pausar atendimento (aguardando peça ou outro setor)
     subFastify.put(
       "/sector-service/:id/pause",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new PauseSectorController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new PauseSectorController().handle(req, reply),
     );
-
-    // Retomar atendimento pausado
     subFastify.put(
       "/sector-service/:id/resume",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ResumeSectorController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new ResumeSectorController().handle(req, reply),
     );
-
-    // Finalizar atendimento e calcular tempo líquido
     subFastify.put(
       "/sector-service/:id/finish",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new FinishSectorServiceController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new FinishSectorServiceController().handle(req, reply),
     );
 
-    // -----------------------------------------------------------------------
-    // COLABORADORES
-    // -----------------------------------------------------------------------
+    // Colaboradores
     subFastify.get(
       "/collaborator",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListCollaboratorController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new ListCollaboratorController().handle(req, reply),
     );
-
-    subFastify.put(
-      "/collaborator/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new UpdateCollaboratorController().handle(request, reply);
-      },
-    );
-
-    subFastify.delete(
-      "/collaborator/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new DeleteCollaboratorController().handle(request, reply);
-      },
-    );
-
-    // Cadastro inicial de colaborador
     subFastify.post(
       "/collaborator",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreateCollaboratorController().handle(request, reply);
-      },
-    );  
-
-    // -----------------------------------------------------------------------
-    // EQUIPAMENTOS
-    // -----------------------------------------------------------------------
-    subFastify.get(
-      "/equipment",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListEquipmentController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new CreateCollaboratorController().handle(req, reply),
+    );
+    subFastify.put(
+      "/collaborator/:id",
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new UpdateCollaboratorController().handle(req, reply),
+    );
+    subFastify.delete(
+      "/collaborator/:id",
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new DeleteCollaboratorController().handle(req, reply),
     );
 
-    subFastify.post(
-      "/equipment",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreateEquipmentController().handle(request, reply);
-      },
+    // Equipamentos
+    subFastify.get("/equipment", (req: FastifyRequest, reply: FastifyReply) =>
+      new ListEquipmentController().handle(req, reply),
     );
-
+    subFastify.post("/equipment", (req: FastifyRequest, reply: FastifyReply) =>
+      new CreateEquipmentController().handle(req, reply),
+    );
     subFastify.put(
       "/equipment/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new UpdateEquipmentController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new UpdateEquipmentController().handle(req, reply),
     );
-
     subFastify.delete(
       "/equipment/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new DeleteEquipmentController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new DeleteEquipmentController().handle(req, reply),
     );
 
-    // -----------------------------------------------------------------------
-    // OPERADORES
-    // -----------------------------------------------------------------------
-    subFastify.get(
-      "/operator",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListOperatorController().handle(request, reply);
-      },
+    // Operadores
+    subFastify.get("/operator", (req: FastifyRequest, reply: FastifyReply) =>
+      new ListOperatorController().handle(req, reply),
     );
-
-    subFastify.post(
-      "/operator",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreateOperatorController().handle(request, reply);
-      },
+    subFastify.post("/operator", (req: FastifyRequest, reply: FastifyReply) =>
+      new CreateOperatorController().handle(req, reply),
     );
-
     subFastify.put(
       "/operator/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new UpdateOperatorController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new UpdateOperatorController().handle(req, reply),
     );
-
     subFastify.delete(
       "/operator/:id",
-      async (request: FastifyRequest, reply: FastifyReply) => {
-        return new DeleteOperatorController().handle(request, reply);
-      },
+      (req: FastifyRequest, reply: FastifyReply) =>
+        new DeleteOperatorController().handle(req, reply),
     );
   });
 }

@@ -1,14 +1,12 @@
+// src/services/SectorService/ResumeSectorService.ts
 import prismaClient from "../../prisma/index.js";
 
-interface ResumeSectorProps {
-  sectorServiceId: string;
-}
-
 export class ResumeSectorService {
-  async execute({ sectorServiceId }: ResumeSectorProps) {
+  async execute({ sectorServiceId }: { sectorServiceId: string }) {
     const sectorService = await prismaClient.sectorService.findUnique({
       where: { id: sectorServiceId },
     });
+
     if (!sectorService) {
       throw new Error("Serviço não encontrado.");
     }
@@ -19,13 +17,11 @@ export class ResumeSectorService {
       );
     }
 
-    // Busca a última pausa registrada para este serviço
     const lastPause = await prismaClient.servicePause.findFirst({
       where: { sectorServiceId },
       orderBy: { pausedAt: "desc" },
     });
 
-    // Se a pausa existir e ainda não tiver horário de retorno, atualiza o resumedAt
     if (lastPause && !lastPause.resumedAt) {
       await prismaClient.servicePause.update({
         where: { id: lastPause.id },
@@ -33,14 +29,15 @@ export class ResumeSectorService {
       });
     }
 
-    // Atualiza o status do serviço de volta para EM_MANUTENCAO
-    const updatedService = await prismaClient.sectorService.update({
+    return prismaClient.sectorService.update({
       where: { id: sectorServiceId },
-      data: {
-        status: "EM_MANUTENCAO",
+      data: { status: "EM_MANUTENCAO" },
+      include: {
+        operator: true,
+        criador: { select: { id: true, name: true, role: true } },
+        tecnicoResponsavel: { select: { id: true, name: true, role: true } },
+        pauses: true,
       },
     });
-
-    return updatedService;
   }
 }

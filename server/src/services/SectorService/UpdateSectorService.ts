@@ -1,7 +1,8 @@
+// src/services/SectorService/UpdateSectorService.ts
 import prismaClient from "../../prisma/index.js";
 import { isManagement } from "../../config/roles.js";
 
-interface UpdateSectorProps {
+export interface UpdateSectorProps {
   id: string;
   setor?: string | undefined;
   qruDescricao?: string | undefined;
@@ -18,55 +19,45 @@ export class UpdateSectorService {
   async execute(data: UpdateSectorProps, userRole: string) {
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar ordens de serviço.",
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar setores.",
       );
     }
 
-    const {
-      id,
-      setor,
-      qruDescricao,
-      qth,
-      city,
-      solucaoTecnico,
-      tipoCausa,
-      status,
-      tecnicoResponsavelId,
-      operatorId,
-    } = data;
-
-    const orderSectorExists = await prismaClient.sectorService.findUnique({
-      where: { id },
+    const existing = await prismaClient.sectorService.findUnique({
+      where: { id: data.id },
     });
 
-    if (!orderSectorExists) {
+    if (!existing) {
       throw new Error("Setor da ordem de serviço não encontrado.");
     }
 
-    if (operatorId) {
+    if (data.operatorId) {
       const operatorExists = await prismaClient.operator.findUnique({
-        where: { id: operatorId },
+        where: { id: data.operatorId },
       });
-
       if (!operatorExists) {
         throw new Error("Operador não encontrado com este ID.");
       }
     }
 
     const updateData = {
-      ...(setor !== undefined && { setor }),
-      ...(qruDescricao !== undefined && { qruDescricao }),
-      ...(qth !== undefined && { qth }),
-      ...(city !== undefined && { city }),
-      ...(solucaoTecnico !== undefined && { solucaoTecnico }),
-      ...(tipoCausa !== undefined && { tipoCausa }),
-      ...(status !== undefined && { status }),
-      ...(tecnicoResponsavelId !== undefined && { tecnicoResponsavelId }),
-      ...(operatorId !== undefined && { operatorId }),
+      ...(data.setor !== undefined && { setor: data.setor }),
+      ...(data.qruDescricao !== undefined && { qruDescricao: data.qruDescricao }),
+      ...(data.qth !== undefined && { qth: data.qth }),
+      ...(data.city !== undefined && { city: data.city }),
+      ...(data.solucaoTecnico !== undefined && {
+        solucaoTecnico: data.solucaoTecnico,
+      }),
+      ...(data.tipoCausa !== undefined && { tipoCausa: data.tipoCausa }),
+      ...(data.status !== undefined && { status: data.status }),
+      ...(data.tecnicoResponsavelId !== undefined && {
+        tecnicoResponsavelId: data.tecnicoResponsavelId,
+      }),
+      ...(data.operatorId !== undefined && { operatorId: data.operatorId }),
     };
 
-    const updatedSector = await prismaClient.sectorService.update({
-      where: { id },
+    return prismaClient.sectorService.update({
+      where: { id: data.id },
       data: updateData,
       include: {
         operator: true,
@@ -74,7 +65,5 @@ export class UpdateSectorService {
         tecnicoResponsavel: { select: { id: true, name: true, role: true } },
       },
     });
-
-    return updatedSector;
   }
 }

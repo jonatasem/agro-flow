@@ -1,5 +1,6 @@
-import prismaClient from "../../prisma/index.js";
+// src/services/Collaborator/CreateCollaboratorService.ts
 import { hash } from "bcryptjs";
+import prismaClient from "../../prisma/index.js";
 import { isManagement } from "../../config/roles.js";
 
 export interface CreateCollaboratorProps {
@@ -22,18 +23,17 @@ export class CreateCollaboratorService {
     city,
     userRole,
   }: CreateCollaboratorProps) {
-  
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar colaboradores.",
       );
     }
-  
-    const collaboratorExists = await prismaClient.collaborator.findUnique({
+
+    const exists = await prismaClient.collaborator.findUnique({
       where: { registration },
     });
 
-    if (collaboratorExists) {
+    if (exists) {
       throw new Error("Esta matrícula já está cadastrada no sistema.");
     }
 
@@ -49,9 +49,19 @@ export class CreateCollaboratorService {
         city,
         status: true,
       },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        sector: true,
+        registration: true,
+        city: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    const { password: _, ...collaboratorWithoutPassword } = collaborator;
-    return collaboratorWithoutPassword;
+    return collaborator;
   }
 }

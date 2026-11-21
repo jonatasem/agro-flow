@@ -1,8 +1,9 @@
+// src/services/LoginCollaborator/LoginCollaboratorService.ts
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prismaClient from "../../prisma/index.js";
 
-interface LoginCollaboratorProps {
+export interface LoginCollaboratorProps {
   registration: string;
   password: string;
 }
@@ -22,18 +23,15 @@ export class LoginCollaboratorService {
     }
 
     const passwordMatch = await bcrypt.compare(password, collaborator.password);
-
     if (!passwordMatch) {
       throw new Error("Senha incorreta.");
     }
 
     const secret = process.env.JWT_SECRET;
-
     if (!secret) {
       throw new Error("A variável de ambiente JWT_SECRET não foi definida.");
     }
 
-    // GERAÇÃO DO TOKEN JWT
     const token = jwt.sign(
       {
         name: collaborator.name,
@@ -43,7 +41,7 @@ export class LoginCollaboratorService {
       secret,
       {
         subject: collaborator.id,
-        expiresIn: "8h", // Tempo de expiração da sessão do JWT
+        expiresIn: "8h",
       },
     );
 

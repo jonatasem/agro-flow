@@ -1,11 +1,12 @@
+// src/services/LoginCollaborator/CheckRegistrationService.ts
 import prismaClient from "../../prisma/index.js";
 
-export interface CheckProps {
+export interface CheckRegistrationProps {
   registration: string;
 }
 
 export class CheckRegistrationService {
-  async execute({ registration }: CheckProps) {
+  async execute({ registration }: CheckRegistrationProps) {
     const collaborator = await prismaClient.collaborator.findUnique({
       where: { registration },
       select: {
@@ -22,8 +23,6 @@ export class CheckRegistrationService {
       throw new Error("Este cadastro está inativo. Contate o administrador.");
     }
 
-    return {
-      name: collaborator.name,
-    };
+    return { name: collaborator.name };
   }
 }

@@ -1,25 +1,24 @@
+// src/controllers/LoginCollaborator/CheckRegistrationController.ts
 import type { FastifyRequest, FastifyReply } from "fastify";
-import {
-  CheckRegistrationService,
-  type CheckProps,
-} from "../../services/LoginCollaborator/CheckRegistrationService.js";
+import { CheckRegistrationService } from "../../services/LoginCollaborator/CheckRegistrationService.js";
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class CheckRegistrationController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { registration } = request.body as CheckProps;
+    const { registration } = (request.body ?? {}) as { registration?: string };
 
-    if (!registration) {
+    if (!registration?.trim()) {
       return reply.status(400).send({ error: "A matrícula é obrigatória." });
     }
 
-    const checkService = new CheckRegistrationService();
-
     try {
-      const result = await checkService.execute({ registration });
-
+      const service = new CheckRegistrationService();
+      const result = await service.execute({
+        registration: registration.trim(),
+      });
       return reply.status(200).send(result);
-    } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao verificar matrícula.");
     }
   }
 }

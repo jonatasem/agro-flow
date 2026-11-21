@@ -3,12 +3,10 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "./useAuth";
 import { getErrorMessage } from "@/utils/getErrorMessage";
 
-// Gerir o fluxo do formulário de login em duas etapas.
 export function useLoginForm() {
   const { checkRegistration, signIn } = useAuth();
   const router = useRouter();
 
-  // Estados locais
   const [step, setStep] = useState<1 | 2>(1);
   const [registration, setRegistration] = useState("");
   const [password, setPassword] = useState("");
@@ -16,14 +14,14 @@ export function useLoginForm() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Etapa 1: Validação e verificação da matrícula
-  const handleCheckRegistration = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleCheckRegistration = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     if (!registration.trim()) return;
 
     setError("");
     setIsSubmitting(true);
-
     try {
       const data = await checkRegistration(registration.trim());
       setCollaboratorName(data.name);
@@ -35,14 +33,12 @@ export function useLoginForm() {
     }
   };
 
-  // Etapa 2: Autenticação com senha
-  const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!password.trim()) return;
 
     setError("");
     setIsSubmitting(true);
-
     try {
       await signIn(registration.trim(), password);
       router.push("/dashboard");
@@ -53,7 +49,6 @@ export function useLoginForm() {
     }
   };
 
-  // Retorna para a primeira etapa do formulário
   const handleBackToStep1 = () => {
     setStep(1);
     setPassword("");

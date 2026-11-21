@@ -1,11 +1,5 @@
+// src/services/SectorService/FinishSectorServiceService.ts
 import prismaClient from "../../prisma/index.js";
-
-interface FinishSectorServiceProps {
-  sectorServiceId: string;
-  solucaoTecnico: string;
-  tipoCausa: string;
-  tecnicoId: string;
-}
 
 export class FinishSectorServiceService {
   async execute({
@@ -13,8 +7,12 @@ export class FinishSectorServiceService {
     solucaoTecnico,
     tipoCausa,
     tecnicoId,
-  }: FinishSectorServiceProps) {
-    // Busca o serviço e as pausas registradas
+  }: {
+    sectorServiceId: string;
+    solucaoTecnico: string;
+    tipoCausa?: string | undefined;
+    tecnicoId: string;
+  }) {
     const sectorService = await prismaClient.sectorService.findUnique({
       where: { id: sectorServiceId },
       include: { pauses: true },
@@ -35,34 +33,24 @@ export class FinishSectorServiceService {
     }
 
     const dataInicio = sectorService.dataInicioManutencao;
-
     if (!dataInicio) {
-      throw new Error("Dados do início da manutenção ausente.");
+      throw new Error("Dados do início da manutenção ausentes.");
     }
 
     const dataFim = new Date();
-
-    // Cálculo de tempo de pausas (em milissegundos)
     let totalPauseMs = 0;
-    if (sectorService.pauses && sectorService.pauses.length > 0) {
-      for (const pause of sectorService.pauses) {
-        const start = new Date(pause.pausedAt).getTime();
-        const end = pause.resumedAt
-          ? new Date(pause.resumedAt).getTime()
-          : dataFim.getTime();
-        totalPauseMs += end - start;
-      }
+
+    for (const pause of sectorService.pauses ?? []) {
+      const start = new Date(pause.pausedAt).getTime();
+      const end = pause.resumedAt
+        ? new Date(pause.resumedAt).getTime()
+        : dataFim.getTime();
+      totalPauseMs += Math.max(0, end - start);
     }
 
-    // Tempo líquido descontando as pausas
-    const diferencaEmMilissegundos =
-      dataFim.getTime() - dataInicio.getTime() - totalPauseMs;
-    const tempoManutencaoEmMinutos = Math.max(
-      1,
-      Math.round(diferencaEmMilissegundos / 60000),
-    );
+    const diffMs = dataFim.getTime() - dataInicio.getTime() - totalPauseMs;
+    const tempoManutencaoEmMinutos = Math.max(1, Math.round(diffMs / 60000));
 
-    //  Atualizar o serviço do setor
     const updatedService = await prismaClient.sectorService.update({
       where: { id: sectorServiceId },
       data: {
@@ -73,29 +61,28 @@ export class FinishSectorServiceService {
         tempoManutencao: tempoManutencaoEmMinutos,
       },
       include: {
+        operator: true,
+        criador: { select: { id: true, name: true, role: true } },
+        tecnicoResponsavel: { select: { id: true, name: true, role: true } },
         pauses: true,
       },
     });
 
-    // Verificar se todos os setores da O.S. foram finalizados
-    const totalServicosDaOrdem = await prismaClient.sectorService.count({
+    const totalSectors = await prismaClient.sectorService.count({
       where: { workOrderId: sectorService.workOrderId },
     });
 
-    const servicosFinalizadosDaOrdem = await prismaClient.sectorService.count({
+    const finishedSectors = await prismaClient.sectorService.count({
       where: {
         workOrderId: sectorService.workOrderId,
         status: "FINALIZADO",
       },
     });
 
-    // Finaliza a os global
-    if (totalServicosDaOrdem === servicosFinalizadosDaOrdem) {
+    if (totalSectors > 0 && totalSectors === finishedSectors) {
       await prismaClient.workOrder.update({
         where: { id: sectorService.workOrderId },
-        data: {
-          status: "FINALIZADA",
-        },
+        data: { status: "FINALIZADA" },
       });
     }
 

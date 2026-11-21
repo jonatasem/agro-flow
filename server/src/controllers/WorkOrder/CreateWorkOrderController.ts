@@ -1,69 +1,54 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { CreateWorkOrderService } from "../../services/WorkOrder/CreateWorkOrderService.js";
-
-interface CreateWorkServiceProps {
-  fleet: string;
-  operatorId: string; // Matrícula informada no formulário
-  setor: string;
-  qruDescricao: string;
-  qth: string;
-  city: string;
-}
+import {
+  CreateWorkOrderService,
+  type SectorPayload,
+} from "../../services/WorkOrder/CreateWorkOrderService.js";
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class CreateWorkOrderController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    // Extrai o cargo autenticado
-    const userRole = request.userRole;
-
-    // Se o middleware falhar ou não injetar o papel, barra antes do Service
-    if (!userRole) {
+    if (!request.userRole || !request.userId) {
       return reply
         .status(401)
         .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
-    const criadoPor = request.userId;
+    const { equipmentId, setores } = (request.body ?? {}) as {
+      equipmentId?: string;
+      setores?: SectorPayload[];
+    };
 
-    if (!criadoPor) {
-      return reply
-        .status(401)
-        .send({ error: "Sessão inválida ou usuário não autenticado." });
-    }
-
-    const { fleet, operatorId, setor, qruDescricao, qth, city } =
-      request.body as CreateWorkServiceProps;
-
-    if (
-      !fleet ||
-      !operatorId ||
-      !setor ||
-      !qruDescricao ||
-      !qth ||
-      !city ||
-      !criadoPor
-    ) {
+    if (!equipmentId?.trim() || !Array.isArray(setores) || setores.length === 0) {
       return reply
         .status(400)
         .send({ error: "Todos os campos são obrigatórios." });
     }
 
-    const workOrderService = new CreateWorkOrderService();
+    const hasInvalidSector = setores.some(
+      (s) =>
+        !s.setor?.trim() ||
+        !s.qth?.trim() ||
+        !s.city?.trim() ||
+        !s.qruDescricao?.trim(),
+    );
+
+    if (hasInvalidSector) {
+      return reply
+        .status(400)
+        .send({ error: "Todos os campos são obrigatórios." });
+    }
 
     try {
-      const result = await workOrderService.execute({
-        fleet,
-        operatorRegistration: operatorId,
-        setor,
-        qruDescricao,
-        qth,
-        city,
-        criadoPor,
-        userRole,
+      const result = await new CreateWorkOrderService().execute({
+        equipmentId: equipmentId.trim(),
+        setores,
+        criadoPor: request.userId,
+        userRole: request.userRole,
       });
 
       return reply.status(201).send(result);
-    } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao criar Ordem de Serviço.");
     }
   }
 }

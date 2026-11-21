@@ -1,7 +1,8 @@
+// src/services/Operator/UpdateOperatorService.ts
 import prismaClient from "../../prisma/index.js";
 import { isManagement } from "../../config/roles.js";
 
-interface UpdateOperatorProps {
+export interface UpdateOperatorProps {
   id: string;
   name?: string | undefined;
   registration?: string | undefined;
@@ -21,29 +22,24 @@ export class UpdateOperatorService {
   }: UpdateOperatorProps) {
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para atualizar operadores.",
       );
     }
 
-    const operatorExists = await prismaClient.operator.findUnique({
-      where: { id },
-    });
-
-    if (!operatorExists) {
-      throw new Error("Funcionário não encontrado.");
+    const existing = await prismaClient.operator.findUnique({ where: { id } });
+    if (!existing) {
+      throw new Error("Operador não encontrado.");
     }
 
-    if (registration && registration !== operatorExists.registration) {
-      const registrationInUse = await prismaClient.operator.findUnique({
+    if (registration && registration !== existing.registration) {
+      const inUse = await prismaClient.operator.findUnique({
         where: { registration },
       });
-
-      if (registrationInUse) {
-        throw new Error("Esta matricula já está em uso por outro funcionário.");
+      if (inUse) {
+        throw new Error("Esta matrícula já está em uso por outro operador.");
       }
     }
 
-    // Filtra os dados diferente de undefined
     const updateData = {
       ...(name !== undefined && { name }),
       ...(registration !== undefined && { registration }),
@@ -51,11 +47,9 @@ export class UpdateOperatorService {
       ...(status !== undefined && { status }),
     };
 
-    const updateOperator = await prismaClient.operator.update({
+    return prismaClient.operator.update({
       where: { id },
       data: updateData,
     });
-
-    return updateOperator;
   }
 }

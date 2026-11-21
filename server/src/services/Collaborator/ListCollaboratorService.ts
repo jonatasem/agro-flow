@@ -1,32 +1,28 @@
+// src/services/Collaborator/ListCollaboratorService.ts
 import prismaClient from "../../prisma/index.js";
 import { isManagement } from "../../config/roles.js";
 
-export interface ListCollaboratorProps {
-  userRole: string;
-}
-
 export class ListCollaboratorService {
-  async execute({ userRole }: ListCollaboratorProps) {
-    // Validação do RBAC
+  async execute({ userRole }: { userRole: string }) {
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para listar os colaboradores.",
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para listar colaboradores.",
       );
     }
 
-    const result = await prismaClient.collaborator.findMany({
+    return prismaClient.collaborator.findMany({
       select: {
         id: true,
         name: true,
         role: true,
+        sector: true,
         registration: true,
         city: true,
         status: true,
         createdAt: true,
         updatedAt: true,
       },
+      orderBy: { name: "asc" },
     });
-
-    return result;
   }
 }

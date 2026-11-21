@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const TOKEN_KEY = "@agroflow:token";
-const USER_KEY = "@agroflow:user";
+export const TOKEN_KEY = "@agroflow:token";
+export const USER_KEY = "@agroflow:user";
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
@@ -9,7 +9,10 @@ export const api = axios.create({
   baseURL,
 });
 
-function clearSession() {
+let isRedirectingToLogin = false;
+
+export function clearSessionStorage() {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
 }
@@ -21,7 +24,6 @@ api.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
-
   return config;
 });
 
@@ -29,13 +31,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    const requestUrl = error.config?.url ?? "";
-    const isAuthRoute = requestUrl.includes("/login");
+    const url = error.config?.url ?? "";
+    const isAuthRoute = url.includes("/login");
 
     if (status === 401 && typeof window !== "undefined" && !isAuthRoute) {
-      clearSession();
+      clearSessionStorage();
 
-      if (!window.location.pathname.startsWith("/login")) {
+      if (!window.location.pathname.startsWith("/login") && !isRedirectingToLogin) {
+        isRedirectingToLogin = true;
         window.location.replace("/login");
       }
     }

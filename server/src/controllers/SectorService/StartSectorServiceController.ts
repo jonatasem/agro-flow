@@ -1,34 +1,30 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { StartSectorServiceService } from "../../services/SectorService/StartSectorServiceService.js";
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class StartSectorServiceController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const { id: sectorServiceId } = request.params as { id: string };
-    const tecnicoId = request.userId;
+    if (!request.userId) {
+      return reply
+        .status(401)
+        .send({ error: "Não autorizado. Técnico não identificado." });
+    }
 
+    const { id: sectorServiceId } = (request.params ?? {}) as { id?: string };
     if (!sectorServiceId) {
       return reply
         .status(400)
-        .send({ error: "O Id do serviço é obrigatório." });
+        .send({ error: "O ID do serviço é obrigatório." });
     }
-
-    if (!tecnicoId) {
-      return reply
-        .status(401)
-        .send({ error: "Não autorizado. Técnico não autorizado." });
-    }
-
-    const startService = new StartSectorServiceService();
 
     try {
-      const result = await startService.execute({
+      const result = await new StartSectorServiceService().execute({
         sectorServiceId,
-        tecnicoId,
+        tecnicoId: request.userId,
       });
-
       return reply.status(200).send(result);
-    } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao iniciar manutenção.");
     }
   }
 }

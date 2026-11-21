@@ -1,11 +1,10 @@
+// src/services/SectorService/PauseSectorService.ts
 import prismaClient from "../../prisma/index.js";
 
-interface PauseSectorProps {
-  sectorServiceId: string;
-  pauseReason: "FALTA_DE_PECA" | "AGUARDANDO_OUTRO_SETOR" | "OUTRO_MOTIVO";
-  observation: string;
-  tecnicoId: string;
-}
+export type PauseReason =
+  | "FALTA_DE_PECA"
+  | "AGUARDANDO_OUTRO_SETOR"
+  | "OUTRO_MOTIVO";
 
 export class PauseSectorService {
   async execute({
@@ -13,7 +12,12 @@ export class PauseSectorService {
     pauseReason,
     observation,
     tecnicoId,
-  }: PauseSectorProps) {
+  }: {
+    sectorServiceId: string;
+    pauseReason: PauseReason;
+    observation: string;
+    tecnicoId: string;
+  }) {
     const sectorService = await prismaClient.sectorService.findUnique({
       where: { id: sectorServiceId },
     });
@@ -24,7 +28,7 @@ export class PauseSectorService {
 
     if (sectorService.tecnicoResponsavelId !== tecnicoId) {
       throw new Error(
-        "Apenas o técnico que iniciou a manutenção pode pausa-la.",
+        "Apenas o técnico que iniciou a manutenção pode pausá-la.",
       );
     }
 
@@ -39,8 +43,13 @@ export class PauseSectorService {
           status: "PAUSADO",
           motivoPausa: observation,
         },
+        include: {
+          operator: true,
+          criador: { select: { id: true, name: true, role: true } },
+          tecnicoResponsavel: { select: { id: true, name: true, role: true } },
+          pauses: true,
+        },
       }),
-
       prismaClient.servicePause.create({
         data: {
           sectorServiceId,

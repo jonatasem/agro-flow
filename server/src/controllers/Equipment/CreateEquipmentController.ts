@@ -1,44 +1,35 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import {
-  CreateEquipmentService,
-  type CreateEquipmentProps,
-} from "../../services/Equipment/CreateEquipmentService.js";
+import { CreateEquipmentService } from "../../services/Equipment/CreateEquipmentService.js";
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class CreateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    // Extrai o cargo autenticado
-    const userRole = request.userRole;
-
-    // Se o middleware falhar ou não injetar o papel, barra antes do Service
-    if (!userRole) {
+    if (!request.userRole) {
       return reply
         .status(401)
         .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
-    const { name, fleet } = request.body as CreateEquipmentProps;
+    const { name, fleet } = (request.body ?? {}) as {
+      name?: string;
+      fleet?: string;
+    };
 
-    if (!name || !fleet) {
+    if (!name?.trim() || !fleet?.trim()) {
       return reply
         .status(400)
-        .send({ error: "Todos os campos são obrigatórios." });
+        .send({ error: "Nome e frota são obrigatórios." });
     }
 
-    const equipmentService = new CreateEquipmentService();
-
     try {
-      const result = await equipmentService.execute({
-        name,
-        fleet,
-        userRole,
+      const created = await new CreateEquipmentService().execute({
+        name: name.trim(),
+        fleet: fleet.trim(),
+        userRole: request.userRole,
       });
-
-      return reply.status(201).send(result);
-    } catch (error: any) {
-      const isPermissionError = error.message?.includes("Acesso negado");
-      const statusCode = isPermissionError ? 403 : 400;
-
-      return reply.status(statusCode).send({ error: error.message });
+      return reply.status(201).send(created);
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao cadastrar equipamento.");
     }
   }
 }
