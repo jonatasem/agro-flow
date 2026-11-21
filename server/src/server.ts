@@ -1,10 +1,9 @@
+// src/server.ts
 import fastify from "fastify";
-import routes from "./routes/index.js";
 import cors from "@fastify/cors";
+import routes from "./routes/index.js";
 
-const app = fastify({
-  logger: false,
-});
+const app = fastify({ logger: false });
 
 const urlProd = process.env.URL_PROD;
 const port = process.env.PORT;

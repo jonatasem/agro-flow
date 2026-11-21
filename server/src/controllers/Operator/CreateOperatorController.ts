@@ -1,45 +1,37 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { CreateOperatorService } from "../../services/Operator/CreateOperatorService.js";
-
-interface CreateOperatorProps {
-  name: string;
-  registration: string;
-  city: string;
-}
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class CreateOperatorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    // Extrai o cargo autenticado
-    const userRole = request.userRole;
-
-    // Se o middleware falhar ou não injetar o papel, barra antes do Service
-    if (!userRole) {
+    if (!request.userRole) {
       return reply
         .status(401)
         .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
-    const { name, registration, city } = request.body as CreateOperatorProps;
+    const { name, registration, city } = (request.body ?? {}) as {
+      name?: string;
+      registration?: string;
+      city?: string;
+    };
 
-    if (!name || !registration || !city) {
+    if (!name?.trim() || !registration?.trim() || !city?.trim()) {
       return reply
-        .status(401)
-        .send({ error: "Todos os campos são obrigatórios" });
+        .status(400)
+        .send({ error: "Nome, matrícula e cidade são obrigatórios." });
     }
 
-    const operatorService = new CreateOperatorService();
-
     try {
-      const result = await operatorService.execute({
-        name,
-        registration,
-        city,
-        userRole,
+      const created = await new CreateOperatorService().execute({
+        name: name.trim(),
+        registration: registration.trim(),
+        city: city.trim(),
+        userRole: request.userRole,
       });
-
-      return reply.status(201).send(result);
-    } catch (error: any) {
-      return reply.status(400).send({ error: error.message });
+      return reply.status(201).send(created);
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao cadastrar operador.");
     }
   }
 }

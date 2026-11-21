@@ -1,18 +1,20 @@
+// src/services/SectorService/StartSectorServiceService.ts
 import prismaClient from "../../prisma/index.js";
 
-interface StartSectorServiceProps {
-  sectorServiceId: string;
-  tecnicoId: string;
-}
-
 export class StartSectorServiceService {
-  async execute({ sectorServiceId, tecnicoId }: StartSectorServiceProps) {
+  async execute({
+    sectorServiceId,
+    tecnicoId,
+  }: {
+    sectorServiceId: string;
+    tecnicoId: string;
+  }) {
     const sectorService = await prismaClient.sectorService.findUnique({
       where: { id: sectorServiceId },
     });
 
     if (!sectorService) {
-      throw new Error("Serviço não encontrado");
+      throw new Error("Serviço não encontrado.");
     }
 
     if (sectorService.status !== "AGUARDANDO_MANUTENCAO") {
@@ -21,7 +23,7 @@ export class StartSectorServiceService {
       );
     }
 
-    const updatedService = await prismaClient.sectorService.update({
+    return prismaClient.sectorService.update({
       where: { id: sectorServiceId },
       data: {
         status: "EM_MANUTENCAO",
@@ -30,15 +32,10 @@ export class StartSectorServiceService {
       },
       include: {
         workOrder: true,
-        tecnicoResponsavel: {
-          select: {
-            name: true,
-            role: true,
-          },
-        },
+        operator: true,
+        criador: { select: { id: true, name: true, role: true } },
+        tecnicoResponsavel: { select: { id: true, name: true, role: true } },
       },
     });
-
-    return updatedService;
   }
 }

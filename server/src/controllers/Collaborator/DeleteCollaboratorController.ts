@@ -1,35 +1,30 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { DeleteCollaboratorService } from "../../services/Collaborator/DeleteCollaboratorService.js";
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class DeleteCollaboratorController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    // Extrai o cargo autenticado injetado pelo middleware
-    const userRole = request.userRole;
-
-    if (!userRole) {
+    if (!request.userRole) {
       return reply
         .status(401)
         .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
-    const { id } = request.params as { id: string };
-
+    const { id } = (request.params ?? {}) as { id?: string };
     if (!id) {
       return reply
         .status(400)
-        .send({ error: "Id do funcionário não informado." });
+        .send({ error: "O ID do colaborador é obrigatório." });
     }
 
-    const collaboratorService = new DeleteCollaboratorService();
-
     try {
-      const result = await collaboratorService.execute({ id, userRole });
+      const result = await new DeleteCollaboratorService().execute({
+        id,
+        userRole: request.userRole,
+      });
       return reply.status(200).send(result);
-    } catch (error: any) {
-      const isPermissionError = error.message?.includes("Acesso negado");
-      const statusCode = isPermissionError ? 403 : 400;
-
-      return reply.status(statusCode).send({ error: error.message });
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao excluir colaborador.");
     }
   }
 }

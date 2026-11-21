@@ -4,17 +4,19 @@ export const MANAGEMENT_ROLES = [
   "supervisor",
   "coa",
   "admin",
-];
+] as const;
 
-export function isManagement(role?: string): boolean {
-  if (!role) return false;
+export function normalizeRole(role?: string): string {
+  if (!role) return "";
 
-  // Normaliza o texto: remove acentos, converte para minúsculo e remove espaços
-  const normalizedRole = role
+  return role
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+}
 
-  return MANAGEMENT_ROLES.includes(normalizedRole);
+export function isManagement(role?: string): boolean {
+  const normalizedRole = normalizeRole(role);
+  return (MANAGEMENT_ROLES as readonly string[]).includes(normalizedRole);
 }

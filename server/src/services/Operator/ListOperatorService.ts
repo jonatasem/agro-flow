@@ -1,8 +1,10 @@
+// src/services/Operator/ListOperatorService.ts
 import prismaClient from "../../prisma/index.js";
 
 export class ListOperatorService {
   async execute() {
-    const operator = await prismaClient.operator.findMany();
-    return operator;
+    return prismaClient.operator.findMany({
+      orderBy: { name: "asc" },
+    });
   }
 }

@@ -1,98 +1,32 @@
-import { useState, useEffect, useCallback } from "react";
+// src/hooks/useCollaborator.ts
 import {
   collaboratorService,
   type CreateCollaboratorInput,
   type UpdateCollaboratorInput,
 } from "@/services/collaboratorService";
-import { getErrorMessage } from "@/utils/getErrorMessage";
-import type { Collaborator } from "@/types/collaborator";
+import { useCrudResource } from "./useCrudResource";
 
-export type { Collaborator, CreateCollaboratorInput, UpdateCollaboratorInput };
-
-async function runMutation<T>(
-  operation: () => Promise<T>,
-  fallbackMessage: string
-): Promise<T> {
-  try {
-    return await operation();
-  } catch (err: unknown) {
-    throw new Error(getErrorMessage(err, fallbackMessage), { cause: err });
-  }
-}
+export type { CreateCollaboratorInput, UpdateCollaboratorInput };
 
 export function useCollaborator() {
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const crud = useCrudResource(collaboratorService, {
+    loadError: "Erro ao carregar colaboradores.",
+    createError: "Erro ao criar colaborador.",
+    updateError: "Erro ao atualizar colaborador.",
+    deleteError: "Erro ao remover colaborador.",
+  });
 
-  const refetch = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = await collaboratorService.getAll();
-      setCollaborators(data);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, "Erro ao carregar colaboradores."));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refetch();
-  }, [refetch]);
-
-  const createCollaborator = async (payload: CreateCollaboratorInput) => {
-    const created = await runMutation(
-      () => collaboratorService.create(payload),
-      "Erro ao criar colaborador."
-    );
-    setCollaborators((prev) => [...prev, created]);
-    return created;
-  };
-
-  const updateCollaborator = async (
-    id: string,
-    payload: UpdateCollaboratorInput
-  ) => {
-    const updated = await runMutation(
-      () => collaboratorService.update(id, payload),
-      "Erro ao atualizar colaborador."
-    );
-    setCollaborators((prev) =>
-      prev.map((item) => (item.id === id ? updated : item))
-    );
-    return updated;
-  };
-
-  const toggleStatus = async (id: string, status: boolean) => {
-    const updated = await runMutation(
-      () => collaboratorService.update(id, { status } as UpdateCollaboratorInput),
-      "Erro ao alterar estado do colaborador."
-    );
-    setCollaborators((prev) =>
-      prev.map((item) => (item.id === id ? updated : item))
-    );
-    return updated;
-  };
-
-  const deleteCollaborator = async (id: string) => {
-    await runMutation(
-      () => collaboratorService.delete(id),
-      "Erro ao remover colaborador."
-    );
-    setCollaborators((prev) => prev.filter((item) => item.id !== id));
-  };
+  const toggleStatus = (id: string, status: boolean) =>
+    crud.updateItem(id, { status });
 
   return {
-    collaborators,
-    loading,
-    error,
-    refetch,
-    createCollaborator,
-    updateCollaborator,
+    collaborators: crud.items,
+    loading: crud.loading,
+    error: crud.error,
+    refetch: crud.refetch,
+    createCollaborator: crud.createItem,
+    updateCollaborator: crud.updateItem,
     toggleStatus,
-    deleteCollaborator,
+    deleteCollaborator: crud.deleteItem,
   };
 }

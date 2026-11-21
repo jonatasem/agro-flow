@@ -1,3 +1,4 @@
+// src/services/Equipment/CreateEquipmentService.ts
 import prismaClient from "../../prisma/index.js";
 import { isManagement } from "../../config/roles.js";
 
@@ -9,10 +10,9 @@ export interface CreateEquipmentProps {
 
 export class CreateEquipmentService {
   async execute({ name, fleet, userRole }: CreateEquipmentProps) {
-    // Validação do RBAC
     if (!isManagement(userRole)) {
       throw new Error(
-        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar novos colaboradores.",
+        "Acesso negado. Apenas colaboradores da Gestão e COA têm permissão para cadastrar equipamentos.",
       );
     }
 
@@ -24,13 +24,8 @@ export class CreateEquipmentService {
       throw new Error("Já existe um equipamento cadastrado com essa frota.");
     }
 
-    const equipment = await prismaClient.equipment.create({
-      data: {
-        name,
-        fleet,
-      },
+    return prismaClient.equipment.create({
+      data: { name, fleet },
     });
-
-    return equipment;
   }
 }

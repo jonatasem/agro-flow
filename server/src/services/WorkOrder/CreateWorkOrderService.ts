@@ -1,25 +1,36 @@
 import prismaClient from "../../prisma/index.js";
 import { isManagement } from "../../config/roles.js";
 
-interface CreateWorkOrderProps {
-  fleet: string;
-  operatorRegistration: string;
+export interface SectorPayload {
   setor: string;
-  qruDescricao: string;
   qth: string;
   city: string;
+  operatorId?: string;
+  qruDescricao: string;
+}
+
+export interface CreateWorkOrderProps {
+  equipmentId: string;
+  setores: SectorPayload[];
   criadoPor: string;
   userRole: string;
 }
 
+const WORK_ORDER_INCLUDE = {
+  equipment: true,
+  setores: {
+    include: {
+      operator: true,
+      criador: { select: { id: true, name: true, role: true } },
+      tecnicoResponsavel: { select: { id: true, name: true, role: true } },
+    },
+  },
+} as const;
+
 export class CreateWorkOrderService {
   async execute({
-    fleet,
-    operatorRegistration,
-    setor,
-    qruDescricao,
-    qth,
-    city,
+    equipmentId,
+    setores,
     criadoPor,
     userRole,
   }: CreateWorkOrderProps) {
@@ -29,32 +40,46 @@ export class CreateWorkOrderService {
       );
     }
 
-    const collaboratorExists = await prismaClient.collaborator.findUnique({
+    const creator = await prismaClient.collaborator.findUnique({
       where: { id: criadoPor },
     });
-
-    if (!collaboratorExists) {
+    if (!creator) {
       throw new Error("Usuário criador não encontrado.");
     }
 
     const equipment = await prismaClient.equipment.findUnique({
-      where: { fleet },
+      where: { id: equipmentId },
     });
-
     if (!equipment) {
       throw new Error("Equipamento não encontrado.");
     }
 
-    // Busca o operador pela matrícula
-    const operatorExists = await prismaClient.operator.findUnique({
-      where: { registration: operatorRegistration },
-    });
+    // Valida ou resolve operadores (aceita ID do banco ou matrícula)
+    const resolvedOperatorIds: string[] = [];
+    for (const item of setores) {
+      if (!item.operatorId) {
+        throw new Error(
+          "Selecione um operador para o setor (o banco exige operador vinculado).",
+        );
+      }
 
-    if (!operatorExists) {
-      throw new Error("Operador não encontrado com a matrícula informada.");
+      const operator =
+        (await prismaClient.operator.findUnique({
+          where: { id: item.operatorId },
+        })) ??
+        (await prismaClient.operator.findUnique({
+          where: { registration: item.operatorId },
+        }));
+
+      if (!operator) {
+        throw new Error(
+          `Operador não encontrado para o identificador "${item.operatorId}".`,
+        );
+      }
+
+      resolvedOperatorIds.push(operator.id);
     }
 
-    // Se existir O.S. aberta com a mesma frota do equipamento
     const activeWorkOrder = await prismaClient.workOrder.findFirst({
       where: {
         equipmentId: equipment.id,
@@ -62,73 +87,45 @@ export class CreateWorkOrderService {
       },
     });
 
-    // Vincula o setor/operador diretamente à O.S. já aberta
+    const sectorsToCreate = setores.map((item, idx) => ({
+      operatorId: resolvedOperatorIds[idx]!,
+      setor: item.setor.trim(),
+      qruDescricao: item.qruDescricao.trim(),
+      qth: item.qth.trim(),
+      city: item.city.trim(),
+      criadoPorId: criadoPor,
+      status: "AGUARDANDO_MANUTENCAO",
+    }));
+
     if (activeWorkOrder) {
-      await prismaClient.sectorService.create({
-        data: {
+      await prismaClient.sectorService.createMany({
+        data: sectorsToCreate.map((s) => ({
+          ...s,
           workOrderId: activeWorkOrder.id,
-          operatorId: operatorExists.id,
-          setor,
-          qruDescricao,
-          qth,
-          city,
-          criadoPorId: criadoPor,
-          status: "AGUARDANDO_MANUTENCAO",
-        },
+        })),
       });
 
-      return await prismaClient.workOrder.findUnique({
+      const updated = await prismaClient.workOrder.findUnique({
         where: { id: activeWorkOrder.id },
-        include: {
-          equipment: true,
-          setores: {
-            include: {
-              operator: true,
-              criador: {
-                select: { id: true, name: true, role: true },
-              },
-              tecnicoResponsavel: {
-                select: { id: true, name: true, role: true },
-              },
-            },
-          },
-        },
+        include: WORK_ORDER_INCLUDE,
       });
+
+      if (!updated) {
+        throw new Error("Ordem de Serviço não encontrada após atualização.");
+      }
+
+      return updated;
     }
 
-    // Se não existir O.S. aberta, cria uma nova O.S. e insere o primeiro setor
-    const newWorkOrder = await prismaClient.workOrder.create({
+    return prismaClient.workOrder.create({
       data: {
         equipmentId: equipment.id,
         status: "ABERTA",
         setores: {
-          create: {
-            operatorId: operatorExists.id,
-            setor,
-            qruDescricao,
-            qth,
-            city,
-            criadoPorId: criadoPor,
-            status: "AGUARDANDO_MANUTENCAO",
-          },
+          create: sectorsToCreate,
         },
       },
-      include: {
-        equipment: true,
-        setores: {
-          include: {
-            operator: true,
-            criador: {
-              select: { id: true, name: true, role: true },
-            },
-            tecnicoResponsavel: {
-              select: { id: true, name: true, role: true },
-            },
-          },
-        },
-      },
+      include: WORK_ORDER_INCLUDE,
     });
-
-    return newWorkOrder;
   }
 }

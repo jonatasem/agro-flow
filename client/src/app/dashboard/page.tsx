@@ -1,77 +1,93 @@
-'use client';
+// src/app/dashboard/page.tsx
+"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkOrders } from "@/hooks/useWorkOrders";
 import { Header } from "@/components/Header";
-import { WorkOrderTable } from "@/components/WorkOrderCard";
+import { WorkOrderTable } from "@/components/WorkOrderTable";
 import { CreateWorkOrderModal } from "@/components/CreateWorkOrderModal";
-import type { SectorService } from "@/types/sectorService";
+import type { SectorService, WorkOrderStatus } from "@/types/sectorService";
 
-type StatusFilter = "ABERTA" | "FINALIZADA";
-
-const FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
-  { label: "Abertas / Em Andamento", value: "ABERTA" },
-  { label: "Histórico Concluídas", value: "FINALIZADA" },
+const FILTER_OPTIONS: { label: string; value: WorkOrderStatus }[] = [
+  { label: "Abertas", value: "ABERTA" },
+  { label: "Concluídas", value: "FINALIZADA" },
 ];
 
 export default function DashboardPage() {
-  const { user, signOut } = useAuth();
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ABERTA");
+  const { user, isAuthenticated, loading: authLoading, signOut } = useAuth();
+  const router = useRouter();
+
+  const [statusFilter, setStatusFilter] = useState<WorkOrderStatus>("ABERTA");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingSector, setEditingSector] = useState<{
+    sector: SectorService;
+    fleet: string;
+  } | null>(null);
 
   const { workOrders, loading, error, refetch } = useWorkOrders(statusFilter);
 
-  const handleEditSector = (_sector: SectorService, _fleet: string) => {
-    // Abrir modal de edição de setor quando integrado
-  };
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  if (authLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-500 flex items-center justify-center text-xs font-semibold">
+        Carregando sessão...
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 p-4 sm:p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       <Header
         user={user}
-        handleCreateOpen={() => setIsCreateModalOpen(true)}
-        signOut={signOut}
+        onCreateOpen={() => {
+          setEditingSector(null);
+          setIsCreateModalOpen(true);
+        }}
+        onSignOut={signOut}
       />
 
-      <main className="max-w-6xl mx-auto space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-950/5">
-          <div className="flex gap-2">
-            {FILTER_OPTIONS.map((option) => {
-              const isActive = statusFilter === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setStatusFilter(option.value)}
-                  className={`px-4 py-2.5 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
+      <main className="w-full max-w-6xl mx-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4 flex-1">
+        <div className="flex items-center justify-between gap-2 bg-white p-1.5 rounded-2xl border border-slate-200/90 w-full sm:w-fit">
+          {FILTER_OPTIONS.map((option) => {
+            const isActive = statusFilter === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setStatusFilter(option.value)}
+                className={`flex-1 sm:flex-none px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? "bg-emerald-600 text-white shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
         </div>
 
         {loading && (
-          <div className="text-center py-16 text-slate-500 font-medium text-sm">
-            A carregar Ordens de Serviço...
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-10 text-center text-slate-500 font-medium text-xs">
+            Carregando Ordens de Serviço...
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-4 rounded-xl text-center font-medium">
+          <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-xl text-center font-medium">
             {error}
           </div>
         )}
 
         {!loading && !error && workOrders.length === 0 && (
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center text-slate-400 text-sm shadow-sm">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-10 text-center text-slate-500 text-xs font-medium">
             Nenhuma Ordem de Serviço encontrada para este filtro.
           </div>
         )}
@@ -79,7 +95,10 @@ export default function DashboardPage() {
         {!loading && !error && workOrders.length > 0 && (
           <WorkOrderTable
             workOrders={workOrders}
-            onEditSector={handleEditSector}
+            onEditSector={(sector, fleet) => {
+              setEditingSector({ sector, fleet });
+              setIsCreateModalOpen(true);
+            }}
             onRefresh={refetch}
           />
         )}
@@ -87,8 +106,14 @@ export default function DashboardPage() {
 
       <CreateWorkOrderModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreated={refetch}
+        editingSector={editingSector}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setEditingSector(null);
+        }}
+        onCreated={() => {
+          void refetch();
+        }}
       />
     </div>
   );

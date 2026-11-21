@@ -1,54 +1,43 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { UpdateEquipmentService } from "../../services/Equipment/UpdateEquipmentService.js";
-
-export interface UpdateEquipmentBody {
-  name?: string;
-  fleet?: string;
-}
+import { sendError } from "../../utils/handleControllerError.js";
 
 export class UpdateEquipmentController {
   async handle(request: FastifyRequest, reply: FastifyReply) {
-    const userRole = request.userRole;
-
-    if (!userRole) {
+    if (!request.userRole) {
       return reply
         .status(401)
         .send({ error: "Sessão inválida ou usuário não autenticado." });
     }
 
-    const { id } = request.params as { id: string };
-
+    const { id } = (request.params ?? {}) as { id?: string };
     if (!id) {
       return reply
         .status(400)
-        .send({ error: "O ID do equipamento é obrigatório para atualização." });
+        .send({ error: "O ID do equipamento é obrigatório." });
     }
 
-    const { name, fleet } = request.body as UpdateEquipmentBody;
+    const { name, fleet } = (request.body ?? {}) as {
+      name?: string;
+      fleet?: string;
+    };
 
-    // Garante que ao menos um campo foi enviado para atualização
     if (name === undefined && fleet === undefined) {
       return reply
         .status(400)
         .send({ error: "Informe ao menos um campo para atualização." });
     }
 
-    const updateEquipmentService = new UpdateEquipmentService();
-
     try {
-      const updatedEquipment = await updateEquipmentService.execute({
+      const updated = await new UpdateEquipmentService().execute({
         id,
         name,
         fleet,
-        userRole,
+        userRole: request.userRole,
       });
-
-      return reply.status(200).send(updatedEquipment);
-    } catch (error: any) {
-      const isPermissionError = error.message?.includes("Acesso negado");
-      const statusCode = isPermissionError ? 403 : 400;
-
-      return reply.status(statusCode).send({ error: error.message });
+      return reply.status(200).send(updated);
+    } catch (error: unknown) {
+      return sendError(reply, error, "Erro ao atualizar equipamento.");
     }
   }
 }

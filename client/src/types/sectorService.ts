@@ -1,8 +1,33 @@
-
 import type { Collaborator } from "./collaborator";
 import type { Equipment } from "./equipment";
 
-// Informações do operador vinculado ao setor
+export const SETORES = [
+  "Agricultura de Precisão",
+  "Mecânica",
+  "Elétrica",
+  "Hidráulica",
+  "Geral",
+] as const;
+
+export type Setor = (typeof SETORES)[number];
+
+export const CITIES = [
+  "Lucélia - SP",
+  "Adamantina - SP",
+  "Salmourão - SP",
+  "Dracena - SP",
+] as const;
+
+export type City = (typeof CITIES)[number];
+
+export type SectorStatus =
+  | "AGUARDANDO_MANUTENCAO"
+  | "EM_MANUTENCAO"
+  | "PAUSADO"
+  | "FINALIZADO";
+
+export type WorkOrderStatus = "ABERTA" | "EM_ANDAMENTO" | "FINALIZADA";
+
 export interface SectorOperator {
   id: string;
   name: string;
@@ -10,14 +35,13 @@ export interface SectorOperator {
   city: string;
 }
 
-// Estrutura detalhada de um setor dentro da Ordem de Serviço
 export interface SectorService {
   id: string;
   workOrderId: string;
   setor: string;
-  status: "AGUARDANDO_MANUTENCAO" | "EM_MANUTENCAO" | "PAUSADO" | "FINALIZADO";
+  status: SectorStatus;
   qruDescricao: string;
-  solucaoTecnico?: string;
+  solucaoTecnico?: string | null;
   tipoCausa?: string | null;
   motivoPausa?: string | null;
   qth: string;
@@ -28,42 +52,44 @@ export interface SectorService {
   dataInicioManutencao?: string | null;
   dataFimManutencao?: string | null;
   tempoManutencao?: number | null;
-  operator: SectorOperator;
-  criador: Collaborator;
+  operator?: SectorOperator | null;
+  criador?: Collaborator;
   tecnicoResponsavel?: Collaborator | null;
-  pauses?: unknown[];
 }
 
-// Estrutura principal da Ordem de Serviço (OS)
 export interface WorkOrder {
   id: string;
   equipmentId: string;
-  operatorId: string;
-  status: "ABERTA" | "EM_ANDAMENTO" | "FINALIZADA";
+  operatorId?: string;
+  status: WorkOrderStatus;
   createdAt: string;
   updatedAt?: string;
   equipment: Equipment;
-  operator?: Collaborator;
+  operator?: SectorOperator | Collaborator | null;
   setores: SectorService[];
 }
 
-// Dados necessários para criar uma nova Ordem de Serviço
-export interface CreateWorkOrderInput {
-  fleet: string;
-  operatorId: string;
+export interface CreateSectorInput {
   setor: string;
-  qruDescricao: string;
   qth: string;
   city: string;
+  operatorId?: string;
+  qruDescricao: string;
 }
 
-// Campos permitidos na atualização de um setor
+export interface CreateWorkOrderInput {
+  equipmentId: string;
+  setores: CreateSectorInput[];
+}
+
 export type UpdateSectorInput = Partial<{
   setor: string;
   qruDescricao: string;
   qth: string;
   city: string;
+  operatorId: string;
+  motivoPausa: string;
   solucaoTecnico: string;
   tipoCausa: string;
-  status: string;
+  status: SectorStatus;
 }>;
